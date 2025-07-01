@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
-using MMOR.Utils.Utilities;
 
 namespace MMOR.Utils.Random
 {
     /// <summary>
     ///     <see cref="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
     /// </summary>
-    public class ChaCha20 : vRandom<ChaCha20>
+    public class ChaCha20 : IRandom<ChaCha20>
     {
         protected uint[] block = new uint[16];
         protected ulong blockDex;
@@ -22,8 +21,8 @@ namespace MMOR.Utils.Random
         {
             for (var i = 0; i < 4; ++i) input[i] = constants[i];
             for (var i = 0; i < 8; ++i) input[4 + i] = keysetup[i];
-            input[12] = (uint)blockDex & 0xffffffffu;
-            input[13] = (uint)blockDex >> 32;
+            input[12] = (uint)(blockDex & 0xffffffffu);
+            input[13] = (uint)(blockDex >> 32);
             input[14] = input[15] = 0xdeadbeef; // Could use 128-bit counter.
 
             for (var i = 0; i < 16; ++i) block[i] = input[i];
@@ -86,43 +85,39 @@ namespace MMOR.Utils.Random
         //-+-+-+-+-+-+-+-+
         // Initialization
         //-+-+-+-+-+-+-+-+
-
         #region Initialization
         public ChaCha20() : this(DefaultReSeed()) { }
-
-        public ChaCha20(ulong seed, params ulong[] additonalParameters) { Initialize(seed, additonalParameters); }
-
-        public override string getSeed() { return $"ChaCha-0x{seed:X}-0x{stream:X}"; }
-
-        protected override void Initialize(ulong seed, params ulong[] additonalParameters)
+        public ChaCha20(ulong seed, ulong? stream = null)
         {
-            base.Initialize(seed, additonalParameters);
-
+            this.seed = seed;
+            
             ctr = 0;
             blockDex = ulong.MaxValue;
 
             uint seedVal;
-            if (additonalParameters.IsNullOrEmpty())
+            if (stream == null)
             {
                 SplitMix64 sm = new(seed);
                 seedVal = (uint)sm.Next();
-                stream = (uint)sm.Next();
+                this.stream = (uint)sm.Next();
 
                 this.seed = seedVal;
             }
             else
             {
                 seedVal = (uint)seed;
-                stream = (uint)additonalParameters[0];
+                this.stream = (uint)stream;
             }
 
             keysetup[0] = seedVal & 0xffffffffu;
-            keysetup[1] = seedVal >> 32;
+            keysetup[1] = (uint)(seed >> 32);
             keysetup[2] = keysetup[3] = 0xdeadbeef;
-            keysetup[4] = stream & 0xffffffffu;
-            keysetup[5] = stream >> 32;
+            keysetup[4] = this.stream & 0xffffffffu;
+            keysetup[5] = (uint)(seed >> 32);
             keysetup[6] = keysetup[7] = 0xdeadbeef;
         }
+
+        public override string getSeed() { return $"ChaCha-0x{seed:X}-0x{stream:X}"; }
 
         //-+-+-+-+-+-+-+-+
         #endregion

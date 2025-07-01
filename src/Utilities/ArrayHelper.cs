@@ -121,11 +121,11 @@ namespace MMOR.Utils.Utilities
         ///         Shuffle Algorithm
         ///     </see>
         ///     .
-        ///     <br /> - Takes optional <see cref="vRandom" /> for custom RNGs.
+        ///     <br /> - Takes optional <see cref="IRandom" /> for custom RNGs.
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShuffleInplace<T>(this IList<T> list, vRandom rng = null)
+        public static void ShuffleInplace<T>(this IList<T> list, IRandom rng = null)
         {
             rng ??= PCG.global;
             int len = list.Count;
@@ -143,7 +143,7 @@ namespace MMOR.Utils.Utilities
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IList<T> Shuffle<T>(this IReadOnlyList<T> list, IList<T> outList = null, vRandom rng = null)
+        public static IList<T> Shuffle<T>(this IReadOnlyList<T> list, IList<T> outList = null, IRandom rng = null)
         {
             outList = list.ToList();
             outList.ShuffleInplace(rng);

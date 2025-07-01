@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using MMOR.Utils.Utilities;
 
 namespace MMOR.Utils.Random
 {
@@ -14,7 +13,7 @@ namespace MMOR.Utils.Random
     ///     <br />
     ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    public class PCG : vRandom<PCG>
+    public class PCG : IRandom<PCG>
     {
         protected const ulong _defaultSequence = 721347520444481703ul;
         protected const ulong Multiplier = 6364136223846793005ul;
@@ -40,26 +39,20 @@ namespace MMOR.Utils.Random
         #region Initialization
         public PCG() : this(DefaultReSeed()) { }
 
-        public PCG(ulong seed, params ulong[] additonalParameters) { Initialize(seed, additonalParameters); }
-
-        public override string getSeed() { return $"PCG-0x{seed:X}-0x{inc:X}"; }
-
-        protected override void Initialize(ulong seed, params ulong[] additonalParameters)
+        public PCG(ulong seed, ulong? inc = null)
         {
-            base.Initialize(seed, additonalParameters);
+            this.seed = seed;
 
             state = 0ul;
-            ulong sequence;
-            if (additonalParameters.IsNullOrEmpty())
-                sequence = _defaultSequence;
-            else
-                sequence = additonalParameters[0];
-            inc = (sequence << 1) | 1; // PCG Needs inc to be always odd
+            ulong sequence = inc ?? _defaultSequence;
+            this.inc = (sequence << 1) | 1; // PCG Needs inc to be always odd
 
             NextUInt();
             state += seed;
             NextUInt();
         }
+
+        public override string getSeed() { return $"PCG-0x{seed:X}-0x{inc:X}"; }
 
         //-+-+-+-+-+-+-+-+
         #endregion

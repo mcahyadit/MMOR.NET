@@ -14,7 +14,7 @@ namespace MMOR.Utils.Random
     ///     <br />
     ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    public class MT19937 : vRandom<MT19937>
+    public class MT19937 : IRandom<MT19937>
     {
         protected const int N = 624;
         protected const int M = 397;
@@ -66,20 +66,17 @@ namespace MMOR.Utils.Random
         //-+-+-+-+-+-+-+-+
 
         #region Initialization
+
         public MT19937() : this(DefaultReSeed()) { }
-
-        public MT19937(ulong seed, params ulong[] additonalParameters) { Initialize(seed, additonalParameters); }
-
-        public override string getSeed() { return $"MT19937-0x{seed:X}"; }
-
-        protected override void Initialize(ulong seed, params ulong[] additonalParameters)
+        public MT19937(ulong seed)
         {
-            base.Initialize(seed, additonalParameters);
-
+            this.seed = seed;
             mtVal[0] = (uint)seed;
             for (mtDex = 1; mtDex < N; mtDex++)
                 mtVal[mtDex] = 1812433253u * (mtVal[mtDex - 1] ^ (mtVal[mtDex - 1] >> 30)) + (uint)mtDex;
         }
+
+        public override string getSeed() { return $"MT19937-0x{seed:X}"; }
 
         //-+-+-+-+-+-+-+-+
         #endregion

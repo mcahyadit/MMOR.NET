@@ -25,7 +25,7 @@ namespace MMOR.Utils.Random
     ///     <br /> - Have period of 2^128 ~ 3.4e+38
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    public class Xoroshiro : vRandom<Xoroshiro>
+    public class Xoroshiro : IRandom<Xoroshiro>
     {
         protected (uint x, uint y) s;
 
@@ -54,25 +54,23 @@ namespace MMOR.Utils.Random
 
         #region Initialization
         //-+-+-+-+-+-+-+-+
-        public Xoroshiro() { Initialize(DefaultReSeed()); }
+        public Xoroshiro() : this(DefaultReSeed()) { }
 
-        public Xoroshiro(ulong seed, params ulong[] additonalParameters) { Initialize(seed, additonalParameters); }
+        public Xoroshiro(ulong seed, ulong? mix = null)
+        { 
+            this.seed = seed;
 
-        protected override void Initialize(ulong seed, params ulong[] additonalParameters)
-        {
-            base.Initialize(seed, additonalParameters);
-
-            if (additonalParameters.IsNullOrEmpty())
+            if (mix == null)
             {
                 SplitMix64 sm = new(seed);
                 s = new ValueTuple<uint, uint>((uint)sm.Next(), (uint)sm.Next());
             }
             else
             {
-                s = new ValueTuple<uint, uint>((uint)seed, (uint)additonalParameters[0]);
+                s = new ValueTuple<uint, uint>((uint)seed, (uint)mix.Value);
             }
+            
         }
-
         //-+-+-+-+-+-+-+-+
         #endregion
     }
