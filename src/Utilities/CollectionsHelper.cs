@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using MMOR.Utils.Mathematics;
 using MMOR.Utils.Random;
 
@@ -14,19 +14,10 @@ namespace MMOR.Utils.Utilities
     //-+-+-+-+-+-+-+-+
     public static partial class Utilities
     {
-        private static readonly List<KeyValuePair<string, string>> collectionBrackets = new()
-        {
-            new KeyValuePair<string, string>("{", "}"),
-            new KeyValuePair<string, string>("[", "]"),
-            new KeyValuePair<string, string>("(", ")")
-        };
-
         // ulong didn't have a built-in Sum LINQ, possibly since if you are summing such big number, it bound to overflow
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong Sum(this IEnumerable<ulong> arr)
-        {
-            return arr.IsNullOrEmpty() ? 0 : arr.Aggregate((sum, val) => sum + val);
-        }
+        public static ulong Sum(this IEnumerable<ulong> arr) =>
+            arr.IsNullOrEmpty() ? 0 : arr.Aggregate((sum, val) => sum + val);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Reverse<T>(IList<T> list, int begin, int end)
@@ -43,37 +34,29 @@ namespace MMOR.Utils.Utilities
         // Null || Empty Check
         //-+-+-+-+-+-+-+-+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> arr) { return arr == null || arr.Count() <= 0; }
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T>? arr) => arr == null || arr.Count() <= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrEmpty(string str) { return string.IsNullOrWhiteSpace(str); }
+        public static bool IsNullOrEmpty(this string str) => string.IsNullOrWhiteSpace(str);
 
         //-+-+-+-+-+-+-+-+
         // Creation
         //-+-+-+-+-+-+-+-+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static List<T> InitList<T>(int length, T value = default) where T : struct
-        {
-            return Enumerable.Repeat(value, length).ToList();
-        }
+        public static List<T> InitList<T>(int length, T value = default) where T : struct =>
+            Enumerable.Repeat(value, length).ToList();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static List<T> InitList<T>(int length, Func<T> constructor) where T : class
-        {
-            return Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToList();
-        }
+        public static List<T> InitList<T>(int length, Func<T> constructor) where T : class =>
+            Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToList();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T[] InitArr<T>(int length, T value = default) where T : struct
-        {
-            return Enumerable.Repeat(value, length).ToArray();
-        }
+        public static T[] InitArr<T>(int length, T value = default) where T : struct =>
+            Enumerable.Repeat(value, length).ToArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T[] InitArr<T>(int length, Func<T> constructor) where T : class
-        {
-            return Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToArray();
-        }
+        public static T[] InitArr<T>(int length, Func<T> constructor) where T : class =>
+            Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToArray();
 
         //-+-+-+-+-+-+-+-+
         // Fill & Clear
@@ -125,7 +108,7 @@ namespace MMOR.Utils.Utilities
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ShuffleInplace<T>(this IList<T> list, IRandom rng = null)
+        public static void ShuffleInplace<T>(this IList<T> list, IRandom? rng = null)
         {
             rng ??= PCG.global;
             int len = list.Count;
@@ -143,9 +126,9 @@ namespace MMOR.Utils.Utilities
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IList<T> Shuffle<T>(this IReadOnlyList<T> list, IList<T> outList = null, IRandom rng = null)
+        public static IList<T> Shuffle<T>(this IReadOnlyList<T> list, IRandom? rng = null)
         {
-            outList = list.ToList();
+            List<T> outList = list.ToList();
             outList.ShuffleInplace(rng);
             return outList;
         }
@@ -215,12 +198,8 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TValue SafeGet<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key,
-            TKey defaultT1 = default) where TKey : notnull
-        {
-            if (dictionary.ContainsKey(key))
-                return dictionary[key];
-            return dictionary[defaultT1];
-        }
+            TKey defaultT1 = default) where TKey : notnull =>
+            dictionary.TryGetValue(key, out TValue? get) ? get : dictionary[defaultT1];
 
         //-+-+-+-+-+-+-+-+
         // Transformation
@@ -260,7 +239,7 @@ namespace MMOR.Utils.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Queue<T> toQueue<T>(this IEnumerable<T> list, Queue<T> result = null)
+        public static Queue<T> toQueue<T>(this IEnumerable<T> list, Queue<T>? result = null)
         {
             result ??= new Queue<T>();
             foreach (T item in list)
@@ -268,7 +247,10 @@ namespace MMOR.Utils.Utilities
             return result;
         }
 
-        public static List<int> toIndicesList(this IReadOnlyList<bool> boolList, List<int> outList = null)
+        /// <summary>
+        /// <br/> - Returns a List of integer of indices of <param name="boolList"/> that was <see langword="true"/> 
+        /// </summary>
+        public static List<int> toIndicesList(this IReadOnlyList<bool> boolList, List<int>? outList = null)
         {
             outList ??= new List<int>();
             outList.Clear();
@@ -281,52 +263,18 @@ namespace MMOR.Utils.Utilities
             return outList;
         }
 
-        public static string join(this IEnumerable<string> stringList, string separator = "")
-        {
-            return string.Join(separator, stringList);
-        }
+        public static string join(this IEnumerable<string> stringList, string separator = "") =>
+            string.Join(separator, stringList);
 
-        public static string join(this IEnumerable<char> stringList, string separator = "")
-        {
-            return string.Join(separator, stringList);
-        }
+        public static string join(this IEnumerable<char> stringList, string separator = "") =>
+            string.Join(separator, stringList);
 
-        public static string deepPrintArray<T>(this IEnumerable<T> array, int bracketId = 0)
-        {
-            StringBuilder strResult = new();
-            strResult.Append(collectionBrackets.SafeGet(bracketId).Key);
-            string bracketClose = collectionBrackets.SafeGet(bracketId).Value;
-            foreach (T item in array)
-            {
-                strResult.Append(" ");
-                if (!(item is string) && item is IEnumerable)
-                {
-                    string tmpStr = deepPrintArray(ConvertToEnum(item as IEnumerable), bracketId++);
-                    strResult.Append(tmpStr);
-                }
-                else
-                {
-                    strResult.Append(item);
-                }
+        public static IEnumerable<T> ListAll<T>() where T : Enum => Enum.GetValues(typeof(T)).Cast<T>();
 
-                strResult.Append(',');
-            }
-
-            //strResult.Remove(strResult.Length - 1, 1);
-            strResult.Append(bracketClose);
-            strResult.Append('\n');
-
-            return strResult.ToString();
-        }
-
-        private static IEnumerable<object> ConvertToEnum(IEnumerable iEnumerable)
-        {
-            foreach (object item in iEnumerable)
-                yield return item;
-        }
-
-        public static IEnumerable<T> ListAll<T>() where T : Enum { return Enum.GetValues(typeof(T)).Cast<T>(); }
-
+        //-+-+-+-+-+-+-+-+
+        // Upsert
+        //-+-+-+-+-+-+-+-+
+        #region Upsert
         public static void Upsert<T>(this IList<T> list, int index, T val)
         {
             int count = list.Count;
@@ -368,6 +316,7 @@ namespace MMOR.Utils.Utilities
             else
                 list.Add(index, update(default));
         }
+        #endregion
 
         /// <summary>
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -378,8 +327,19 @@ namespace MMOR.Utils.Utilities
         {
             if (list is List<T> listT)
                 listT.AddRange(range);
-            foreach (T data in range)
-                list.Add(data);
+            else
+                foreach (T data in range)
+                    list.Add(data);
+        }
+
+        public static void Copy<T>(IReadOnlyList<T> source, IList<T> target) where T : struct
+        {
+            int len = source.Count;
+            if (target is T[] targetArr && source is T[] sourceArr)
+                Array.Copy(sourceArr, targetArr, len);
+            else
+                for (var i = 0; i < len; i++)
+                    target[i] = source[i];
         }
 
         //-+-+-+-+-+-+-+
@@ -389,15 +349,13 @@ namespace MMOR.Utils.Utilities
         /// <summary>
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         ///     <br /> - Acts like a normal <see cref="Dictionary{TKey, TValue}.TryGetValue" />.
-        ///     <br /> - Equipped with a cast, for better comtibility with <see cref="object" />.
+        ///     <br /> - Equipped with a cast, for better compatibility with <see cref="object" />.
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TValue GetCastedValueOrDefault<TKey, TValue>(this IDictionary<TKey, object> dictionary, TKey key,
-            Func<object, TValue> castDefinition, TValue defaultValue = default)
-        {
-            return dictionary.TryGetValue(key, out object rawValue) ? castDefinition(rawValue) : defaultValue;
-        }
+            Func<object, TValue> castDefinition, TValue defaultValue = default) =>
+            dictionary.TryGetValue(key, out object rawValue) ? castDefinition(rawValue) : defaultValue;
 
         /// <summary>
         ///     <inheritdoc
@@ -405,10 +363,7 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetCastedValueOrDefault<TKey>(this IDictionary<TKey, object> dictionary, TKey key,
-            string defaultValue = default)
-        {
-            return GetCastedValueOrDefault(dictionary, key, x => x as string, defaultValue);
-        }
+            string defaultValue = "") => GetCastedValueOrDefault(dictionary, key, x => x as string, defaultValue);
 
         /// <summary>
         ///     <inheritdoc
@@ -416,10 +371,8 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint GetCastedValueOrDefault<TKey>(this IDictionary<TKey, object> dictionary, TKey key,
-            uint defaultValue = default)
-        {
-            return GetCastedValueOrDefault(dictionary, key, Convert.ToUInt32, defaultValue);
-        }
+            uint defaultValue = 0) =>
+            GetCastedValueOrDefault(dictionary, key, Convert.ToUInt32, defaultValue);
 
         /// <summary>
         ///     <inheritdoc
@@ -427,10 +380,8 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetCastedValueOrDefault<TKey>(this IDictionary<TKey, object> dictionary, TKey key,
-            int defaultValue = default)
-        {
-            return GetCastedValueOrDefault(dictionary, key, Convert.ToInt32, defaultValue);
-        }
+            int defaultValue = 0) =>
+            GetCastedValueOrDefault(dictionary, key, Convert.ToInt32, defaultValue);
 
         /// <summary>
         ///     <inheritdoc
@@ -438,16 +389,13 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double GetCastedValueOrDefault<TKey>(this IDictionary<TKey, object> dictionary, TKey key,
-            double defaultValue = default)
-        {
-            return GetCastedValueOrDefault(dictionary, key, Convert.ToDouble, defaultValue);
-        }
+            double defaultValue = 0) =>
+            GetCastedValueOrDefault(dictionary, key, Convert.ToDouble, defaultValue);
         #endregion
 
         //-+-+-+-+-+-+-+-+
         // Deep Copy to Array
         //-+-+-+-+-+-+-+-+
-
         #region Deep Copy to Array
         // ..not using IList or IReadOnlyList, and multi function for each level of nest.
         // ..if not properly defined as List<List> or [][],
@@ -457,15 +405,12 @@ namespace MMOR.Utils.Utilities
         // ..e.g. a List<List<List>> will turn as List<List>[] since T is recognized as List<List> instead.
         //-+-+-+-+-+-+-+-+
 
-        public static T[][] deepToArray<T>(this IEnumerable<IEnumerable<T>> list) where T : struct
-        {
-            return list.Select(x => x.ToArray()).ToArray();
-        }
+        public static T[][] deepToArray<T>(this IEnumerable<IEnumerable<T>> list) where T : struct =>
+            list.Select(x => x.ToArray()).ToArray();
 
-        public static T[][][] deepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list) where T : struct
-        {
-            return list.Select(x => x.deepToArray()).ToArray();
-        }
+        public static T[][][] deepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list) where T : struct =>
+            list.Select(x => x.deepToArray()).ToArray();
+
 
         //-+-+-+-+-+-+-+-+
         #endregion

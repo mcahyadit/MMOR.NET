@@ -59,24 +59,16 @@ namespace MMOR.Utils.ColorMaps
             ColorUtils.FromHexCode(0x6cd4c5)
         };
 
-        public static Vector4 OmniBlueRed<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniBlueRedMap);
-        }
+        public static Vector4 OmniBlueRed<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniBlueRedMap);
 
-        public static Vector4 OmniOrangePurple<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniOrangePurpleMap);
-        }
+        public static Vector4 OmniOrangePurple<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniOrangePurpleMap);
 
-        public static Vector4 OmniPinkFoam<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniPinkFoamMap);
-        }
+        public static Vector4 OmniPinkFoam<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniPinkFoamMap);
 
-        public static Vector4 OmniSalmonAqua<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniSalmonAquaMap);
-        }
+        public static Vector4 OmniSalmonAqua<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), OmniSalmonAquaMap);
     }
 }

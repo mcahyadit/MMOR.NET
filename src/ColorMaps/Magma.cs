@@ -268,9 +268,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.987053f, 0.991438f, 0.749504f, 1f)
         };
 
-        public static Vector4 Magma<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), MagmaMap);
-        }
+        public static Vector4 Magma<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), MagmaMap);
     }
 }

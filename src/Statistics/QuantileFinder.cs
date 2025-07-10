@@ -160,14 +160,10 @@ namespace MMOR.Utils.Statistics
             return QuantileSorted(list.Select(x => x.ToDouble(null)).OrderBy(x => x).ToList(), tau);
         }
 
-        public static double Quantile(this IDictionary<double, uint> map, double tau)
-        {
-            return QuantileSorted(new SortedDictionary<double, uint>(map), tau);
-        }
+        public static double Quantile(this IDictionary<double, uint> map, double tau) =>
+            QuantileSorted(new SortedDictionary<double, uint>(map), tau);
 
-        public static double Quantile<T>(this IDictionary<T, uint> map, double tau) where T : IConvertible
-        {
-            return QuantileSorted(map.ConvertToSortedDouble(), tau);
-        }
+        public static double Quantile<T>(this IDictionary<T, uint> map, double tau) where T : IConvertible =>
+            QuantileSorted(map.ConvertToSortedDouble(), tau);
     }
 }

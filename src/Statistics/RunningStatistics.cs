@@ -133,10 +133,7 @@ namespace MMOR.Utils.Statistics
                 _max = stats._max;
                 _nM = stats._nM;
             }
-            else if (stats._max == _max)
-            {
-                _nM += stats._nM;
-            }
+            else if (stats._max == _max) { _nM += stats._nM; }
 
             _min = stats._min < _min ? stats._min : _min;
 

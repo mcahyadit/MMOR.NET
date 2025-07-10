@@ -105,6 +105,6 @@ namespace MMOR.Utils.Mathematics
             }
         }
 
-        public static float Exposure(in float value, in float exposure) { return value * MathF.Pow(2, exposure); }
+        public static float Exposure(in float value, in float exposure) => value * MathF.Pow(2, exposure);
     }
 }

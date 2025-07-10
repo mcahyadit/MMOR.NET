@@ -252,22 +252,15 @@ namespace MMOR.Utils.Utilities
         }
 
         public static string BoxPlotRepresentation(double Q1, double Q2, double Q3, Func<double, string> stringFormat,
-            double min = double.MinValue, double max = double.MaxValue)
-        {
-            return
-                $"{stringFormat(Math.Max(min, Q1 - 1.5 * (Q3 - Q1)))} <- [{stringFormat(Q1)} | {stringFormat(Q2)} | {stringFormat(Q3)}] -> {stringFormat(Math.Min(max, Q3 + 1.5 * (Q3 - Q1)))}";
-        }
+            double min = double.MinValue, double max = double.MaxValue) =>
+            $"{stringFormat(Math.Max(min, Q1 - 1.5 * (Q3 - Q1)))} <- [{stringFormat(Q1)} | {stringFormat(Q2)} | {stringFormat(Q3)}] -> {stringFormat(Math.Min(max, Q3 + 1.5 * (Q3 - Q1)))}";
 
         public static string BoxPlotRepresentation(IReadOnlyList<double> Qs, Func<double, string> stringFormat,
-            double min = double.MinValue, double max = double.MaxValue)
-        {
-            return BoxPlotRepresentation(Qs[0], Qs[1], Qs[2], stringFormat, min, max);
-        }
+            double min = double.MinValue, double max = double.MaxValue) =>
+            BoxPlotRepresentation(Qs[0], Qs[1], Qs[2], stringFormat, min, max);
 
         public static string BoxPlotRepresentation((double x, double y, double z) Qs, Func<double, string> stringFormat,
-            double min = double.MinValue, double max = double.MaxValue)
-        {
-            return BoxPlotRepresentation(Qs.x, Qs.y, Qs.z, stringFormat, min, max);
-        }
+            double min = double.MinValue, double max = double.MaxValue) =>
+            BoxPlotRepresentation(Qs.x, Qs.y, Qs.z, stringFormat, min, max);
     }
 }

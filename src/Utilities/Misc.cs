@@ -67,10 +67,10 @@ namespace MMOR.Utils.Utilities
             {
                 H = MathF.Pow(MathF.Sin(val * MathF.PI / 2), 1.2f) * 0.92f;
                 S = 0.4f + MathF.Pow((MathF.Cos(2 * MathF.PI * MathF.Pow(H, 1.7f)) + 1) / 3, 2.2f);
-                V = 1f
-                    - 0.1f * MathF.Exp(-MathF.Pow((H - 0.154f) / 0.05f, 2))
-                    - 0.12f * MathF.Exp(-MathF.Pow((H - 0.317f) / 0.2f, 2))
-                    - 0.21f * MathF.Exp(-MathF.Pow((H - 0.48f) / 0.1f, 2));
+                V = 1f -
+                    0.1f * MathF.Exp(-MathF.Pow((H - 0.154f) / 0.05f, 2)) -
+                    0.12f * MathF.Exp(-MathF.Pow((H - 0.317f) / 0.2f, 2)) -
+                    0.21f * MathF.Exp(-MathF.Pow((H - 0.48f) / 0.1f, 2));
             }
 
             Vector4 color = ColorUtils.HSVtoRGB(MathExt.Frac(H), S, V);

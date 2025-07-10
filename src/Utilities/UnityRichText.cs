@@ -79,37 +79,25 @@ namespace MMOR.Utils.Utilities
         private static readonly Regex RichRegex = new($"<\\/?({string.Join("|", RichTags.Select(Regex.Escape))}).*?>");
 
         //-+-+-+-+-+-+-+-+
-        public static string SetWeight<T>(this string inStr, T weight) where T : struct, Enum
-        {
-            return $"<font-weight={Convert.ToInt32(weight)}>{inStr}</font-weight>";
-        }
+        public static string SetWeight<T>(this string inStr, T weight) where T : struct, Enum =>
+            $"<font-weight={Convert.ToInt32(weight)}>{inStr}</font-weight>";
 
-        public static string SetWeight(this string inStr, vFontWeight weight)
-        {
-            return $"<font-weight={(int)weight}>{inStr}</font-weight>";
-        }
+        public static string SetWeight(this string inStr, vFontWeight weight) =>
+            $"<font-weight={(int)weight}>{inStr}</font-weight>";
 
-        public static string SetWeight(this string inStr, int weight)
-        {
-            return $"<font-weight={weight}>{inStr}</font-weight>";
-        }
+        public static string SetWeight(this string inStr, int weight) => $"<font-weight={weight}>{inStr}</font-weight>";
 
-        public static string SetSize(this string inStr, float size) { return $"<size={size}>{inStr}</size>"; }
+        public static string SetSize(this string inStr, float size) => $"<size={size}>{inStr}</size>";
 
-        public static string SetRelativeSize(this string inStr, float size)
-        {
-            return $"<size={size * 100}%>{inStr}</size>";
-        }
+        public static string SetRelativeSize(this string inStr, float size) => $"<size={size * 100}%>{inStr}</size>";
 
-        public static string StrikeThrough(this string inStr) { return $"<s>{inStr}</s>"; }
+        public static string StrikeThrough(this string inStr) => $"<s>{inStr}</s>";
 
-        public static string Italic(this string inStr) { return $"<i>{inStr}</i>"; }
+        public static string Italic(this string inStr) => $"<i>{inStr}</i>";
 
-        public static string ColorIt(this string inStr, Vector4 color)
-        {
-            return string.Format("<color=#{0:X2}{1:X2}{2:X2}{3:X2}>{4}</color>", (byte)(color.X * 255f),
+        public static string ColorIt(this string inStr, Vector4 color) =>
+            string.Format("<color=#{0:X2}{1:X2}{2:X2}{3:X2}>{4}</color>", (byte)(color.X * 255f),
                 (byte)(color.Y * 255f), (byte)(color.Z * 255f), (byte)(color.W * 255f), inStr);
-        }
 
         /// <summary>
         ///     <strong>CustomLibrary.SplitRichTags()</strong>
@@ -232,10 +220,7 @@ namespace MMOR.Utils.Utilities
             StringBuilder strResult = new();
             var plainLen = 0;
             foreach ((string text, bool isTag) subStr in listSubStr)
-                if (subStr.isTag)
-                {
-                    strResult.Append(subStr.text);
-                }
+                if (subStr.isTag) { strResult.Append(subStr.text); }
                 else
                 {
                     plainLen += subStr.text.Length;
@@ -288,10 +273,8 @@ namespace MMOR.Utils.Utilities
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
         /// </summary>
         public static string RichPadCenter(this string inStr, int totalWidth, char paddingChar = ' ',
-            bool padInside = false)
-        {
-            return inStr.RichPad((Math.Abs(totalWidth) + inStr.Length) / 2, paddingChar, padInside)
+            bool padInside = false) =>
+            inStr.RichPad((Math.Abs(totalWidth) + inStr.Length) / 2, paddingChar, padInside)
                 .RichPad(-Math.Abs(totalWidth), paddingChar, padInside);
-        }
     }
 }

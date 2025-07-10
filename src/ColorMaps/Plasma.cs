@@ -268,9 +268,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.940015f, 0.975158f, 0.131326f, 1f)
         };
 
-        public static Vector4 Plasma<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), PlasmaMap);
-        }
+        public static Vector4 Plasma<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), PlasmaMap);
     }
 }

@@ -178,16 +178,12 @@ namespace MMOR.Utils.Statistics
         }
 
         /// <inheritdoc cref="StreamingStatistics.Variance" />
-        public static double Variance(this IEnumerable<(double, uint)> map, bool sample = true)
-        {
-            return VarBaseAlgo(map, sample).variance;
-        }
+        public static double Variance(this IEnumerable<(double, uint)> map, bool sample = true) =>
+            VarBaseAlgo(map, sample).variance;
 
         /// <inheritdoc cref="StreamingStatistics.StandardDeviation" />
-        public static double StandardDeviation(this IEnumerable<(double, uint)> map, bool sample = true)
-        {
-            return Math.Sqrt(Variance(map, sample));
-        }
+        public static double StandardDeviation(this IEnumerable<(double, uint)> map, bool sample = true) =>
+            Math.Sqrt(Variance(map, sample));
 
         /// <inheritdoc cref="StreamingStatistics.StandardError" />
         public static double StandardError(this IEnumerable<(double, uint)> map, bool sample = true)

@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using MMOR.Utils.Utilities;
 
 namespace MMOR.Utils.Mathematics
 {

@@ -267,9 +267,7 @@ namespace MMOR.Utils.ColorMaps
             new(1.0000f, 0.9169f, 0.2731f, 1f)
         };
 
-        public static Vector4 Cividis<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), CividisMap);
-        }
+        public static Vector4 Cividis<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), CividisMap);
     }
 }

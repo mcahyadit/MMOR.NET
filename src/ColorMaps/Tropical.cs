@@ -267,9 +267,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.26709688f, 0.98689776f, 0.98796051f, 1f)
         };
 
-        public static Vector4 Tropical<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), TropicalMap);
-        }
+        public static Vector4 Tropical<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), TropicalMap);
     }
 }
