@@ -20,28 +20,49 @@ namespace MMOR.Utils.Random
     /// </summary>
     public abstract class IRandom
     {
-        protected ulong seed;
+        public ulong Seed { get; protected set; }
 
         protected static ulong DefaultReSeed()
         {
-            var seed = (ulong)(Environment.TickCount ^ Thread.CurrentThread.ManagedThreadId ^
+            var seed = (ulong)(Environment.TickCount ^
+                               Thread.CurrentThread.ManagedThreadId ^
                                Guid.NewGuid().GetHashCode());
             seed = (seed >> 32) ^ seed;
             return (uint)seed;
         }
 
-        public abstract string getSeed();
         public abstract uint NextUInt(); // Primary Result
-
+#if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public uint NextUInt(uint minInclusive, uint maxExclusive)
+        {
+            if (minInclusive >= maxExclusive)
+                throw new Exception($"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
+
+            uint range = maxExclusive - minInclusive;
+            uint limit = uint.MaxValue - uint.MaxValue % range;
+            uint result;
+
+            do { result = NextUInt(); } while (result >= limit);
+
+            return minInclusive + result % range;
+        }
+
+#if !DEBUG && !UNITY_EDITOR
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public int NextInt(int minInclusive, int maxExclusive)
         {
             if (minInclusive >= maxExclusive)
                 throw new Exception($"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
-            return (int)(minInclusive + NextUInt() % (uint)(maxExclusive - minInclusive));
+            var range = (uint)(maxExclusive - minInclusive);
+            return minInclusive + (int)NextUInt(0, range);
         }
 
+#if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public float NextFloat(float minInclusive = 0, float maxExclusive = 1)
         {
             if (MathExt.Approximately(minInclusive, maxExclusive))
@@ -51,7 +72,9 @@ namespace MMOR.Utils.Random
             return minInclusive + (float)NextUInt() / uint.MaxValue * (maxExclusive - minInclusive);
         }
 
+#if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public double NextDouble(double minInclusive = 0, double maxExclusive = 1)
         {
             if (MathExt.Approximately(minInclusive, maxExclusive))
@@ -64,21 +87,29 @@ namespace MMOR.Utils.Random
 
     public class NETdefault : IRandom<NETdefault>
     {
-        private System.Random random;
+        private readonly System.Random random;
 
         public NETdefault() : this(DefaultReSeed()) { }
+
         public NETdefault(ulong seed)
         {
-            this.seed = seed;
-            
+            Seed = seed;
+
             var castedSeed = (int)seed;
-            this.seed = (ulong)castedSeed;
+            Seed = (ulong)castedSeed;
             random = new System.Random(castedSeed);
         }
 
-        public override string getSeed() { return $".NET-0x{seed:X}"; }
+        public override string ToString() => $".NET-0x{Seed:X}";
 
+#if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override uint NextUInt() { return (uint)random.Next(); }
+#endif
+        public override uint NextUInt()
+        {
+            var first = (uint)random.Next();
+            var second = (uint)random.Next();
+            return (second << 16) | (first & 0xFFFF);
+        }
     }
 }
