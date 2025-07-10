@@ -268,9 +268,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.993248f, 0.906157f, 0.143936f, 1f)
         };
 
-        public static Vector4 Viridis<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), ViridisMap);
-        }
+        public static Vector4 Viridis<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), ViridisMap);
     }
 }

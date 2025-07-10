@@ -37,13 +37,10 @@ namespace MMOR.Utils.Statistics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TotalStatistics Calculate(IEnumerable<KeyValuePair<double, uint>> map)
-        {
-            return new TotalStatistics(map);
-        }
+        public static TotalStatistics Calculate(IEnumerable<KeyValuePair<double, uint>> map) => new(map);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TotalStatistics Calculate(IEnumerable<double> list) { return new TotalStatistics(list); }
+        public static TotalStatistics Calculate(IEnumerable<double> list) => new(list);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TotalStatistics Calculate<T>(IEnumerable<KeyValuePair<T, uint>> map) where T : IConvertible

@@ -267,9 +267,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.55823761f, 0.99688544f, 0.08315849f, 1f)
         };
 
-        public static Vector4 Neon<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), NeonMap);
-        }
+        public static Vector4 Neon<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), NeonMap);
     }
 }

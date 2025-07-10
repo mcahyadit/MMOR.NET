@@ -28,21 +28,17 @@ namespace MMOR.Utils.Utilities
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         // Do not use Convert.ToInt() for the Enum checking, the conversion demands a Garbage Collection and not ideal for Simulations
-        public static bool ContainsFlag<T>(this T bitmask, T flag) where T : struct, Enum
-        {
-            return EqualityComparer<T>.Default.Equals(flag, default)
+        public static bool ContainsFlag<T>(this T bitmask, T flag) where T : struct, Enum =>
+            EqualityComparer<T>.Default.Equals(flag, default)
                 ? EqualityComparer<T>.Default.Equals(bitmask, default)
                 : bitmask.HasFlag(flag);
-        }
 
         /// <summary>
         ///     <inheritdoc cref="ContainsFlag" />
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ContainsFlag(this int bitmask, int flag)
-        {
-            return flag == 0 ? bitmask == 0 : (bitmask & flag) == flag;
-        }
+        public static bool ContainsFlag(this int bitmask, int flag) =>
+            flag == 0 ? bitmask == 0 : (bitmask & flag) == flag;
 
         /// <summary>
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -56,7 +52,7 @@ namespace MMOR.Utils.Utilities
         ///     <inheritdoc cref="MaxFlag{T}" />
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T MaxFlagCasted<T>() where T : struct, Enum { return (T)Enum.ToObject(typeof(T), MaxFlag<T>()); }
+        public static T MaxFlagCasted<T>() where T : struct, Enum => (T)Enum.ToObject(typeof(T), MaxFlag<T>());
 
         /// <summary>
         ///     <br />
@@ -166,10 +162,7 @@ namespace MMOR.Utils.Utilities
                     // ..Otherwise, simply return value
                     if (firstThread)
                     {
-                        lock (dictionary)
-                        {
-                            dictionary.Add(flag, value);
-                        }
+                        lock (dictionary) { dictionary.Add(flag, value); }
 
                         // Reset the ThreadId ahead for next Accessor
                         _threadId = -1;
@@ -187,10 +180,7 @@ namespace MMOR.Utils.Utilities
             // ..Otherwise, simply return value
             if (firstThread)
             {
-                lock (dictionary)
-                {
-                    dictionary.Add(flag, value);
-                }
+                lock (dictionary) { dictionary.Add(flag, value); }
 
                 // Reset the ThreadId ahead for next Accessor
                 _threadId = -1;
@@ -249,10 +239,8 @@ namespace MMOR.Utils.Utilities
 
         /// <inheritdoc cref="InList" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool InList<T>(this T bitmask, IReadOnlyCollection<T> listFlags) where T : struct, Enum
-        {
-            return listFlags.InList(bitmask);
-        }
+        public static bool InList<T>(this T bitmask, IReadOnlyCollection<T> listFlags) where T : struct, Enum =>
+            listFlags.InList(bitmask);
 
         /// <summary>
         ///     <strong>CustomLibrary.FlagToIndex()</strong>

@@ -4,6 +4,8 @@ namespace MMOR.Utils.Utilities
 {
     public static partial class Utilities
     {
+        public delegate bool TryParseDelegate<T>(string s, out T result);
+
         /// <summary>
         ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         ///     <br /> - <see cref="Console.ReadLine" /> with Utilities.
@@ -50,8 +52,6 @@ namespace MMOR.Utils.Utilities
                     return result;
             }
         }
-
-        public delegate bool TryParseDelegate<T>(string s, out T result);
     }
 
     /// <summary>

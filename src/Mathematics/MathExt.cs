@@ -29,45 +29,31 @@ namespace MMOR.Utils.Mathematics
         private static readonly double log2d = Math.Log(2d);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GCD(int a, int b) { return b == 0 ? a : GCD(b, a % b); }
+        public static int GCD(int a, int b) => b == 0 ? a : GCD(b, a % b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GCD(IEnumerable<int> list) { return list.Aggregate(GCD); }
+        public static int GCD(IEnumerable<int> list) => list.Aggregate(GCD);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(float a, float b, float tolerance) { return Math.Abs(a - b) < tolerance; }
+        public static bool Approximately(float a, float b, float tolerance) => Math.Abs(a - b) < tolerance;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(float a, float b)
-        {
-            return Math.Abs(a - b) < Math.Max(1E-06f * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceF);
-        }
+        public static bool Approximately(float a, float b) =>
+            Math.Abs(a - b) < Math.Max(1E-06f * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceF);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(in Vector4 a, in Vector4 b)
-        {
-            return Approximately(a.X, b.X) &&
-                   Approximately(a.Y, b.Y) &&
-                   Approximately(a.Z, b.Z) &&
-                   Approximately(a.W, b.W);
-        }
+        public static bool Approximately(in Vector4 a, in Vector4 b) =>
+            Approximately(a.X, b.X) &&
+            Approximately(a.Y, b.Y) &&
+            Approximately(a.Z, b.Z) &&
+            Approximately(a.W, b.W);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(double a, double b, double tolerance) { return Math.Abs(a - b) < tolerance; }
+        public static bool Approximately(double a, double b, double tolerance) => Math.Abs(a - b) < tolerance;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(double a, double b)
-        {
-            return Math.Abs(a - b) < Math.Max(1E-15 * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceD);
-        }
-
-#if !NETCOREAPP3_0_OR_GREATER
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Log2(float value) { return MathF.Log(value) / log2f; }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Log2(double value) { return Math.Log(value) / log2d; }
-#endif
+        public static bool Approximately(double a, double b) =>
+            Math.Abs(a - b) < Math.Max(1E-15 * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceD);
 
         //-+-+-+-+-+-+-+-+
         // Repeat
@@ -77,28 +63,19 @@ namespace MMOR.Utils.Mathematics
         // (0, 5) => 4
         // (12, 5) => 2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Repeat(this int value, int length)
-        {
-            return Math.Clamp(value - value / length * length, 0, length);
-        }
+        public static int Repeat(this int value, int length) => Math.Clamp(value - value / length * length, 0, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Repeat(this float value, float length)
-        {
-            return Math.Clamp(value - MathF.Floor(value / length) * length, 0, length);
-        }
+        public static float Repeat(this float value, float length) =>
+            Math.Clamp(value - MathF.Floor(value / length) * length, 0, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Repeat(this double value, double length)
-        {
-            return Math.Clamp(value - Math.Floor(value / length) * length, 0, length);
-        }
+        public static double Repeat(this double value, double length) =>
+            Math.Clamp(value - Math.Floor(value / length) * length, 0, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static decimal Repeat(this decimal value, in decimal length)
-        {
-            return Math.Clamp(value - Math.Floor(value / length) * length, 0, length);
-        }
+        public static decimal Repeat(this decimal value, in decimal length) =>
+            Math.Clamp(value - Math.Floor(value / length) * length, 0, length);
 
         //-+-+-+-+-+-+-+-+
         // Remap
@@ -109,37 +86,27 @@ namespace MMOR.Utils.Mathematics
         // ..y = yMin + (x - xMin) * (yMax - yMin) / (xMax - xMin)
         //-+-+-+-+-+-+-+-+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Remap(this float value, float staMin, float staMax, float endMin = 0, float endMax = 1)
-        {
-            return (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
-        }
+        public static float Remap(this float value, float staMin, float staMax, float endMin = 0, float endMax = 1) =>
+            (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Remap(this double value, double staMin, double staMax, double endMin = 0,
-            double endMax = 1)
-        {
-            return (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
-        }
+            double endMax = 1) =>
+            (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static decimal Remap(this decimal value, in decimal staMin, in decimal staMax, in decimal endMin = 0,
-            in decimal endMax = 1)
-        {
-            return (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
-        }
+            in decimal endMax = 1) =>
+            (value - staMin) / (staMax - staMin) * (endMax - endMin) + endMin;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Remap(this Vector4 value, in Vector4 staMin, in Vector4 staMax)
-        {
-            return (value - staMin) / (staMax - staMin);
-        }
+        public static Vector4 Remap(this Vector4 value, in Vector4 staMin, in Vector4 staMax) =>
+            (value - staMin) / (staMax - staMin);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Remap(this Vector4 value, in Vector4 staMin, in Vector4 staMax, in Vector4 endMin,
-            in Vector4 endMax)
-        {
-            return Remap(value, staMin, staMax) * (endMax - endMin) + endMin;
-        }
+            in Vector4 endMax) =>
+            Remap(value, staMin, staMax) * (endMax - endMin) + endMin;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Remap(this Vector4 value, float staMin, float staMax, float endMin = 0, float endMax = 1)
@@ -158,51 +125,44 @@ namespace MMOR.Utils.Mathematics
         //-+-+-+-+-+-+-+-+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Frac(float x) { return x - MathF.Floor(x); }
+        public static float Frac(float x) => x - MathF.Floor(x);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Frac(double x)
-        {
-            return x - Math.Floor(x);
-            // Can't belive there's no native frac for double
-        }
+        public static double Frac(double x) => x - Math.Floor(x);
+
+        // Can't belive there's no native frac for double
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static decimal Frac(in decimal x) => x - Math.Floor(x);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static decimal Frac(in decimal x) { return x - Math.Floor(x); }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Frac(Vector4 x)
-        {
-            return new Vector4(
+        public static Vector4 Frac(Vector4 x) =>
+            new(
                 x.X - MathF.Floor(x.X),
                 x.Y - MathF.Floor(x.Y),
                 x.Z - MathF.Floor(x.Z),
                 x.W - MathF.Floor(x.W)
             );
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Lerp(float a, float b, float alpha) { return a + (b - a) * alpha; }
+        public static float Lerp(float a, float b, float alpha) => a + (b - a) * alpha;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Lerp(double a, double b, double alpha) { return a + (b - a) * alpha; }
+        public static double Lerp(double a, double b, double alpha) => a + (b - a) * alpha;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static decimal Lerp(in decimal a, in decimal b, in decimal alpha) { return a + (b - a) * alpha; }
+        public static decimal Lerp(in decimal a, in decimal b, in decimal alpha) => a + (b - a) * alpha;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Lerp(in Vector4 a, in Vector4 b, in Vector4 alpha)
-        {
-            return new Vector4(
+        public static Vector4 Lerp(in Vector4 a, in Vector4 b, in Vector4 alpha) =>
+            new(
                 a.X + (b.X - a.X) * alpha.X,
                 a.Y + (b.Y - a.Y) * alpha.Y,
                 a.Z + (b.Z - a.Z) * alpha.Z,
                 a.W + (b.W - a.W) * alpha.W
             );
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Lerp(in Vector4 a, in Vector4 b, float alpha) { return Vector4.Lerp(a, b, alpha); }
+        public static Vector4 Lerp(in Vector4 a, in Vector4 b, float alpha) => Vector4.Lerp(a, b, alpha);
 
         //-+-+-+-+-+-+-+-+
         // MultiLerp
@@ -245,5 +205,13 @@ namespace MMOR.Utils.Mathematics
 
             return Lerp(lerpMap.SafeGet(mapIndexOI - 1), lerpMap.SafeGet(mapIndexOI), Frac(alphaScale));
         }
+
+#if !NETCOREAPP3_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Log2(float value) => MathF.Log(value) / log2f;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Log2(double value) => Math.Log(value) / log2d;
+#endif
     }
 }

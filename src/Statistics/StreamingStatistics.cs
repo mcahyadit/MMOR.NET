@@ -123,15 +123,11 @@ namespace MMOR.Utils.Statistics
             return (count > 1 ? variance / (count - (sample ? 1.0 : 0)) : double.NaN, count);
         }
 
-        public static double Variance(this IEnumerable<double> stream, bool sample = true)
-        {
-            return VarBaseAlgo(stream, sample).variance;
-        }
+        public static double Variance(this IEnumerable<double> stream, bool sample = true) =>
+            VarBaseAlgo(stream, sample).variance;
 
-        public static double StandardDeviation(this IEnumerable<double> stream, bool sample = true)
-        {
-            return Math.Sqrt(Variance(stream, sample));
-        }
+        public static double StandardDeviation(this IEnumerable<double> stream, bool sample = true) =>
+            Math.Sqrt(Variance(stream, sample));
 
         public static double StandardError(this IEnumerable<double> stream, bool sample = true)
         {

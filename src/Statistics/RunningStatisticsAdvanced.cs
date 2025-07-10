@@ -70,11 +70,14 @@ namespace MMOR.Utils.Statistics
 
             double m1 = (_n * _m1 + stats._n * stats._m1) / n;
             double m2 = _m2 + stats._m2 + d2 * _n * stats._n / n;
-            double m3 = _m3 + stats._m3 + d3 * _n * stats._n * (_n - stats._n) / (n * n)
-                        + 3 * d * (_n * stats._m2 - stats._n * _m2) / n;
-            double m4 = _m4 + stats._m4 +
-                        d4 * _n * stats._n * (_n * _n - _n * stats._n + stats._n * stats._n) / (n * n * n)
-                        + 6 * d2 * (_n * _n * stats._m2 + stats._n * stats._n * _m2) / (n * n) +
+            double m3 = _m3 +
+                        stats._m3 +
+                        d3 * _n * stats._n * (_n - stats._n) / (n * n) +
+                        3 * d * (_n * stats._m2 - stats._n * _m2) / n;
+            double m4 = _m4 +
+                        stats._m4 +
+                        d4 * _n * stats._n * (_n * _n - _n * stats._n + stats._n * stats._n) / (n * n * n) +
+                        6 * d2 * (_n * _n * stats._m2 + stats._n * stats._n * _m2) / (n * n) +
                         4 * d * (_n * stats._m3 - stats._n * _m3) / n;
 
             // Update Max Min

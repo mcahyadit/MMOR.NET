@@ -268,9 +268,7 @@ namespace MMOR.Utils.ColorMaps
             new(0.988362f, 0.998364f, 0.644924f, 1f)
         };
 
-        public static Vector4 Inferno<T>(T value) where T : IConvertible
-        {
-            return MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), InfernoMap);
-        }
+        public static Vector4 Inferno<T>(T value) where T : IConvertible =>
+            MathExt.MultiLerp(Math.Clamp(value.ToSingle(null), 0f, 1f), InfernoMap);
     }
 }

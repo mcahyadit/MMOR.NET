@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.Utils.Utilities
@@ -98,6 +97,7 @@ namespace MMOR.Utils.Utilities
         {
             frequencyMap.AddFrequency(data.Key, data.Value);
         }
+
         //-+-+-+-+-+-+-+-+
         #endregion
 
@@ -115,36 +115,39 @@ namespace MMOR.Utils.Utilities
 #if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void CombineFrequency<T>(this IDictionary<T, uint> a, IReadOnlyDictionary<T, uint> b) where T : notnull
+        public static void CombineFrequency<T>(this IDictionary<T, uint> a, IReadOnlyDictionary<T, uint> b)
+            where T : notnull
         {
-            // This Casting is the only reliable way
-            // ..to avoid Collection was Modified after Enumeration Exception
-            foreach (T key in b.Keys.ToList())
-                a.AddFrequency(key, b[key]);
+            foreach ((T value, uint freq) in b)
+                a.AddFrequency(value, freq);
         }
 
         /// <summary>
-        ///     <inheritdoc cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})"/>
+        ///     <inheritdoc
+        ///         cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})" />
         /// </summary>
 #if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void CombineFrequency<T>(this IDictionary<T, ulong> a, IReadOnlyDictionary<T, uint> b) where T : notnull
+        public static void CombineFrequency<T>(this IDictionary<T, ulong> a, IReadOnlyDictionary<T, uint> b)
+            where T : notnull
         {
-            foreach (T key in b.Keys.ToList())
-                a.AddFrequency(key, b[key]);
+            foreach ((T value, uint freq) in b)
+                a.AddFrequency(value, freq);
         }
 
         /// <summary>
-        ///     <inheritdoc cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})"/>
+        ///     <inheritdoc
+        ///         cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})" />
         /// </summary>
 #if !DEBUG && !UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void CombineFrequency<T>(this IDictionary<T, ulong> a, IReadOnlyDictionary<T, ulong> b) where T : notnull
+        public static void CombineFrequency<T>(this IDictionary<T, ulong> a, IReadOnlyDictionary<T, ulong> b)
+            where T : notnull
         {
-            foreach (T key in b.Keys.ToList())
-                a.AddFrequency(key, b[key]);
+            foreach ((T value, ulong freq) in b)
+                a.AddFrequency(value, freq);
         }
         #endregion
 
