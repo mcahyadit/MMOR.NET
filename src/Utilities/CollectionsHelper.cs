@@ -411,6 +411,12 @@ namespace MMOR.Utils.Utilities
         public static T[][][] deepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list) where T : struct =>
             list.Select(x => x.deepToArray()).ToArray();
 
+        public static ImmutableArray<ImmutableArray<T>> deepToImmutableArray<T>(this IEnumerable<IEnumerable<T>> list)
+            where T : struct => list.Select(x => x.ToImmutableArray()).ToImmutableArray();
+
+        public static ImmutableArray<ImmutableArray<ImmutableArray<T>>>
+            deepToImmutableArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list) where T : struct =>
+            list.Select(x => x.deepToImmutableArray()).ToImmutableArray();
 
         //-+-+-+-+-+-+-+-+
         #endregion
