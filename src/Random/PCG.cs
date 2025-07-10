@@ -41,7 +41,7 @@ namespace MMOR.Utils.Random
 
         public PCG(ulong seed, ulong? inc = null)
         {
-            this.seed = seed;
+            Seed = seed;
 
             state = 0ul;
             ulong sequence = inc ?? _defaultSequence;
@@ -52,7 +52,7 @@ namespace MMOR.Utils.Random
             NextUInt();
         }
 
-        public override string getSeed() { return $"PCG-0x{seed:X}-0x{inc:X}"; }
+        public override string ToString() => $"PCG-0x{Seed:X}-0x{inc:X}";
 
         //-+-+-+-+-+-+-+-+
         #endregion

@@ -66,17 +66,17 @@ namespace MMOR.Utils.Random
         //-+-+-+-+-+-+-+-+
 
         #region Initialization
-
         public MT19937() : this(DefaultReSeed()) { }
+
         public MT19937(ulong seed)
         {
-            this.seed = seed;
+            Seed = seed;
             mtVal[0] = (uint)seed;
             for (mtDex = 1; mtDex < N; mtDex++)
                 mtVal[mtDex] = 1812433253u * (mtVal[mtDex - 1] ^ (mtVal[mtDex - 1] >> 30)) + (uint)mtDex;
         }
 
-        public override string getSeed() { return $"MT19937-0x{seed:X}"; }
+        public override string ToString() => $"MT19937-0x{Seed:X}";
 
         //-+-+-+-+-+-+-+-+
         #endregion

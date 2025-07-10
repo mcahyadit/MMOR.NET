@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using MMOR.Utils.Utilities;
 
 namespace MMOR.Utils.Random
 {
@@ -8,7 +7,7 @@ namespace MMOR.Utils.Random
     {
         private ulong x;
 
-        public SplitMix64(ulong seed) { x = seed; }
+        public SplitMix64(ulong seed) => x = seed;
 
         public ulong Next()
         {
@@ -30,10 +29,10 @@ namespace MMOR.Utils.Random
         protected (uint x, uint y) s;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected virtual uint RotateLeft(uint x, int k) { return (x << k) | (x >> (64 - k)); }
+        protected virtual uint RotateLeft(uint x, int k) => (x << k) | (x >> (64 - k));
 
         //-+-+-+-+-+-+-+-+
-        public override string getSeed() { return @$"XSR_128pp-0x{seed:X}"; }
+        public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override uint NextUInt()
@@ -57,20 +56,17 @@ namespace MMOR.Utils.Random
         public Xoroshiro() : this(DefaultReSeed()) { }
 
         public Xoroshiro(ulong seed, ulong? mix = null)
-        { 
-            this.seed = seed;
+        {
+            Seed = seed;
 
             if (mix == null)
             {
                 SplitMix64 sm = new(seed);
                 s = new ValueTuple<uint, uint>((uint)sm.Next(), (uint)sm.Next());
             }
-            else
-            {
-                s = new ValueTuple<uint, uint>((uint)seed, (uint)mix.Value);
-            }
-            
+            else { s = new ValueTuple<uint, uint>((uint)seed, (uint)mix.Value); }
         }
+
         //-+-+-+-+-+-+-+-+
         #endregion
     }
@@ -83,9 +79,9 @@ namespace MMOR.Utils.Random
     /// </summary>
     public class Xoroshiro64s : Xoroshiro
     {
-        protected override uint RotateLeft(uint x, int k) { return (x << k) | (x >> (32 - k)); }
+        protected override uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
 
-        public override string getSeed() { return @$"XSR_64s-0x{seed:X}"; }
+        public override string ToString() => @$"XSR_64s-0x{Seed:X}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override uint NextUInt()
@@ -110,7 +106,7 @@ namespace MMOR.Utils.Random
     /// </summary>
     public class Xoroshiro64ss : Xoroshiro64s
     {
-        public override string getSeed() { return @$"XSR_64ss-0x{seed:X}"; }
+        public override string ToString() => @$"XSR_64ss-0x{Seed:X}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override uint NextUInt()
@@ -135,7 +131,7 @@ namespace MMOR.Utils.Random
     /// </summary>
     public class Xoroshiro128ss : Xoroshiro
     {
-        public override string getSeed() { return @$"XSR_128ss-0x{seed:X}"; }
+        public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override uint NextUInt()
@@ -160,7 +156,7 @@ namespace MMOR.Utils.Random
     /// </summary>
     public class Xoroshiro128p : Xoroshiro
     {
-        public override string getSeed() { return @$"XSR_128p-0x{seed:X}"; }
+        public override string ToString() => @$"XSR_128p-0x{Seed:X}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override uint NextUInt()

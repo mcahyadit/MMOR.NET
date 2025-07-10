@@ -31,7 +31,7 @@ namespace MMOR.Utils.Random
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static uint ROTL(uint v, int n) { return (v << n) | (v >> (32 - n)); }
+        protected static uint ROTL(uint v, int n) => (v << n) | (v >> (32 - n));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static void QuarterRound(uint[] x, int a, int b, int c, int d)
@@ -87,10 +87,11 @@ namespace MMOR.Utils.Random
         //-+-+-+-+-+-+-+-+
         #region Initialization
         public ChaCha20() : this(DefaultReSeed()) { }
+
         public ChaCha20(ulong seed, ulong? stream = null)
         {
-            this.seed = seed;
-            
+            Seed = seed;
+
             ctr = 0;
             blockDex = ulong.MaxValue;
 
@@ -101,7 +102,7 @@ namespace MMOR.Utils.Random
                 seedVal = (uint)sm.Next();
                 this.stream = (uint)sm.Next();
 
-                this.seed = seedVal;
+                Seed = seedVal;
             }
             else
             {
@@ -117,7 +118,7 @@ namespace MMOR.Utils.Random
             keysetup[6] = keysetup[7] = 0xdeadbeef;
         }
 
-        public override string getSeed() { return $"ChaCha-0x{seed:X}-0x{stream:X}"; }
+        public override string ToString() => $"ChaCha-0x{Seed:X}-0x{stream:X}";
 
         //-+-+-+-+-+-+-+-+
         #endregion
