@@ -20,10 +20,10 @@ namespace MMOR.Utils.Statistics
             { 0.0215, 0.0887, 0.10, 0.125, 0.25, 0.5, 0.75, 0.875, 0.90, 0.9113, 0.9785 };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected TotalStatistics(IEnumerable<KeyValuePair<double, uint>> map)
+        protected TotalStatistics(IEnumerable<KeyValuePair<double, ulong>> map)
         {
             FirstPassLoop(map);
-            IOrderedEnumerable<KeyValuePair<double, uint>> _oMap = map.OrderBy(x => x.Key);
+            IOrderedEnumerable<KeyValuePair<double, ulong>> _oMap = map.OrderBy(x => x.Key);
             SecondPassLoop(_oMap);
             ThirdPassLoop(_oMap);
         }
@@ -31,13 +31,13 @@ namespace MMOR.Utils.Statistics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected TotalStatistics(IEnumerable<double> list)
         {
-            IOrderedEnumerable<KeyValuePair<double, uint>> _oMap = FirstPassLoopList(list).OrderBy(x => x.Key);
+            IOrderedEnumerable<KeyValuePair<double, ulong>> _oMap = FirstPassLoopList(list).OrderBy(x => x.Key);
             SecondPassLoop(_oMap);
             ThirdPassLoop(_oMap);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TotalStatistics Calculate(IEnumerable<KeyValuePair<double, uint>> map) => new(map);
+        public static TotalStatistics Calculate(IEnumerable<KeyValuePair<double, ulong>> map) => new(map);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TotalStatistics Calculate(IEnumerable<double> list) => new(list);
@@ -45,7 +45,13 @@ namespace MMOR.Utils.Statistics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TotalStatistics Calculate<T>(IEnumerable<KeyValuePair<T, uint>> map) where T : IConvertible
         {
-            return new TotalStatistics(map.Select(x => new KeyValuePair<double, uint>(x.Key.ToDouble(null), x.Value)));
+            return new TotalStatistics(map.Select(x => new KeyValuePair<double, ulong>(x.Key.ToDouble(null), x.Value)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TotalStatistics Calculate<T>(IEnumerable<KeyValuePair<T, ulong>> map) where T : IConvertible
+        {
+            return new TotalStatistics(map.Select(x => new KeyValuePair<double, ulong>(x.Key.ToDouble(null), x.Value)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -270,9 +276,9 @@ namespace MMOR.Utils.Statistics
         //-+-+-+-+-+-+-+-+
 
         #region Calculation
-        protected virtual void FirstPassLoop(IEnumerable<KeyValuePair<double, uint>> map)
+        protected virtual void FirstPassLoop(IEnumerable<KeyValuePair<double, ulong>> map)
         {
-            foreach ((double value, uint freq) in map)
+            foreach ((double value, ulong freq) in map)
             {
                 // Update Count
                 ulong _nPrev = _n;
@@ -306,9 +312,9 @@ namespace MMOR.Utils.Statistics
             }
         }
 
-        protected virtual IEnumerable<KeyValuePair<double, uint>> FirstPassLoopList(IEnumerable<double> list)
+        protected virtual IEnumerable<KeyValuePair<double, ulong>> FirstPassLoopList(IEnumerable<double> list)
         {
-            Dictionary<double, uint> _map = new();
+            Dictionary<double, ulong> _map = new();
             foreach (double value in list)
             {
                 // Update Count
@@ -341,7 +347,7 @@ namespace MMOR.Utils.Statistics
             return _map;
         }
 
-        protected virtual void SecondPassLoop(IEnumerable<KeyValuePair<double, uint>> map)
+        protected virtual void SecondPassLoop(IEnumerable<KeyValuePair<double, ulong>> map)
         {
             ulong reCount = 0;
             var cumProportionV = 0.0;
@@ -349,7 +355,7 @@ namespace MMOR.Utils.Statistics
 
             double mS = 0;
 
-            foreach ((double value, uint freq) in map)
+            foreach ((double value, ulong freq) in map)
             {
                 // Quantiles Calculator
                 reCount += freq;
@@ -388,9 +394,9 @@ namespace MMOR.Utils.Statistics
             }
         }
 
-        protected virtual void ThirdPassLoop(IEnumerable<KeyValuePair<double, uint>> map)
+        protected virtual void ThirdPassLoop(IEnumerable<KeyValuePair<double, ulong>> map)
         {
-            foreach ((double value, uint freq) in map) _nO += value < _fL || value > _fU ? freq : 0;
+            foreach ((double value, ulong freq) in map) _nO += value < _fL || value > _fU ? freq : 0;
         }
 
         //-+-+-+-+-+-+-+-+
