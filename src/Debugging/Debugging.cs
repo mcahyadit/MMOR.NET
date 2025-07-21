@@ -27,30 +27,30 @@ namespace MMOR.Utils.Debugging
 
             return result;
         }
-    }
 
-    public class RichConverter : JsonConverter
-    {
-        public override bool CanConvert(Type objectType) =>
-            typeof(IEnumerable<string>).IsAssignableFrom(objectType) &&
-            objectType != typeof(string) &&
-            objectType != typeof(byte[]);
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        private class RichConverter : JsonConverter
         {
-            if (value == null)
-            {
-                writer.WriteNull();
-                return;
-            }
-            writer.WriteStartArray();
-            var collection = (IEnumerable<string>)value;
-            foreach (string item in collection)
-                writer.WriteValue(item);
-            writer.WriteEndArray();
-        }
+            public override bool CanConvert(Type objectType) =>
+                typeof(IEnumerable<string>).IsAssignableFrom(objectType) &&
+                objectType != typeof(string) &&
+                objectType != typeof(byte[]);
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-            JsonSerializer serializer) => serializer.Deserialize(reader, objectType);
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                if (value == null)
+                {
+                    writer.WriteNull();
+                    return;
+                }
+                writer.WriteStartArray();
+                var collection = (IEnumerable<string>)value;
+                foreach (string item in collection)
+                    writer.WriteValue(item);
+                writer.WriteEndArray();
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+                JsonSerializer serializer) => serializer.Deserialize(reader, objectType);
+        }
     }
 }
