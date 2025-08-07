@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -104,5 +105,38 @@ namespace MMOR.Utils.Utilities
 
             return transpose ? result.Transpose() : result;
         }
+
+        [Pure] public static string PadSmart(this string str, int total_width,
+            char padding_char = ' ') =>
+            total_width < 0
+                ? str.PadLeft(-total_width, padding_char)
+                : str.PadRight(total_width, padding_char);
+
+        [Pure] public static string PadCenter(this string str, int total_width,
+            char padding_char = ' ') {
+          int str_len = str.Length;
+          if (total_width > 0) {
+            return str.PadLeft((total_width + str_len) / 2, padding_char)
+                .PadRight(total_width, padding_char);
+          }
+          total_width = -total_width;
+          return str.PadRight((total_width + str_len) / 2, padding_char)
+              .PadLeft(total_width, padding_char);
+        }
+
+        [Pure] public static string PadSmartToDecimal(this string str, int total_width,
+            char padding_char = ' ') {
+          int decimal_pos = str.IndexOf(localeDecimalSeparator);
+          if (decimal_pos == -1)
+            return str.PadSmart(total_width, padding_char);
+          string left_side = str[..decimal_pos];
+          string right_side = str[decimal_pos..];
+          return
+              $"{left_side.PadSmart(total_width, padding_char)}{right_side}";
+        }
+        [Pure] public static string HtmlBody(this string str) => $"<body>{str}</body>";
+        [Pure] public static string HtmlHead(this string str) => $"<head>{str}</head>";
+        [Pure] public static string HtmlStyle(this string str) => $"<style>{str}</style>";
+        [Pure] public static string HtmlParagraph(this string str) => $"<p>{str}</p>";
     }
 }
