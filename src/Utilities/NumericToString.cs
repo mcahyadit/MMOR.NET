@@ -20,10 +20,10 @@ namespace MMOR.Utils.Utilities
             { 'k', 10E3m }
         };
 
-        internal static readonly char localeDecimalSeparator = 0.0.ToString("F1")[1];
-        internal static readonly char localeThousandSeparator = 1000.0.ToString("N1")[1];
+        public static readonly char localeDecimalSeparator = 0.0.ToString("F1")[1];
+        public static readonly char localeThousandSeparator = 1000.0.ToString("N1")[1];
 
-        internal static readonly char localeCurrencySymbol = 0.0.ToString("C0")[0];
+        public static readonly char localeCurrencySymbol = 0.0.ToString("C0")[0];
 
         //private static readonly char decimalThousandSeparator = '\'';
         public static string SmartToString(this double value, int decimalPlaces = -1)
