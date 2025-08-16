@@ -1,9 +1,9 @@
-namespace MMOR.Utils.Consts
+namespace MMOR.NET.Consts
 {
-    public static class Consts
-    {
-        public const char multiplierSign = '\u00D7';
+  public static class Consts
+  {
+    public const char multiplierSign = '\u00D7';
 
-        public const char plusMinusSign = '\u00B1';
-    }
+    public const char plusMinusSign = '\u00B1';
+  }
 }
