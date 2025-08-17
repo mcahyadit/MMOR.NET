@@ -234,12 +234,24 @@ namespace MMOR.NET.Mathematics
       return Lerp(lerpMap.SafeGet(mapIndexOI - 1), lerpMap.SafeGet(mapIndexOI), Frac(alphaScale));
     }
 
-#if !NETCOREAPP3_0_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Log2(float value) => MathF.Log(value) / log2f;
+    public static float Log2(float value)
+    {
+#if !NETCOREAPP3_0_OR_GREATER
+      return MathF.Log(value) / log2f;
+#else
+      return MathF.Log2(value);
+#endif
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Log2(double value) => Math.Log(value) / log2d;
+    public static double Log2(double value)
+    {
+#if !NETCOREAPP3_0_OR_GREATER
+      return MathF.Log(value) / log2f;
+#else
+      return MathF.Log2(value);
 #endif
+    }
   }
 }
