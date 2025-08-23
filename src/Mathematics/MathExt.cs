@@ -248,9 +248,9 @@ namespace MMOR.NET.Mathematics
     public static double Log2(double value)
     {
 #if !NETCOREAPP3_0_OR_GREATER
-      return MathF.Log(value) / log2f;
+      return Math.Log(value) / log2f;
 #else
-      return MathF.Log2(value);
+      return Math.Log2(value);
 #endif
     }
   }
