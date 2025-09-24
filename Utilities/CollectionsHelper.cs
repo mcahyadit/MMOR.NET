@@ -280,10 +280,10 @@ namespace MMOR.NET.Utilities
       return outList;
     }
 
-    public static string join(this IEnumerable<string> stringList, string separator = "") =>
+    public static string Join(this IEnumerable<string> stringList, string separator = "") =>
       string.Join(separator, stringList);
 
-    public static string join(this IEnumerable<char> stringList, string separator = "") =>
+    public static string Join(this IEnumerable<char> stringList, string separator = "") =>
       string.Join(separator, stringList);
 
     public static IEnumerable<T> ListAll<T>()
@@ -444,21 +444,21 @@ namespace MMOR.NET.Utilities
     // ..e.g. a List<List<List>> will turn as List<List>[] since T is recognized as List<List> instead.
     //-+-+-+-+-+-+-+-+
 
-    public static T[][] deepToArray<T>(this IEnumerable<IEnumerable<T>> list)
+    public static T[][] DeepToArray<T>(this IEnumerable<IEnumerable<T>> list)
       where T : struct => list.Select(x => x.ToArray()).ToArray();
 
-    public static T[][][] deepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list)
-      where T : struct => list.Select(x => x.deepToArray()).ToArray();
+    public static T[][][] DeepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list)
+      where T : struct => list.Select(x => x.DeepToArray()).ToArray();
 
-    public static ImmutableArray<ImmutableArray<T>> deepToImmutableArray<T>(
+    public static ImmutableArray<ImmutableArray<T>> DeepToImmutableArray<T>(
       this IEnumerable<IEnumerable<T>> list
     )
       where T : struct => list.Select(x => x.ToImmutableArray()).ToImmutableArray();
 
-    public static ImmutableArray<ImmutableArray<ImmutableArray<T>>> deepToImmutableArray<T>(
+    public static ImmutableArray<ImmutableArray<ImmutableArray<T>>> DeepToImmutableArray<T>(
       this IEnumerable<IEnumerable<IEnumerable<T>>> list
     )
-      where T : struct => list.Select(x => x.deepToImmutableArray()).ToImmutableArray();
+      where T : struct => list.Select(x => x.DeepToImmutableArray()).ToImmutableArray();
 
     //-+-+-+-+-+-+-+-+
     #endregion
