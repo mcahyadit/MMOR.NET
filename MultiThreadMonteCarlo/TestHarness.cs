@@ -489,7 +489,7 @@ namespace MMOR.NET.MultiThreadMonteCarlo
           .Append("Current ")
           .AppendFormat("{0:N0}", currentIterations)
           .Append(" (")
-          .Append(completionPercentage.toPercentage())
+          .Append(completionPercentage.ToPercentage())
           .AppendLine(")");
 
         // There was some error when
@@ -503,10 +503,10 @@ namespace MMOR.NET.MultiThreadMonteCarlo
             .Append("/s")
             .Append(" | ")
             .Append("Est. time remaining: ")
-            .Append(estimatedTime.toTime())
+            .Append(estimatedTime.ToTime())
             .Append(" | ")
             .Append("Time Elapsed: ")
-            .AppendLine(timeElapsed.toTime());
+            .AppendLine(timeElapsed.ToTime());
         }
       }
       else
@@ -518,7 +518,7 @@ namespace MMOR.NET.MultiThreadMonteCarlo
             .Append("Aborted After ")
             .AppendFormat("{0:N0}", currentIterations)
             .Append(" (")
-            .Append(completionPercentage.toPercentage())
+            .Append(completionPercentage.ToPercentage())
             .AppendLine(")");
 
         strResult
@@ -527,7 +527,7 @@ namespace MMOR.NET.MultiThreadMonteCarlo
           .Append("/s")
           .Append(" | ")
           .Append("Completed in ")
-          .AppendLine(timeElapsed.toTime());
+          .AppendLine(timeElapsed.ToTime());
       }
 
       strResult.AppendLine();
