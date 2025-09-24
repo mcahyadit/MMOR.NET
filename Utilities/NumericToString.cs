@@ -91,7 +91,7 @@ namespace MMOR.NET.Utilities
       return value.ToString(format, CultureInfo.InvariantCulture);
     }
 
-    public static string toPercentage<T>(this T value, int decimalPlaces = 2)
+    public static string ToPercentage<T>(this T value, int decimalPlaces = 2)
       where T : IConvertible
     {
       double val = value.ToDouble(null) * 100;
@@ -100,7 +100,7 @@ namespace MMOR.NET.Utilities
       return SmartToString(val, decimalPlaces) + "%";
     }
 
-    public static string toCurrency<T>(this T value, uint decimalPlaces = 2)
+    public static string ToCurrency<T>(this T value, uint decimalPlaces = 2)
       where T : IConvertible
     {
       var val = value.ToDecimal(null);
@@ -121,7 +121,7 @@ namespace MMOR.NET.Utilities
       return $"({val.ToString($"C{decimalPlaces}")}{appender})";
     }
 
-    public static string toTime<T>(this T time)
+    public static string ToTime<T>(this T time)
       where T : struct, IComparable, IConvertible, IFormattable
     {
       var value = time.ToDouble(null);
