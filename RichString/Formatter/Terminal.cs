@@ -41,7 +41,7 @@ namespace MMOR.NET.RichString
     private void FormatColor(RichStringColored rich_str, StringBuilder result)
     {
       ref RichStringColor col = ref rich_str.color;
-      result.Append("\033[38;2;");
+      result.Append("\u001b[38;2;");
       result.Append($"{col.R};{col.G};{col.B}");
       result.Append("m");
       Format(rich_str.str, result);

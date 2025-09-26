@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MMOR.NET.Random;
+using MMOR.NET.RichString;
 using MMOR.NET.Utilities;
 
 namespace MMOR.NET.MultiThreadMonteCarlo
@@ -80,7 +81,8 @@ namespace MMOR.NET.MultiThreadMonteCarlo
     #region Multi-thread Logic
     // Cancelation Token is used to Break Tasks
     private CancellationTokenSource? cancellationTokenSource;
-    private CancellationToken cancellationToken => cancellationTokenSource!.Token;
+    private CancellationToken cancellationToken =>
+      cancellationTokenSource!.Token;
 
     /// <summary>
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -231,7 +233,10 @@ namespace MMOR.NET.MultiThreadMonteCarlo
       // Interpret Data
       //-+-+-+-+-+-+-+-+
       threadCount = Math.Max((byte)1, threadCount); // No 0 threads, duh
-      ulong checkThreshold = Math.Min(targetIteration, (ulong)(checkRate * targetIteration));
+      ulong checkThreshold = Math.Min(
+        targetIteration,
+        (ulong)(checkRate * targetIteration)
+      );
       ulong threadIterations = targetIteration / threadCount;
       ulong threadLeftOver = targetIteration % threadCount;
       Queue<Func<IRandom>> qRngCtor = !rngConstructors.IsNullOrEmpty()
@@ -392,7 +397,10 @@ namespace MMOR.NET.MultiThreadMonteCarlo
           // ..this have more overhead, but minimizes useless checking
           // ..if wait is faster than the checking period
           double speed = completedIterations / stopWatch.Elapsed.TotalSeconds;
-          smartWait = Math.Min(checkPeriod, (int)Math.Ceiling(nextReportThreshold / speed * 10)); // Interpolate the wait delay based on speed
+          smartWait = Math.Min(
+            checkPeriod,
+            (int)Math.Ceiling(nextReportThreshold / speed * 10)
+          ); // Interpolate the wait delay based on speed
 
           OnReleaseInput?.Invoke();
         }
@@ -426,10 +434,17 @@ namespace MMOR.NET.MultiThreadMonteCarlo
           OnExceptionCatch?.Invoke(ex);
         }
 
-      currentlyTesting = false;
-      ReportFull(targetIteration, markTime, seedsStr, fullSimData);
-      OnReleaseInput?.Invoke();
-      OnFinish?.Invoke();
+      try
+      {
+        currentlyTesting = false;
+        ReportFull(targetIteration, markTime, seedsStr, fullSimData);
+        OnReleaseInput?.Invoke();
+        OnFinish?.Invoke();
+      }
+      catch (Exception ex)
+      {
+        OnExceptionCatch?.Invoke(ex);
+      }
 
       cancellationTokenSource.Dispose();
     }
@@ -449,7 +464,11 @@ namespace MMOR.NET.MultiThreadMonteCarlo
     /// <summary>
     ///     <br /> Invokes with Header Text, Body Text, and List of RNG Seeds
     /// </summary>
-    public event Action<string, string, IReadOnlyList<string>>? OnReport;
+    public event Action<
+      IRichString,
+      IRichString,
+      IReadOnlyList<string>
+    >? OnReport;
 
     private void ReportFull<T>(
       in ulong targetIterations,
@@ -460,12 +479,20 @@ namespace MMOR.NET.MultiThreadMonteCarlo
     )
       where T : SimulationObject<T>
     {
-      string header = GenerateTextHeader(targetIterations, timeElapsed, seeds, simData);
-      string body = printBody || !currentlyTesting ? GenerateTextBody(simData) : string.Empty;
+      IRichString header = GenerateTextHeader(
+        targetIterations,
+        timeElapsed,
+        seeds,
+        simData
+      );
+      IRichString body =
+        printBody || !currentlyTesting
+          ? GenerateTextBody(simData)
+          : RichStringUtils.kRichEmpty;
       OnReport?.Invoke(header, body, seeds);
     }
 
-    private string GenerateTextHeader<T>(
+    private IRichString GenerateTextHeader<T>(
       in ulong targetIterations,
       in double timeElapsed,
       IReadOnlyList<string> seeds,
@@ -473,21 +500,22 @@ namespace MMOR.NET.MultiThreadMonteCarlo
     )
       where T : SimulationObject<T>
     {
-      StringBuilder strResult = new();
+      RichStringBuilder strResult = new();
 
       //-+-+-+-+-+-+-+-+
       // Progress Information
       //-+-+-+-+-+-+-+-+
       ulong currentIterations = simData.totalIterations;
       double averageSpeed = currentIterations / timeElapsed;
-      double estimatedTime = (targetIterations - currentIterations) / averageSpeed;
+      double estimatedTime =
+        (targetIterations - currentIterations) / averageSpeed;
       float completionPercentage = (float)currentIterations / targetIterations;
 
       if (currentlyTesting)
       {
         strResult
           .Append("Current ")
-          .AppendFormat("{0:N0}", currentIterations)
+          .Append(string.Format("{0:N0}", currentIterations))
           .Append(" (")
           .Append(completionPercentage.ToPercentage())
           .AppendLine(")");
@@ -499,7 +527,7 @@ namespace MMOR.NET.MultiThreadMonteCarlo
         {
           strResult
             .Append("Current Speed: ")
-            .AppendFormat("{0:N2}", averageSpeed)
+            .Append(string.Format("{0:N2}", averageSpeed))
             .Append("/s")
             .Append(" | ")
             .Append("Est. time remaining: ")
@@ -512,18 +540,21 @@ namespace MMOR.NET.MultiThreadMonteCarlo
       else
       {
         if (currentIterations >= targetIterations)
-          strResult.Append("Completed ").AppendFormat("{0:N0}", currentIterations).AppendLine();
+          strResult
+            .Append("Completed ")
+            .Append(string.Format("{0:N0}", currentIterations))
+            .AppendLine();
         else
           strResult
             .Append("Aborted After ")
-            .AppendFormat("{0:N0}", currentIterations)
+            .Append(string.Format("{0:N0}", currentIterations))
             .Append(" (")
             .Append(completionPercentage.ToPercentage())
             .AppendLine(")");
 
         strResult
           .Append("Average Speed: ")
-          .AppendFormat("{0:N2}", averageSpeed)
+          .Append(string.Format("{0:N2}", averageSpeed))
           .Append("/s")
           .Append(" | ")
           .Append("Completed in ")
@@ -545,10 +576,10 @@ namespace MMOR.NET.MultiThreadMonteCarlo
 
       strResult.AppendLine(simData.PrettyPrintHeader());
 
-      return strResult.ToString();
+      return strResult;
     }
 
-    private static string GenerateTextBody<T>(T simData)
+    private static IRichString GenerateTextBody<T>(T simData)
       where T : SimulationObject<T>
     {
       return simData.PrettyPrintBody();
