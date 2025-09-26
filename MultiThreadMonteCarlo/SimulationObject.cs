@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using MMOR.NET.RichString;
 
 namespace MMOR.NET.MultiThreadMonteCarlo
 {
@@ -19,8 +20,8 @@ namespace MMOR.NET.MultiThreadMonteCarlo
     //-+-+-+-+-+-+-+-+
     // Pretty Print
     //-+-+-+-+-+-+-+-+
-    public abstract string PrettyPrintHeader();
-    public abstract string PrettyPrintBody();
+    public abstract IRichString PrettyPrintHeader();
+    public abstract IRichString PrettyPrintBody();
 
     //-+-+-+-+-+-+-+-+
     // Methods
