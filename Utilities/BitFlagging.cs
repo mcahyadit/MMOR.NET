@@ -66,8 +66,8 @@ namespace MMOR.NET.Utilities
     ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
     /// <returns></returns>
-    public static IDictionary<TFlag, TElement> PrePopulateFlag<TFlag, TElement>(
-      this IDictionary<TFlag, TElement> dictionary
+    public static IReadOnlyDictionary<TFlag, TElement> PrePopulateFlag<TFlag, TElement>(
+      this Dictionary<TFlag, TElement> dictionary
     )
       where TFlag : struct, Enum
     {

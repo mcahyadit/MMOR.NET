@@ -444,11 +444,18 @@ namespace MMOR.NET.Utilities
     // ..e.g. a List<List<List>> will turn as List<List>[] since T is recognized as List<List> instead.
     //-+-+-+-+-+-+-+-+
 
+
     public static T[][] DeepToArray<T>(this IEnumerable<IEnumerable<T>> list)
       where T : struct => list.Select(x => x.ToArray()).ToArray();
 
     public static T[][][] DeepToArray<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list)
       where T : struct => list.Select(x => x.DeepToArray()).ToArray();
+
+    public static List<List<T>> DeepToList<T>(this IEnumerable<IEnumerable<T>> list)
+      where T : struct => list.Select(x => x.ToList()).ToList();
+
+    public static List<List<List<T>>> DeepToList<T>(this IEnumerable<IEnumerable<IEnumerable<T>>> list)
+      where T : struct => list.Select(x => x.DeepToList()).ToList();
 
     public static ImmutableArray<ImmutableArray<T>> DeepToImmutableArray<T>(
       this IEnumerable<IEnumerable<T>> list
