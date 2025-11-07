@@ -1,0 +1,8 @@
+---
+BasedOnStyle: Google
+ColumnLimit: 100
+
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: true
+AlignAfterOpenBracket: BlockIndent
+...

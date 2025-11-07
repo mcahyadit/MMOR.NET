@@ -1,3 +1,14 @@
+# Godot Generated
 *.uid
+
+# Unity Generated
 *.asmdef
 *.meta
+
+# LspSetup Generated
+[Oo]bj/
+[Bb]in/
+*.csproj
+*.sln
+
+.direnv/
