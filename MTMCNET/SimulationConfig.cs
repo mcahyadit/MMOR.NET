@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MMOR.NET.Random;
 
 namespace MMOR.NET.MTMC {
-  public abstract class SimulationConfig<T>
+  public class SimulationConfig<T>
       where T : SimulationObject<T> {
     public Func<IRandom, T> sim_obj_ctor;
     public ulong target_iteration = 1_000_000_000;
