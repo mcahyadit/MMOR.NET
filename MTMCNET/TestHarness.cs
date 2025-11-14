@@ -49,10 +49,10 @@ namespace MMOR.NET.MTMC {
       if (sim_config.sim_obj_ctor == null)
         throw new Exception("SimulationObject<T> constructor is not set.");
       if (sim_config.thread_count < 1 || sim_config.thread_count > kMaxThread) {
-        var half = (ushort)((kMaxThread + 1) / 2);
+        var half                = (ushort)((kMaxThread + 1) / 2);
         sim_config.thread_count = half;
       }
-      if (sim_config.rng_ctor.Any()) {
+      if (!sim_config.rng_ctor.Any()) {
         sim_config.rng_ctor.Capacity = sim_config.thread_count;
         for (var i = 0; i < sim_config.thread_count; ++i)
           sim_config.rng_ctor.Add(() => new MT19937());
@@ -61,10 +61,12 @@ namespace MMOR.NET.MTMC {
       //   std::cerr << std::format(
       //       "TestHarness: You have more `rng_ctor` ({}) than `thread_count` " "({}).\r\n",
       //       sim_config.rng_ctor.Count, sim_config.thread_count);
-      if (sim_config.rng_ctor.Count < sim_config.thread_count)
-        return new ArgumentException(
-            string.Format("TestHarness: You have less `rng_ctor` ({0}) than `thread_count` ({1})\n",
-                sim_config.rng_ctor, sim_config.thread_count));
+      if (sim_config.rng_ctor.Count < sim_config.thread_count) {
+        return new ArgumentException(string.Format(
+            "TestHarness: You have less `rng_ctor` ({0}) than `thread_count` ({1})\n",
+            sim_config.rng_ctor, sim_config.thread_count
+        ));
+      }
       // if (sim_config.check_rate < 0 || sim_config.check_rate > 1) {
       //   std::cerr << std::format(
       //       "Invalid `check_rate` argument, was {}. Using default value " "`0.01f`.\r\n",
@@ -84,31 +86,32 @@ namespace MMOR.NET.MTMC {
 
       OnHoldInput?.Invoke();
       CurrentlyTesting = true;
-      stop_source_ = new CancellationTokenSource();
+      stop_source_     = new CancellationTokenSource();
       //-+-+-+-+-+-+-+-+
       // Interpret Data
       //-+-+-+-+-+-+-+-+
-      var check_threshold = (ulong)(sim_config.check_rate * sim_config.target_iteration);
+      var check_threshold    = (ulong)(sim_config.check_rate * sim_config.target_iteration);
       ulong thread_iteration = sim_config.target_iteration / sim_config.thread_count;
-      ulong thread_leftover = sim_config.target_iteration % sim_config.thread_count;
+      ulong thread_leftover  = sim_config.target_iteration % sim_config.thread_count;
       //-+-+-+-+-+-+-+-+
       // Multi-thread Setup
       //-+-+-+-+-+-+-+-+
-      List<Task> thread_list = new();
-      thread_list.Capacity = sim_config.thread_count;
-      List<T> thread_data_list = new();
+      List<Task> thread_list    = new();
+      thread_list.Capacity      = sim_config.thread_count;
+      List<T> thread_data_list  = new();
       thread_data_list.Capacity = sim_config.thread_count;
-      Stopwatch stop_watch = new();
+      Stopwatch stop_watch      = new();
       stop_watch.Start();
       completed_iterations_ = 0;
 
       for (var i = 0; i < sim_config.thread_count; ++i) {
         ulong iterations = thread_iteration + (i == 0 ? thread_leftover : 0);
         IRandom rng_algo = sim_config.rng_ctor[i]();
-        T thread_data = sim_config.sim_obj_ctor(rng_algo);
+        T thread_data    = sim_config.sim_obj_ctor(rng_algo);
         thread_data_list.Add(thread_data);
         thread_list.Add(Task.Factory.StartNew(
-            () => SimulateChunk(thread_data, iterations), TaskCreationOptions.LongRunning));
+            () => SimulateChunk(thread_data, iterations), TaskCreationOptions.LongRunning
+        ));
       }
 
       // Fire Event
@@ -123,7 +126,7 @@ namespace MMOR.NET.MTMC {
           sim_config.initial_sprint.GetValueOrDefault((uint)check_threshold);
       TimeSpan smart_wait = sim_config.minimum_wait;
 
-      T full_sim_data = sim_config.sim_obj_ctor(null);
+      T full_sim_data  = sim_config.sim_obj_ctor(null);
       ulong last_check = sim_config.target_iteration - check_threshold;
 
       while (completed_iterations_ < 0) {
@@ -161,8 +164,10 @@ namespace MMOR.NET.MTMC {
           // Fire Report Events
           //-+-+-+-+-+-+-+-+
           try {
-            ReportFull(sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
-                sim_config.periodic_check_prints_body);
+            ReportFull(
+                sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
+                sim_config.periodic_check_prints_body
+            );
           } catch (Exception ex) {
             OnExceptionCatch?.Invoke(ex);
           }
@@ -211,8 +216,10 @@ namespace MMOR.NET.MTMC {
     // Print Handlers
     //-+-+-+-+-+-+-+-+
     public event Action<IRichString, IRichString>? OnReport;
-    private void ReportFull<T>(ulong target_iteration, in TimeSpan total_time_elapsed, double speed,
-        in T sim_data, bool print_body = false)
+    private void ReportFull<T>(
+        ulong target_iteration, in TimeSpan total_time_elapsed, double speed, in T sim_data,
+        bool print_body = false
+    )
         where T : SimulationObject<T> {
       IRichString header =
           GenerateHeaderText(target_iteration, total_time_elapsed, speed, sim_data);
@@ -221,7 +228,8 @@ namespace MMOR.NET.MTMC {
     }
 
     private IRichString GenerateHeaderText<T>(
-        ulong target_iterations, TimeSpan total_time_elapsed, double speed, in T sim_data)
+        ulong target_iterations, TimeSpan total_time_elapsed, double speed, in T sim_data
+    )
         where T : SimulationObject<T> {
       return null;
     }
