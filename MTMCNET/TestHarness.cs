@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MMOR.NET.Random;
 using MMOR.NET.RichString;
+using MMOR.NET.Utilities;
 
 namespace MMOR.NET.MTMC {
   public class TestHarness {
@@ -237,7 +238,62 @@ namespace MMOR.NET.MTMC {
         ulong target_iterations, TimeSpan total_time_elapsed, double speed, in T sim_data
     )
         where T : SimulationObject<T> {
-      return null;
+      RichStringBuilder strResult = new();
+
+      //-+-+-+-+-+-+-+-+
+      // Progress Information
+      //-+-+-+-+-+-+-+-+
+      ulong current_iterations   = sim_data.total_iterations;
+      double estimated_time      = (target_iterations - current_iterations) / speed;
+      float completionPercentage = (float)current_iterations / target_iterations;
+
+      if (CurrentlyTesting) {
+        strResult.Append("Current ")
+            .Append(string.Format("{0:N0}", current_iterations))
+            .Append(" (")
+            .Append(completionPercentage.ToPercentage())
+            .AppendLine(")");
+
+        // There was some error when
+        // ..averageSpeed == 0
+        // .. do a check, just to prevent throw
+        if (speed > 0 && target_iterations - current_iterations > 0) {
+          strResult.Append("Current Speed: ")
+              .Append(string.Format("{0:N2}", speed))
+              .Append("/s")
+              .Append(" | ")
+              .Append("Est. time remaining: ")
+              .Append(estimated_time.ToTime())
+              .Append(" | ")
+              .Append("Time Elapsed: ")
+              .AppendLine(total_time_elapsed.TotalSeconds.ToTime());
+        }
+      } else {
+        if (current_iterations >= target_iterations)
+          strResult.Append("Completed ")
+              .Append(string.Format("{0:N0}", current_iterations))
+              .AppendLine();
+        else
+          strResult.Append("Aborted After ")
+              .Append(string.Format("{0:N0}", current_iterations))
+              .Append(" (")
+              .Append(completionPercentage.ToPercentage())
+              .AppendLine(")");
+
+        strResult.Append("Average Speed: ")
+            .Append(string.Format("{0:N2}", speed))
+            .Append("/s")
+            .Append(" | ")
+            .Append("Completed in ")
+            .AppendLine(total_time_elapsed.TotalSeconds.ToTime());
+      }
+
+      strResult.AppendLine();
+      strResult.AppendLine();
+
+      strResult.AppendLine(sim_data.PrettyPrintHeader());
+
+      return strResult;
     }
   }
 }
