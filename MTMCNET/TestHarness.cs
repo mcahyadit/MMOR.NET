@@ -87,15 +87,15 @@ namespace MMOR.NET.MTMC {
       OnHoldInput?.Invoke();
       CurrentlyTesting = true;
       stop_source_     = new CancellationTokenSource();
-      //-+-+-+-+-+-+-+-+
+      //================
       // Interpret Data
-      //-+-+-+-+-+-+-+-+
+      //================
       var check_threshold    = (ulong)(sim_config.check_rate * sim_config.target_iteration);
       ulong thread_iteration = sim_config.target_iteration / sim_config.thread_count;
       ulong thread_leftover  = sim_config.target_iteration % sim_config.thread_count;
-      //-+-+-+-+-+-+-+-+
+      //================
       // Multi-thread Setup
-      //-+-+-+-+-+-+-+-+
+      //================
       List<Task> thread_list    = new();
       thread_list.Capacity      = sim_config.thread_count;
       List<T> thread_data_list  = new();
@@ -117,11 +117,11 @@ namespace MMOR.NET.MTMC {
       // Fire Event
       OnStart?.Invoke();
 
-      //-+-+-+-+-+-+-+-+
+      //================
       // Simulation Progress Checking
       // ..using increment and greater than comparison for more flexibility in
       // checking
-      //-+-+-+-+-+-+-+-+
+      //================
       TimeSpan last_check_time = stop_watch.Elapsed;
       ulong next_report_threshold =
           sim_config.initial_sprint.GetValueOrDefault((uint)check_threshold);
@@ -137,9 +137,9 @@ namespace MMOR.NET.MTMC {
         if (completed_iterations_ >= next_report_threshold) {
           OnHoldInput?.Invoke();
           ulong last_iteration_count = full_sim_data.total_iterations;
-          //-+-+-+-+-+-+-+-+
+          //================
           // Collection
-          //-+-+-+-+-+-+-+-+
+          //================
           foreach (T thread_data in thread_data_list) {
             thread_data.Pause();
             try {
@@ -150,15 +150,15 @@ namespace MMOR.NET.MTMC {
             }
             thread_data.Unpause();
           }
-          //-+-+-+-+-+-+-+-+
+          //================
           // Mark Time
-          //-+-+-+-+-+-+-+-+
+          //================
           TimeSpan elapsed_time = stop_watch.Elapsed - last_check_time;
           double last_speed =
               (full_sim_data.total_iterations - last_iteration_count) / elapsed_time.TotalSeconds;
-          //-+-+-+-+-+-+-+-+
+          //================
           // Setup for next Wait
-          //-+-+-+-+-+-+-+-+
+          //================
           var interpolated_wait = TimeSpan.FromSeconds(check_threshold / last_speed);
           smart_wait            = TimeSpan.FromMilliseconds(Math.Clamp(
               interpolated_wait.Milliseconds, sim_config.minimum_wait.Milliseconds,
@@ -166,9 +166,9 @@ namespace MMOR.NET.MTMC {
           ));
           next_report_threshold += check_threshold;
           last_check_time = stop_watch.Elapsed;
-          //-+-+-+-+-+-+-+-+
+          //================
           // Fire Report Events
-          //-+-+-+-+-+-+-+-+
+          //================
           try {
             ReportFull(
                 sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
@@ -182,16 +182,16 @@ namespace MMOR.NET.MTMC {
         await Task.Delay(smart_wait, stop_source_.Token);
       }
 
-      //-+-+-+-+-+-+-+-+
+      //================
       // Simulation Finishing
-      //-+-+-+-+-+-+-+-+
+      //================
       await Task.WhenAll(thread_list);
       TimeSpan total_time_taken = stop_watch.Elapsed;
       stop_watch.Stop();
 
-      //-+-+-+-+-+-+-+-+
+      //================
       // Final Collection
-      //-+-+-+-+-+-+-+-+
+      //================
       foreach (T thread_data in thread_data_list) {
         thread_data.Pause();
         try {
@@ -202,9 +202,9 @@ namespace MMOR.NET.MTMC {
         }
         thread_data.Unpause();
       }
-      //-+-+-+-+-+-+-+-+
+      //================
       // Finishing Up
-      //-+-+-+-+-+-+-+-+
+      //================
       double avg_speed = full_sim_data.total_iterations / total_time_taken.TotalSeconds;
       CurrentlyTesting = false;
       try {
@@ -218,9 +218,9 @@ namespace MMOR.NET.MTMC {
       stop_source_ = null;
     }
 
-    //-+-+-+-+-+-+-+-+
+    //================
     // Print Handlers
-    //-+-+-+-+-+-+-+-+
+    //================
     public event Action<IRichString, IRichString>? OnReport;
     private void ReportFull<T>(
         ulong target_iteration, in TimeSpan total_time_elapsed, double speed, in T sim_data,
