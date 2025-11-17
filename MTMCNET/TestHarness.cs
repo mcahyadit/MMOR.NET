@@ -122,6 +122,7 @@ namespace MMOR.NET.MTMC {
       // ..using increment and greater than comparison for more flexibility in
       // checking
       //-+-+-+-+-+-+-+-+
+      TimeSpan last_check_time = stop_watch.Elapsed;
       ulong next_report_threshold =
           sim_config.initial_sprint.GetValueOrDefault((uint)check_threshold);
       TimeSpan smart_wait = sim_config.minimum_wait;
@@ -152,18 +153,19 @@ namespace MMOR.NET.MTMC {
           //-+-+-+-+-+-+-+-+
           // Mark Time
           //-+-+-+-+-+-+-+-+
-          TimeSpan elapsed_time = stop_watch.Elapsed;
+          TimeSpan elapsed_time = stop_watch.Elapsed - last_check_time;
           double last_speed =
               (full_sim_data.total_iterations - last_iteration_count) / elapsed_time.TotalSeconds;
           //-+-+-+-+-+-+-+-+
           // Setup for next Wait
           //-+-+-+-+-+-+-+-+
-          var interpolated_wait = new TimeSpan((long)(1000.0 * check_threshold / last_speed));
+          var interpolated_wait = TimeSpan.FromSeconds(check_threshold / last_speed);
           smart_wait            = TimeSpan.FromMilliseconds(Math.Clamp(
               interpolated_wait.Milliseconds, sim_config.minimum_wait.Milliseconds,
               sim_config.maximum_wait.Milliseconds
           ));
           next_report_threshold += check_threshold;
+          last_check_time = stop_watch.Elapsed;
           //-+-+-+-+-+-+-+-+
           // Fire Report Events
           //-+-+-+-+-+-+-+-+
