@@ -159,6 +159,10 @@ namespace MMOR.NET.MTMC {
           // Setup for next Wait
           //-+-+-+-+-+-+-+-+
           var interpolated_wait = new TimeSpan((long)(1000.0 * check_threshold / last_speed));
+          smart_wait            = TimeSpan.FromMilliseconds(Math.Clamp(
+              interpolated_wait.Milliseconds, sim_config.minimum_wait.Milliseconds,
+              sim_config.maximum_wait.Milliseconds
+          ));
           next_report_threshold += check_threshold;
           //-+-+-+-+-+-+-+-+
           // Fire Report Events
