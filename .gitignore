@@ -11,4 +11,8 @@
 *.csproj
 *.sln
 
+# IDE Generated
+.idea/
+.vscode/
+.vs/
 .direnv/
