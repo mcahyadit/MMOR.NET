@@ -20,6 +20,15 @@ namespace MMOR.NET.RichString {
         case RichStringFontWeight font_weight:
           FormatWeight(font_weight, result);
           break;
+        case RichStringBold bold:
+          FormatBold(bold, result);
+          break;
+        case RichStringItalic italic:
+          FormatItalic(italic, result);
+          break;
+        case RichStringUnderline underline:
+          FormatUnderline(underline, result);
+          break;
         case RichStringPlain plain:
           result.Append(plain.str);
           break;
@@ -49,6 +58,24 @@ namespace MMOR.NET.RichString {
       result.Append(">");
       Format(rich_str.str, result);
       result.Append("</font-weight>");
+    }
+
+    private void FormatBold(RichStringBold rich_string, StringBuilder result) {
+      result.Append("<b>");
+      Format(rich_string.str, result);
+      result.Append("</b>");
+    }
+
+    private void FormatItalic(RichStringItalic rich_string, StringBuilder result) {
+      result.Append("<i>");
+      Format(rich_string.str, result);
+      result.Append("</i>");
+    }
+
+    private void FormatUnderline(RichStringUnderline rich_string, StringBuilder result) {
+      result.Append("<u>");
+      Format(rich_string.str, result);
+      result.Append("</u>");
     }
   }
 }
