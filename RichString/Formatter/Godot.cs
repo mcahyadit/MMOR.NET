@@ -40,5 +40,33 @@ namespace MMOR.NET.RichString {
       Format(rich_str.str, result);
       result.Append("[/color]");
     }
+
+    private void FormatWeight(RichStringFontWeight rich_str, StringBuilder result) {
+      bool fake_bold = rich_str.font_weight >= (uint)RichFontWeight.Bold;
+
+      if (fake_bold)
+        result.Append("[b]");
+      Format(rich_str.str, result);
+      if (fake_bold)
+        result.Append("[/b]");
+    }
+
+    private void FormatBold(RichStringBold rich_string, StringBuilder result) {
+      result.Append("[b]");
+      Format(rich_string.str, result);
+      result.Append("[/b]");
+    }
+
+    private void FormatItalic(RichStringItalic rich_string, StringBuilder result) {
+      result.Append("[i]");
+      Format(rich_string.str, result);
+      result.Append("[/i]");
+    }
+
+    private void FormatUnderline(RichStringUnderline rich_string, StringBuilder result) {
+      result.Append("[u]");
+      Format(rich_string.str, result);
+      result.Append("[/u]");
+    }
   }
 }
