@@ -185,7 +185,12 @@ namespace MMOR.NET.MTMC {
           }
           OnReleaseInput?.Invoke();
         }
-        await Task.Delay(smart_wait, stop_source_.Token);
+        try {
+          await Task.Delay(smart_wait, stop_source_.Token);
+        } catch (OperationCanceledException) {
+          // The fact that I need to catch it feels weird
+          break;
+        }
       }
 
       //================
