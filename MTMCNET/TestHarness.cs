@@ -74,6 +74,12 @@ namespace MMOR.NET.MTMC {
       //       sim_config.thread_count);
       //   sim_config.check_rate = 0.01f;
       // }
+      if (sim_config.minimum_wait > sim_config.maximum_wait) {
+        return new ArgumentException(string.Format(
+            "TestHarness: `minimum_wait` {0}, needs to be less or equal than `maximum_wait` {1}",
+            sim_config.minimum_wait, sim_config.maximum_wait
+        ));
+      }
       return null;
     }
 
@@ -123,16 +129,15 @@ namespace MMOR.NET.MTMC {
       // ..using increment and greater than comparison for more flexibility in
       // checking
       //================
-      TimeSpan last_check_time = stop_watch.Elapsed;
-      ulong next_report_threshold =
-          sim_config.initial_sprint.GetValueOrDefault((uint)check_threshold);
-      TimeSpan smart_wait = sim_config.minimum_wait;
+      TimeSpan last_check_time    = stop_watch.Elapsed;
+      ulong next_report_threshold = sim_config.initial_sprint.GetValueOrDefault(100);
+      TimeSpan smart_wait         = sim_config.minimum_wait;
 
       T full_sim_data  = sim_config.sim_obj_ctor(null);
       ulong last_check = sim_config.target_iteration - check_threshold;
 
-      while (completed_iterations_ < 0) {
-        if (stop_source_.Token.IsCancellationRequested)
+      while (completed_iterations_ < last_check) {
+        if (stop_source_.IsCancellationRequested)
           break;
 
         if (completed_iterations_ >= next_report_threshold) {
@@ -162,8 +167,8 @@ namespace MMOR.NET.MTMC {
           //================
           var interpolated_wait = TimeSpan.FromSeconds(check_threshold / last_speed);
           smart_wait            = TimeSpan.FromMilliseconds(Math.Clamp(
-              interpolated_wait.Milliseconds, sim_config.minimum_wait.Milliseconds,
-              sim_config.maximum_wait.Milliseconds
+              interpolated_wait.TotalMilliseconds, sim_config.minimum_wait.TotalMilliseconds,
+              sim_config.maximum_wait.TotalMilliseconds
           ));
           next_report_threshold += check_threshold;
           last_check_time = stop_watch.Elapsed;
