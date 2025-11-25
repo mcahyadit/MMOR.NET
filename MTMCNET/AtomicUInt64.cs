@@ -16,5 +16,7 @@ namespace MMOR.NET.MTMC {
     public static implicit operator ulong(atomic_uint64_t x) => x.Value;
 
     public static implicit operator atomic_uint64_t(ulong x) => new(x);
+
+    public override string ToString() => _value.ToString();
   }
 }
