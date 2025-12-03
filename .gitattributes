@@ -1,3 +1,5 @@
 * text=auto eol=lf
 
 *.cs text diff=csharp
+
+*.bat text eol=crlf
