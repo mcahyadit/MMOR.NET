@@ -16,3 +16,5 @@
 .vscode/
 .vs/
 .direnv/
+.pixi/*
+!.pixi/config.toml

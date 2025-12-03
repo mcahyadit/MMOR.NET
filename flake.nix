@@ -1,6 +1,5 @@
 {
   inputs = {
-    self.submodules = true;
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -19,14 +18,10 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            # C#
             dotnet-sdk_9
-            dotnet-ef
             roslyn-ls
-            xmlformat
             clang-tools
 
-            pre-commit
             nixd # LSP for Nix
             nixfmt
           ];
