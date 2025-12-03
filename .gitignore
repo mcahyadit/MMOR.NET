@@ -1,20 +1,3 @@
-# Godot Generated
 *.uid
-
-# Unity Generated
 *.asmdef
 *.meta
-
-# LspSetup Generated
-[Oo]bj/
-[Bb]in/
-*.csproj
-*.sln
-
-# IDE Generated
-.idea/
-.vscode/
-.vs/
-.direnv/
-.pixi/*
-!.pixi/config.toml
