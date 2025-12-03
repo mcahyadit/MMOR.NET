@@ -10,6 +10,7 @@
 [Bb]in/
 *.csproj
 *.sln
+*.slnx
 
 # IDE Generated
 .idea/
