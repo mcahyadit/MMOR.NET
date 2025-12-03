@@ -1,103 +1,67 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 
-namespace MMOR.NET.Utilities
-{
-  //-+-+-+-+-+-+-+-+
-  // BitMask Functions
-  // ..quick read for those unfamiliar with the concept:
-  // https://abdulapopoola.com/2016/05/30/understanding-bit-masks/
-  //-+-+-+-+-+-+-+-+
-  public static partial class Utilities
-  {
-    private static int _threadId = -1;
-
+namespace MMOR.NET.Utilities {
+  public static partial class Utilities {
     /// <summary>
-    ///     <strong>CustomLibrary.ContainsFlag()</strong>
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Practically the default C# <see cref="Enum.HasFlag(Enum)" />.
-    ///     <br /> - Added a different check on <b>flag</b> == 0, where it will check whether the <paramref name="bitmask" />
-    ///     is empty.
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    /// Determines whether a bitmask contains a specified flag, with special handling
+    /// for the <c>0</c> flag.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // Do not use Convert.ToInt() for the Enum checking, the conversion demands a Garbage Collection and not ideal for Simulations
+    /// <typeparam name="T">Enum type representing flags.</typeparam>
+    /// <param name="bitmask">The bitmask to test.</param>
+    /// <param name="flag">The flag to check for.</param>
+    /// <returns>
+    /// <c>true</c> if the <paramref name="bitmask"/> contains <paramref name="flag"/>.
+    /// When <paramref name="flag"/> is <c>0</c>, returns <c>true</c> only if
+    /// <paramref name="bitmask"/> is also <c>0</c>.
+    /// </returns>
+    // Do not use Convert.ToInt() for the Enum checking,
+    // .. the conversion demands a Garbage Collection and not ideal for Simulations
     public static bool ContainsFlag<T>(this T bitmask, T flag)
-      where T : struct, Enum =>
-      EqualityComparer<T>.Default.Equals(flag, default)
-        ? EqualityComparer<T>.Default.Equals(bitmask, default)
-        : bitmask.HasFlag(flag);
+        where T : struct, Enum {
+      return EqualityComparer<T>.Default.Equals(flag, (T)Enum.ToObject(typeof(T), 0))
+                 ? EqualityComparer<T>.Default.Equals(bitmask, (T)Enum.ToObject(typeof(T), 0))
+                 : bitmask.HasFlag(flag);
+    }
 
-    /// <summary>
-    ///     <inheritdoc cref="ContainsFlag" />
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool ContainsFlag(this int bitmask, int flag) =>
-      flag == 0 ? bitmask == 0 : (bitmask & flag) == flag;
-
-    /// <summary>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Returns the highest possible value of flag combination of type <typeparamref name="T" />.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int MaxFlag<T>()
-      where T : struct, Enum => (Enum.GetValues(typeof(T)).Cast<int>().Max() << 1) - 1;
-
-    /// <summary>
-    ///     <inheritdoc cref="MaxFlag{T}" />
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T MaxFlagCasted<T>()
-      where T : struct, Enum => (T)Enum.ToObject(typeof(T), MaxFlag<T>());
-
-    /// <summary>
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Fills in empty Keys in <paramref name="dictionary" />, based on the logic of
-    ///     <see cref="SafeGetFlag{T}(IDictionary{int, T}, in int)" />.
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>
-    /// <returns></returns>
-    public static IReadOnlyDictionary<TFlag, TElement> PrePopulateFlag<TFlag, TElement>(
-      this Dictionary<TFlag, TElement> dictionary
-    )
-      where TFlag : struct, Enum
-    {
-      Type type = typeof(TFlag);
-      int combinations = MaxFlag<TFlag>() + 1;
-      for (var i = 0; i < combinations; i++)
-        _ = dictionary.SafeGetFlagCachedThreadSafe((TFlag)Enum.ToObject(type, i));
-      return dictionary;
+    /// <inheritdoc cref="ContainsFlag{T}(T, T)"/>
+    public static bool ContainsFlag(this int bitmask, int flag) {
+      return flag == 0 ? bitmask == 0 : (bitmask & flag) == flag;
     }
 
     /// <summary>
-    ///     <strong>CustomLibrary.SafeGetFlag()</strong>
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Gets the element of a <b>Dictionary</b> that uses <i>bitmask</i> as <i>Key</i>s at
-    ///     <paramref name="flag" />.
-    ///     <br /> - If <paramref name="flag" /> does not exist as a <i>Key</i>, it will run <paramref name="flag" />.
-    ///     <see cref="ContainsFlag" /> for each <i>Key</i>s in the <paramref name="dictionary" /> and returns the first match.
-    ///     <br /> - If there is still none, returns the element at
-    ///     <b><see langword="default" />(<typeparamref name="TFlag" />)</b> instead.
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    /// Computes the maximum possible bitmask value for an enum type by taking all defined flags
+    /// and producing a mask containing all bits up to the highest flag.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    /// <typeparam name="T">Enum type representing flags.</typeparam>
+    /// <returns>
+    /// The maximum combined-flag value representable by the enum, based on
+    /// all declared enum values.
+    /// </returns>
+    public static int MaxFlag<T>()
+        where T : struct, Enum => (Enum.GetValues(typeof(T)).Cast<int>().Max() << 1) - 1;
+
+    /// <inheritdoc cref="MaxFlag{T}" />
+    public static T MaxFlagCasted<T>()
+        where T : struct, Enum => (T) Enum.ToObject(typeof(T), MaxFlag<T>());
+
+    /// <summary>
+    /// Retrieves a value mapped to a flag from a flag-based dictionary. If the exact flag
+    /// is not present, the method returns the value of the first key whose flag is contained
+    /// within the requested flag, falling back to the default key.
+    /// </summary>
+    /// <typeparam name="TFlag">An enum type representing flags.</typeparam>
+    /// <typeparam name="TElement">The value type mapped to flags.</typeparam>
+    /// <param name="dictionary">A dictionary mapping flags to values.</param>
+    /// <param name="flag">The flag whose associated value is desired.</param>
+    /// <returns>
+    /// The matched value, or the value mapped to the default key if no applicable flag is found.
+    /// </returns>
     public static TElement SafeGetFlag<TFlag, TElement>(
-      this IReadOnlyDictionary<TFlag, TElement> dictionary,
-      TFlag flag
-    )
-      where TFlag : struct, Enum
-    {
+        this IReadOnlyDictionary<TFlag, TElement> dictionary, TFlag flag)
+        where TFlag : struct, Enum {
       if (dictionary.TryGetValue(flag, out TElement value))
         return value;
       foreach (KeyValuePair<TFlag, TElement> kvp in dictionary)
@@ -107,182 +71,98 @@ namespace MMOR.NET.Utilities
     }
 
     /// <summary>
-    ///     <inheritdoc cref="SafeGetFlag{TFlag, TElement}" />
-    ///     <br /> - This version provides Auto-Population. The getter logic remains the same.
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    /// Prepopulates a dictionary with values for every possible bitmask combination for
+    /// <typeparamref name="TFlag"/>. Missing entries are resolved either from matching
+    /// sub-flags or from the default value.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static TElement SafeGetFlagCached<TFlag, TElement>(
-      this IDictionary<TFlag, TElement> dictionary,
-      TFlag flag
-    )
-      where TFlag : struct, Enum
-    {
-      if (dictionary.TryGetValue(flag, out TElement value))
-        return value;
-      foreach (KeyValuePair<TFlag, TElement> kvp in dictionary)
-        if (flag.ContainsFlag(kvp.Key))
-        {
-          value = kvp.Value;
-          dictionary.Add(flag, value);
-          return value;
+    /// <typeparam name="TFlag">An enum type representing flags.</typeparam>
+    /// <typeparam name="TElement">The value type mapped to flags.</typeparam>
+    /// <param name="dictionary">
+    /// The dictionary containing the explicitly mapped flag values.
+    /// </param>
+    /// <returns>
+    /// A new dictionary where all integer flag values up to <see cref="MaxFlag{TFlag}"/>
+    /// map to the most appropriate element.
+    /// </returns>
+    public static IReadOnlyDictionary<TFlag, TElement> PrePopulateFlag<TFlag, TElement>(
+        this Dictionary<TFlag, TElement> dictionary)
+        where TFlag : struct, Enum {
+      Type type    = typeof(TFlag);
+      int max_flag = MaxFlag<TFlag>();
+      var result   = new Dictionary<TFlag, TElement>();
+      result.EnsureCapacity(max_flag);
+      result.Add(default, dictionary[default]);
+
+      for (var i = 1; i <= max_flag; ++i) {
+        TFlag flag = (TFlag)Enum.ToObject(type, i);
+        if (dictionary.TryGetValue(flag, out TElement match)) {
+          dictionary.Add(flag, match);
+          continue;
         }
-
-      value = dictionary[default];
-      dictionary.Add(flag, value);
-      return value;
-    }
-
-    /// <summary>
-    ///     <inheritdoc cref="SafeGetFlag{TFlag, TElement}" />
-    ///     <br /> - This version provides Auto-Population and Thread-Safety. The getter logic remains the same.
-    ///     <br />
-    ///     -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static TElement SafeGetFlagCachedThreadSafe<TFlag, TElement>(
-      this IDictionary<TFlag, TElement> dictionary,
-      TFlag flag
-    )
-      where TFlag : struct, Enum
-    {
-      // Exists, simply return value
-      if (dictionary.TryGetValue(flag, out TElement value))
-        return value;
-
-      // Else,
-      // ..find match, while caching the result
-
-      //-+-+-+-+-+-+-+-+
-      // By Default, ThreadId will be null
-      // ..we first set it to whichever Thread is currently accessing this
-      // ..this will lock ThreadId to the first-come, while others will
-      // ..access this like the old version
-      int currThread = Environment.CurrentManagedThreadId;
-      bool firstThread = Interlocked.CompareExchange(ref _threadId, currThread, -1) == -1;
-
-      TFlag match;
-      foreach (KeyValuePair<TFlag, TElement> kvp in dictionary)
-      {
-        match = kvp.Key;
-        if (flag.ContainsFlag(match))
-        {
-          value = dictionary[match];
-
-          //-+-+-+-+-+-+-+-+
-          // If the current accessor is the first-come Thread,
-          // ..Populate the Dictionary
-          // ..Otherwise, simply return value
-          if (firstThread)
-          {
-            lock (dictionary)
-            {
-              dictionary.Add(flag, value);
-            }
-
-            // Reset the ThreadId ahead for next Accessor
-            _threadId = -1;
+        bool found = false;
+        foreach ((TFlag key, TElement value) in dictionary) {
+          if (flag.ContainsFlag(key)) {
+            result.Add(flag, value);
+            found = true;
+            break;
           }
-
-          return value;
+        }
+        if (!found) {
+          result.Add(flag, dictionary[default]);
         }
       }
-
-      value = dictionary[default];
-
-      //-+-+-+-+-+-+-+-+
-      // If the current accessor is the first-come Thread,
-      // ..Populate the Dictionary
-      // ..Otherwise, simply return value
-      if (firstThread)
-      {
-        lock (dictionary)
-        {
-          dictionary.Add(flag, value);
-        }
-
-        // Reset the ThreadId ahead for next Accessor
-        _threadId = -1;
-      }
-
-      return value;
+      return result;
     }
 
     /// <summary>
-    ///     <strong>CustomLibrary.ToStringAll()</strong>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Prints all the flags contained within the <paramref name="bitmask" />, separated by
-    ///     <paramref name="separator" />.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    /// Produces a formatted string representing all flags present in the bitmask.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    /// <typeparam name="T">Enum type representing flags.</typeparam>
+    /// <param name="bitmask">The bitmask to convert.</param>
+    /// <param name="separator">
+    /// A separator string inserted between flags. Defaults to <c>" | "</c>.
+    /// </param>
+    /// <returns>
+    /// A string containing all contained flags, joined by <paramref name="separator"/>.
+    /// If no flags are set, the default enum value is returned.
+    /// </returns>
     public static string ToStringAll<T>(this T bitmask, in string separator = " | ")
-      where T : struct, Enum
-    {
-      var notFirst = false;
-      StringBuilder strResult = new();
+        where T : struct, Enum {
+      var not_first            = false;
+      StringBuilder str_result = new();
       // Add flags as string
       foreach (T flag in Enum.GetValues(typeof(T)))
-        if (bitmask.ContainsFlag(flag))
-        {
-          if (notFirst)
-          {
-            notFirst = true;
-            strResult.Append(separator);
+        if (bitmask.ContainsFlag(flag)) {
+          if (not_first) {
+            not_first = true;
+            str_result.Append(separator);
           }
-
-          strResult.Append(flag.ToString());
+          str_result.Append(flag.ToString());
         }
-
       // If no flags were added, attach the default flag
-      if (strResult.Length <= 0)
+      if (str_result.Length <= 0)
         return default(T).ToString();
       // Remove last separator
-      return strResult.ToString();
+      return str_result.ToString();
     }
 
     /// <summary>
-    ///     <strong>CustomLibrary.InList()</strong>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Checks if <paramref name="bitmask" /> contains a flag in a <paramref name="listFlags" />.
-    ///     <br /> - Used to check for any invalid <paramref name="bitmask" /> combination.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - While initial thought might lead into using <see cref="HashSet{T}.Contains(T)" />.
-    ///     <br /> - It can only check for exact match, which does not work well with bitmasking.
-    ///     <br /> - e.g. an bitmask of A | B | C, will get passed by with invalid flag A | B.
+    /// Determines whether a bitmask contains at least one flag from a provided collection.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool InList<T>(this IReadOnlyCollection<T> listFlags, T bitmask)
-      where T : struct, Enum
-    {
-      return listFlags.Count(x => bitmask.ContainsFlag(x)) != 0;
+    /// <typeparam name="T">Enum type representing flags.</typeparam>
+    /// <param name="list_flags">A collection of flags to test against.</param>
+    /// <param name="bitmask">The bitmask to inspect.</param>
+    /// <returns>
+    /// <c>true</c> if any flag in <paramref name="list_flags"/> is contained within
+    /// <paramref name="bitmask"/>; otherwise <c>false</c>.
+    /// </returns>
+    public static bool InList<T>(this IReadOnlyCollection<T> list_flags, T bitmask)
+        where T : struct, Enum {
+      return list_flags.Count(x => bitmask.ContainsFlag(x)) != 0;
     }
 
-    /// <inheritdoc cref="InList" />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool InList<T>(this T bitmask, IReadOnlyCollection<T> listFlags)
-      where T : struct, Enum => listFlags.InList(bitmask);
-
-    /// <summary>
-    ///     <strong>CustomLibrary.FlagToIndex()</strong>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Returns the bit position of <paramref name="flag" />.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int FlagToIndex<T>(this T flag)
-      where T : struct, Enum
-    {
-      var i = 0;
-      var f = Convert.ToInt32(flag);
-      while (f != 0)
-      {
-        f >>= 1;
-        i++;
-      }
-
-      return i;
-    }
+    /// <inheritdoc cref="InList{T}(IReadOnlyCollection{T}, T)" />
+    public static bool InList<T>(this T bitmask, IReadOnlyCollection<T> list_flags)
+        where T : struct, Enum => list_flags.InList(bitmask);
   }
 }

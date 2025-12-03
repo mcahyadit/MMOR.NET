@@ -2,11 +2,11 @@ using System.Text;
 
 namespace MMOR.NET.RichString {
   public static partial class RichStringFormatter {
-    public static readonly RichStringUnityFormatter kUnity   = new();
-    public static string ToUnity(this IRichString rich_str) => rich_str.Format(kUnity);
+    public static readonly RichStringTypstFormatter kTypst    = new();
+    public static string ToTypst(this IRichString rich_str) => rich_str.Format(kTypst);
   }
 
-  public readonly struct RichStringUnityFormatter : IRichStringFormatter {
+  public readonly struct RichStringTypstFormatter : IRichStringFormatter {
     public StringBuilder Format(IRichString rich_str, StringBuilder? result) {
       result ??= new StringBuilder();
 
@@ -17,8 +17,8 @@ namespace MMOR.NET.RichString {
         case RichStringColored colored:
           FormatColor(colored, result);
           break;
-        case RichStringFontWeight font_weight:
-          FormatWeight(font_weight, result);
+        case RichStringFontWeight weight:
+          FormatWeight(weight, result);
           break;
         case RichStringBold bold:
           FormatBold(bold, result);
@@ -45,37 +45,38 @@ namespace MMOR.NET.RichString {
     }
 
     private void FormatColor(RichStringColored rich_str, StringBuilder result) {
-      result.Append("<color=");
-      result.Append(rich_str.color.GetHex());
-      result.Append(">");
+      ref RichStringColor col = ref rich_str.color;
+      result.Append("#text(fill: rgb(");
+      result.Append($"{col.R},{col.G},{col.B}");
+      result.Append(")[");
       Format(rich_str.str, result);
-      result.Append("</color>");
+      result.Append("]");
     }
 
     private void FormatWeight(RichStringFontWeight rich_str, StringBuilder result) {
-      result.Append("<font-weight=");
+      result.Append("#text(fill: weight:");
       result.Append(rich_str.font_weight);
-      result.Append(">");
+      result.Append(")[");
       Format(rich_str.str, result);
-      result.Append("</font-weight>");
+      result.Append("]");
     }
 
     private void FormatBold(RichStringBold rich_string, StringBuilder result) {
-      result.Append("<b>");
+      result.Append("*");
       Format(rich_string.str, result);
-      result.Append("</b>");
+      result.Append("*");
     }
 
     private void FormatItalic(RichStringItalic rich_string, StringBuilder result) {
-      result.Append("<i>");
+      result.Append("_");
       Format(rich_string.str, result);
-      result.Append("</i>");
+      result.Append("_");
     }
 
     private void FormatUnderline(RichStringUnderline rich_string, StringBuilder result) {
-      result.Append("<u>");
+      result.Append("#underline[");
       Format(rich_string.str, result);
-      result.Append("</u>");
+      result.Append("]");
     }
   }
 }
