@@ -1,0 +1,6 @@
+* MMOR.NET
+
+  A bunch of C# functions and classes that I use often.
+
+  Targeted towards .NET Standard 2.1 and C# 9.0 for compability with Unity.
+
