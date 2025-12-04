@@ -96,7 +96,7 @@ namespace MMOR.NET.Utilities {
       for (var i = 1; i <= max_flag; ++i) {
         TFlag flag = (TFlag)Enum.ToObject(type, i);
         if (dictionary.TryGetValue(flag, out TElement match)) {
-          dictionary.Add(flag, match);
+          result.Add(flag, match);
           continue;
         }
         bool found = false;
