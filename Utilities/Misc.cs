@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Mathematics;
+using Newtonsoft.Json;
 
 namespace MMOR.NET.Utilities {
   public static partial class Utilities {
@@ -102,5 +103,9 @@ namespace MMOR.NET.Utilities {
 
     [Pure]
     public static string HtmlParagraph(this string str) => $"<p>{str}</p>";
+
+    [Pure]
+    public static T? CheapCopy<T>(this T source) => JsonConvert.DeserializeObject<T>(
+        JsonConvert.SerializeObject(source));
   }
 }
