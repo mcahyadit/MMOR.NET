@@ -35,8 +35,11 @@ namespace MMOR.NET.RichString {
       }
     }
 
-    public string GetHex() {
-      return $"#{R:X2}{G:X2}{B:X2}" + (A != 255 ? $"{A:X2}" : string.Empty);
+    public string GetHex(bool with_alpha = true) {
+      string result = $"#{R:X2}{G:X2}{B:X2}";
+      if (with_alpha)
+        result += A != 255 ? $"{A:X2}" : string.Empty;
+      return result;
     }
 
     public static implicit operator RichStringColor(Vector4 vector) =>
