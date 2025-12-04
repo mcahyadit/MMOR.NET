@@ -62,15 +62,15 @@ namespace MMOR.NET.RichString {
     }
 
     private void FormatBold(RichStringBold rich_string, StringBuilder result) {
-      result.Append("<b>");
+      result.Append("<strong>");
       Format(rich_string.str, result);
-      result.Append("</b>");
+      result.Append("</strong>");
     }
 
     private void FormatItalic(RichStringItalic rich_string, StringBuilder result) {
-      result.Append("<i>");
+      result.Append("<em>");
       Format(rich_string.str, result);
-      result.Append("</i>");
+      result.Append("</em>");
     }
 
     private void FormatUnderline(RichStringUnderline rich_string, StringBuilder result) {

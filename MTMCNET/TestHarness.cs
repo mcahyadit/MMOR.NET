@@ -299,7 +299,6 @@ namespace MMOR.NET.MTMC {
       }
 
       strResult.AppendLine();
-      strResult.AppendLine();
 
       strResult.AppendLine(sim_data.PrettyPrintHeader());
 
