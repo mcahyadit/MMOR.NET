@@ -41,7 +41,7 @@ namespace MMOR.NET.MTMC {
     public void StopTest() {
       if (!CurrentlyTesting)
         return;
-      OnHoldInput();
+      OnHoldInput?.Invoke();
       if (stop_source_ != null && stop_source_.Token.CanBeCanceled)
         stop_source_.Cancel();
     }
@@ -64,10 +64,9 @@ namespace MMOR.NET.MTMC {
       //       "TestHarness: You have more `rng_ctor` ({}) than `thread_count` " "({}).\r\n",
       //       sim_config.rng_ctor.Count, sim_config.thread_count);
       if (sim_config.rng_ctor.Count < sim_config.thread_count) {
-        return new ArgumentException(string.Format(
-            "TestHarness: You have less `rng_ctor` ({0}) than `thread_count` ({1})\n",
-            sim_config.rng_ctor, sim_config.thread_count
-        ));
+        return new ArgumentException(
+            string.Format("TestHarness: You have less `rng_ctor` ({0}) than `thread_count` ({1})\n",
+                sim_config.rng_ctor, sim_config.thread_count));
       }
       // if (sim_config.check_rate < 0 || sim_config.check_rate > 1) {
       //   std::cerr << std::format(
@@ -78,8 +77,7 @@ namespace MMOR.NET.MTMC {
       if (sim_config.minimum_wait > sim_config.maximum_wait) {
         return new ArgumentException(string.Format(
             "TestHarness: `minimum_wait` {0}, needs to be less or equal than `maximum_wait` {1}",
-            sim_config.minimum_wait, sim_config.maximum_wait
-        ));
+            sim_config.minimum_wait, sim_config.maximum_wait));
       }
       return null;
     }
@@ -118,9 +116,8 @@ namespace MMOR.NET.MTMC {
         T thread_data              = sim_config.sim_obj_ctor(rng_algo);
         thread_data.kRngIdentifier = rng_algo.ToString();
         thread_data_list.Add(thread_data);
-        thread_list.Add(Task.Factory.StartNew(
-            () => SimulateChunk(thread_data, iterations), TaskCreationOptions.LongRunning
-        ));
+        thread_list.Add(Task.Factory.StartNew(() => SimulateChunk(thread_data, iterations),
+            TaskCreationOptions.LongRunning));
       }
 
       // Fire Event
@@ -169,20 +166,17 @@ namespace MMOR.NET.MTMC {
           // Setup for next Wait
           //================
           var interpolated_wait = TimeSpan.FromSeconds(check_threshold / last_speed);
-          smart_wait            = TimeSpan.FromMilliseconds(Math.Clamp(
-              interpolated_wait.TotalMilliseconds, sim_config.minimum_wait.TotalMilliseconds,
-              sim_config.maximum_wait.TotalMilliseconds
-          ));
+          smart_wait = TimeSpan.FromMilliseconds(Math.Clamp(interpolated_wait.TotalMilliseconds,
+              sim_config.minimum_wait.TotalMilliseconds,
+              sim_config.maximum_wait.TotalMilliseconds));
           next_report_threshold += check_threshold;
           last_check_time = stop_watch.Elapsed;
           //================
           // Fire Report Events
           //================
           try {
-            ReportFull(
-                sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
-                sim_config.periodic_check_prints_body
-            );
+            ReportFull(sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
+                sim_config.periodic_check_prints_body);
           } catch (Exception ex) {
             OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during PrettyPrinting.");
           }
@@ -236,10 +230,8 @@ namespace MMOR.NET.MTMC {
     // Print Handlers
     //================
     public event Action<IRichString, IRichString>? OnReport;
-    private void ReportFull<T>(
-        ulong target_iteration, in TimeSpan total_time_elapsed, double speed, in T sim_data,
-        bool print_body = false
-    )
+    private void ReportFull<T>(ulong target_iteration, in TimeSpan total_time_elapsed, double speed,
+        in T sim_data, bool print_body = false)
         where T : SimulationObject<T> {
       IRichString header =
           GenerateHeaderText(target_iteration, total_time_elapsed, speed, sim_data);
@@ -247,9 +239,8 @@ namespace MMOR.NET.MTMC {
       OnReport?.Invoke(header, body);
     }
 
-    private IRichString GenerateHeaderText<T>(
-        ulong target_iterations, TimeSpan total_time_elapsed, double speed, in T sim_data
-    )
+    private IRichString GenerateHeaderText<T>(ulong target_iterations, TimeSpan total_time_elapsed,
+        double speed, in T sim_data)
         where T : SimulationObject<T> {
       RichStringBuilder strResult = new();
 

@@ -4,24 +4,23 @@ using MMOR.NET.RichString;
 namespace MMOR.NET.MTMC {
   public abstract class SimulationObject<T>
       where T : SimulationObject<T> {
-    //-+-+-+-+-+-+-+-+
+    //================
     // Generic Data
-    //-+-+-+-+-+-+-+-+
+    //================
     internal string? kRngIdentifier { get; set; }
     public ulong total_iterations { get; private set; }
     private readonly ManualResetEventSlim pause_gate_ = new(true);
-    private readonly SemaphoreSlim process_lock_ = new(1, 1);
+    private readonly SemaphoreSlim process_lock_      = new(1, 1);
 
-    //-+-+-+-+-+-+-+-+
+    //================
     // Pretty Print
-    //-+-+-+-+-+-+-+-+
+    //================
     public abstract IRichString PrettyPrintHeader();
     public abstract IRichString PrettyPrintBody();
 
-//-+-+-+-+-+-+-+-+
-// Methods
-//-+-+-+-+-+-+-+-+
-#region Methods
+    //================
+    // Methods
+    //================
     public void Combine_(T addData) {
       process_lock_.Wait();
       try {
@@ -58,7 +57,7 @@ namespace MMOR.NET.MTMC {
       process_lock_.Wait();
       try {
         SingleSim();
-        total_iterations++;
+        ++total_iterations;
       } finally {
         process_lock_.Release();
       }
@@ -78,6 +77,5 @@ namespace MMOR.NET.MTMC {
     internal void Pause() => pause_gate_.Reset();
 
     internal void Unpause() => pause_gate_.Set();
-#endregion
   }
 }
