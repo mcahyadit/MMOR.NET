@@ -7,6 +7,7 @@ namespace MMOR.NET.MTMC {
     //-+-+-+-+-+-+-+-+
     // Generic Data
     //-+-+-+-+-+-+-+-+
+    internal string? kRngIdentifier { get; set; }
     public ulong total_iterations { get; private set; }
     private readonly ManualResetEventSlim pause_gate_ = new(true);
     private readonly SemaphoreSlim process_lock_ = new(1, 1);

@@ -10,7 +10,7 @@ using MMOR.NET.Utilities;
 
 namespace MMOR.NET.MTMC {
   public class TestHarness {
-    public event Action<Exception>? OnExceptionCatch;
+    public event Action<Exception, string>? OnExceptionCatch;
     public event Action? OnStart;
     public event Action? OnFinish;
     public event Action? OnHoldInput;
@@ -33,7 +33,8 @@ namespace MMOR.NET.MTMC {
           ++completed_iterations_;
         }
       } catch (Exception ex) {
-        OnExceptionCatch?.Invoke(ex);
+        OnExceptionCatch?.Invoke(ex,
+            $"TestHarness: Exception caught on rng: {thread_data.kRngIdentifier}, iteration: {current_iteration}.");
       }
     }
 
@@ -87,7 +88,7 @@ namespace MMOR.NET.MTMC {
         where T : SimulationObject<T> {
       Exception? error = ErrorCheck(sim_config);
       if (error != null) {
-        OnExceptionCatch?.Invoke(error);
+        OnExceptionCatch?.Invoke(error, "TestHarness: Error during initialization.");
         return;
       }
 
@@ -112,9 +113,10 @@ namespace MMOR.NET.MTMC {
       completed_iterations_ = 0;
 
       for (var i = 0; i < sim_config.thread_count; ++i) {
-        ulong iterations = thread_iteration + (i == 0 ? thread_leftover : 0);
-        IRandom rng_algo = sim_config.rng_ctor[i]();
-        T thread_data    = sim_config.sim_obj_ctor(rng_algo);
+        ulong iterations           = thread_iteration + (i == 0 ? thread_leftover : 0);
+        IRandom rng_algo           = sim_config.rng_ctor[i]();
+        T thread_data              = sim_config.sim_obj_ctor(rng_algo);
+        thread_data.kRngIdentifier = rng_algo.ToString();
         thread_data_list.Add(thread_data);
         thread_list.Add(Task.Factory.StartNew(
             () => SimulateChunk(thread_data, iterations), TaskCreationOptions.LongRunning
@@ -152,7 +154,8 @@ namespace MMOR.NET.MTMC {
               full_sim_data.Combine_(thread_data);
               thread_data.Clear_();
             } catch (Exception ex) {
-              OnExceptionCatch?.Invoke(ex);
+              OnExceptionCatch?.Invoke(ex,
+                  "TestHarness: Exception caught during combine and clear.");
             }
             thread_data.Unpause();
           }
@@ -181,7 +184,7 @@ namespace MMOR.NET.MTMC {
                 sim_config.periodic_check_prints_body
             );
           } catch (Exception ex) {
-            OnExceptionCatch?.Invoke(ex);
+            OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during PrettyPrinting.");
           }
           OnReleaseInput?.Invoke();
         }
@@ -209,7 +212,7 @@ namespace MMOR.NET.MTMC {
           full_sim_data.Combine_(thread_data);
           thread_data.Dispose_();
         } catch (Exception ex) {
-          OnExceptionCatch?.Invoke(ex);
+          OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during combine and clear.");
         }
         thread_data.Unpause();
       }
@@ -221,7 +224,7 @@ namespace MMOR.NET.MTMC {
       try {
         ReportFull(sim_config.target_iteration, total_time_taken, avg_speed, full_sim_data, true);
       } catch (Exception ex) {
-        OnExceptionCatch?.Invoke(ex);
+        OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during PrettyPrinting.");
       }
       OnFinish?.Invoke();
       OnReleaseInput?.Invoke();
