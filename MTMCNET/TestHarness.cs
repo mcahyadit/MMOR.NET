@@ -9,7 +9,8 @@ using MMOR.NET.RichString;
 using MMOR.NET.Utilities;
 
 namespace MMOR.NET.MTMC {
-  public class TestHarness {
+  public class TestHarness<T>
+      where T : SimulationObject<T> {
     public event Action<Exception, string>? OnExceptionCatch;
     public event Action? OnStart;
     public event Action? OnFinish;
@@ -22,8 +23,7 @@ namespace MMOR.NET.MTMC {
 
     private atomic_uint64_t completed_iterations_ = 0u;
 
-    private void SimulateChunk<T>(T thread_data, ulong iterations)
-        where T : SimulationObject<T> {
+    private void SimulateChunk(T thread_data, ulong iterations) {
       ulong current_iteration = 0;
       try {
         for (; current_iteration < iterations; ++current_iteration) {
@@ -46,8 +46,7 @@ namespace MMOR.NET.MTMC {
         stop_source_.Cancel();
     }
 
-    private Exception? ErrorCheck<T>(SimulationConfig<T> sim_config)
-        where T : SimulationObject<T> {
+    private Exception? ErrorCheck(SimulationConfig<T> sim_config) {
       if (sim_config.sim_obj_ctor == null)
         throw new Exception("SimulationObject<T> constructor is not set.");
       if (sim_config.thread_count < 1 || sim_config.thread_count > kMaxThread) {
@@ -82,8 +81,14 @@ namespace MMOR.NET.MTMC {
       return null;
     }
 
-    public async Task RunTest<T>(SimulationConfig<T> sim_config)
-        where T : SimulationObject<T> {
+    // SimData
+    private List<T> thread_data_list_             = null;
+    public IReadOnlyList<T> thread_data_list     => thread_data_list_;
+    private List<string> rng_identifiers_         = null;
+    public IReadOnlyList<string> rng_identifiers => rng_identifiers_;
+    public T full_sim_data                        = null;
+
+    public async Task RunTest(SimulationConfig<T> sim_config) {
       Exception? error = ErrorCheck(sim_config);
       if (error != null) {
         OnExceptionCatch?.Invoke(error, "TestHarness: Error during initialization.");
@@ -102,11 +107,12 @@ namespace MMOR.NET.MTMC {
       //================
       // Multi-thread Setup
       //================
-      List<Task> thread_list    = new();
-      thread_list.Capacity      = sim_config.thread_count;
-      List<T> thread_data_list  = new();
-      thread_data_list.Capacity = sim_config.thread_count;
-      Stopwatch stop_watch      = new();
+      List<Task> thread_list     = new();
+      thread_list.Capacity       = sim_config.thread_count;
+      thread_data_list_          = new();
+      thread_data_list_.Capacity = sim_config.thread_count;
+      rng_identifiers_           = new();
+      Stopwatch stop_watch       = new();
       stop_watch.Start();
       completed_iterations_ = 0;
 
@@ -115,7 +121,8 @@ namespace MMOR.NET.MTMC {
         IRandom rng_algo           = sim_config.rng_ctor[i]();
         T thread_data              = sim_config.sim_obj_ctor(rng_algo);
         thread_data.kRngIdentifier = rng_algo.ToString();
-        thread_data_list.Add(thread_data);
+        rng_identifiers_.Add(rng_algo.ToString());
+        thread_data_list_.Add(thread_data);
         thread_list.Add(Task.Factory.StartNew(() => SimulateChunk(thread_data, iterations),
             TaskCreationOptions.LongRunning));
       }
@@ -132,7 +139,7 @@ namespace MMOR.NET.MTMC {
       ulong next_report_threshold = sim_config.initial_sprint.GetValueOrDefault(100);
       TimeSpan smart_wait         = sim_config.minimum_wait;
 
-      T full_sim_data  = sim_config.sim_obj_ctor(null);
+      full_sim_data  = sim_config.sim_obj_ctor(null);
       ulong last_check = sim_config.target_iteration - check_threshold;
 
       while (completed_iterations_ < last_check) {
@@ -145,7 +152,7 @@ namespace MMOR.NET.MTMC {
           //================
           // Collection
           //================
-          foreach (T thread_data in thread_data_list) {
+          foreach (T thread_data in thread_data_list_) {
             thread_data.Pause();
             try {
               full_sim_data.Combine_(thread_data);
@@ -175,7 +182,7 @@ namespace MMOR.NET.MTMC {
           // Fire Report Events
           //================
           try {
-            ReportFull(sim_config.target_iteration, elapsed_time, last_speed, full_sim_data,
+            ReportFull(sim_config.target_iteration, stop_watch.Elapsed, last_speed, full_sim_data,
                 sim_config.periodic_check_prints_body);
           } catch (Exception ex) {
             OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during PrettyPrinting.");
@@ -200,7 +207,7 @@ namespace MMOR.NET.MTMC {
       //================
       // Final Collection
       //================
-      foreach (T thread_data in thread_data_list) {
+      foreach (T thread_data in thread_data_list_) {
         thread_data.Pause();
         try {
           full_sim_data.Combine_(thread_data);
@@ -230,18 +237,16 @@ namespace MMOR.NET.MTMC {
     // Print Handlers
     //================
     public event Action<IRichString, IRichString>? OnReport;
-    private void ReportFull<T>(ulong target_iteration, in TimeSpan total_time_elapsed, double speed,
-        in T sim_data, bool print_body = false)
-        where T : SimulationObject<T> {
+    private void ReportFull(ulong target_iteration, in TimeSpan total_time_elapsed, double speed,
+        in T sim_data, bool print_body = false) {
       IRichString header =
           GenerateHeaderText(target_iteration, total_time_elapsed, speed, sim_data);
       IRichString body = print_body ? sim_data.PrettyPrintBody() : RichStringUtils.kRichEmpty;
       OnReport?.Invoke(header, body);
     }
 
-    private IRichString GenerateHeaderText<T>(ulong target_iterations, TimeSpan total_time_elapsed,
-        double speed, in T sim_data)
-        where T : SimulationObject<T> {
+    private IRichString GenerateHeaderText(ulong target_iterations, TimeSpan total_time_elapsed,
+        double speed, in T sim_data) {
       RichStringBuilder strResult = new();
 
       //-+-+-+-+-+-+-+-+
@@ -291,6 +296,7 @@ namespace MMOR.NET.MTMC {
             .Append("Completed in ")
             .AppendLine(total_time_elapsed.TotalSeconds.ToTime());
       }
+      strResult.AppendLine(rng_identifiers.Join(", "));
 
       strResult.AppendLine();
 
