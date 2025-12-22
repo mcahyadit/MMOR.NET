@@ -81,8 +81,8 @@ namespace MMOR.NET.Utilities {
     }
 
     [Pure]
-    public static string PadSmartToDecimal(
-        this string str, int total_width, char padding_char = ' ') {
+    public static string PadSmartToDecimal(this string str, int total_width,
+        char padding_char = ' ') {
       int decimal_pos = str.IndexOf(localeDecimalSeparator);
       if (decimal_pos == -1)
         return str.PadSmart(total_width, padding_char);
