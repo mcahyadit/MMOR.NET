@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Mathematics;
@@ -34,11 +35,12 @@ namespace MMOR.NET.Utilities
     // Null || Empty Check
     //-+-+-+-+-+-+-+-+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsNullOrEmpty<T>(this IEnumerable<T>? arr) =>
-      arr == null || arr.Count() <= 0;
+    public static bool IsNullOrEmpty<T>(
+        [NotNullWhen(false)] this IEnumerable<T>? arr) => arr == null || arr.Count() <= 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsNullOrEmpty(this string str) => string.IsNullOrWhiteSpace(str);
+    public static bool IsNullOrEmpty(
+        [NotNullWhen(false)] this string str) => string.IsNullOrWhiteSpace(str);
 
     //-+-+-+-+-+-+-+-+
     // Creation
