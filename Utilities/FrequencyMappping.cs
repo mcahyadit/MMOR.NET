@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Utilities
 {
@@ -22,9 +21,6 @@ namespace MMOR.NET.Utilities
     ///     <paramref name="frequencyMap" />.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(
       this IDictionary<T, uint> frequencyMap,
       in T data,
@@ -41,9 +37,6 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="AddFrequency{T}(System.Collections.Generic.IDictionary{T,uint},T,uint)" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(
       this IDictionary<T, ulong> frequencyMap,
       in T data,
@@ -60,9 +53,6 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="AddFrequency{T}(System.Collections.Generic.IDictionary{T,uint},T,uint)" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(this IDictionary<T, uint> frequencyMap, in (T, uint) data)
       where T : notnull
     {
@@ -72,9 +62,6 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="AddFrequency{T}(System.Collections.Generic.IDictionary{T,uint},T,uint)" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(this IDictionary<T, ulong> frequencyMap, in (T, ulong) data)
       where T : notnull
     {
@@ -84,9 +71,6 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="AddFrequency{T}(System.Collections.Generic.IDictionary{T,uint},T,uint)" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(
       this IDictionary<T, uint> frequencyMap,
       in KeyValuePair<T, uint> data
@@ -99,9 +83,6 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="AddFrequency{T}(System.Collections.Generic.IDictionary{T,uint},T,uint)" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void AddFrequency<T>(
       this IDictionary<T, ulong> frequencyMap,
       in KeyValuePair<T, ulong> data
@@ -125,9 +106,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - Otherwise, adds <paramref name="b" />[<b>data</b>] to <paramref name="a" />.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void CombineFrequency<T>(
       this IDictionary<T, uint> a,
       IReadOnlyDictionary<T, uint> b
@@ -142,9 +120,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void CombineFrequency<T>(
       this IDictionary<T, ulong> a,
       IReadOnlyDictionary<T, uint> b
@@ -159,9 +134,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="CombineFrequency{T}(System.Collections.Generic.IDictionary{T,uint},System.Collections.Generic.IReadOnlyDictionary{T,uint})" />
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static void CombineFrequency<T>(
       this IDictionary<T, ulong> a,
       IReadOnlyDictionary<T, ulong> b
@@ -182,9 +154,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - Converts Linear <see cref="List{T}" />/<see cref="Array" /> to a Frequency Map.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static Dictionary<T, uint> ToFrequencyMap<T>(this IEnumerable<T> list)
       where T : notnull
     {
@@ -199,9 +168,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - Converts Linear <see cref="List{T}" />/<see cref="Array" /> to a Sorted Frequency Map.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public static SortedDictionary<T, uint> ToSortedFrequencyMap<T>(this IEnumerable<T> list)
       where T : notnull
     {
