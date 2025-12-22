@@ -27,7 +27,7 @@ namespace MMOR.NET.MTMC {
       ulong current_iteration = 0;
       try {
         for (; current_iteration < iterations; ++current_iteration) {
-          if (stop_source_.Token.IsCancellationRequested)
+          if (stop_source_!.Token.IsCancellationRequested)
             break;
           thread_data.SingleSim_(stop_source_.Token);
           ++completed_iterations_;
@@ -82,11 +82,11 @@ namespace MMOR.NET.MTMC {
     }
 
     // SimData
-    private List<T> thread_data_list_             = null;
+    private List<T> thread_data_list_             = null!;
     public IReadOnlyList<T> thread_data_list     => thread_data_list_;
-    private List<string> rng_identifiers_         = null;
+    private List<string> rng_identifiers_         = null!;
     public IReadOnlyList<string> rng_identifiers => rng_identifiers_;
-    public T full_sim_data                        = null;
+    public T full_sim_data                        = null!;
 
     public async Task RunTest(SimulationConfig<T> sim_config) {
       Exception? error = ErrorCheck(sim_config);
@@ -139,7 +139,7 @@ namespace MMOR.NET.MTMC {
       ulong next_report_threshold = sim_config.initial_sprint.GetValueOrDefault(100);
       TimeSpan smart_wait         = sim_config.minimum_wait;
 
-      full_sim_data  = sim_config.sim_obj_ctor(null);
+      full_sim_data  = sim_config.sim_obj_ctor(null!);
       ulong last_check = sim_config.target_iteration - check_threshold;
 
       while (completed_iterations_ < last_check) {
