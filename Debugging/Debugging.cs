@@ -30,7 +30,7 @@ namespace MMOR.NET.Debugging {
           Type object_type) => typeof(IEnumerable<string>).IsAssignableFrom(object_type) &&
                               object_type != typeof(string) && object_type != typeof(byte[]);
 
-      public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+      public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
         if (value == null) {
           writer.WriteNull();
           return;
@@ -41,8 +41,8 @@ namespace MMOR.NET.Debugging {
         writer.WriteEndArray();
       }
 
-      public override object ReadJson(JsonReader reader, Type object_type, object existing_value,
-          JsonSerializer serializer) => serializer.Deserialize(reader, object_type);
+      public override object ReadJson(JsonReader reader, Type object_type, object? existing_value,
+          JsonSerializer serializer) => serializer.Deserialize(reader, object_type)!;
     }
   }
 }
