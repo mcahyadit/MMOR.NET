@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using MMOR.NET.Mathematics;
 using MMOR.NET.Random;
 
@@ -16,11 +15,9 @@ namespace MMOR.NET.Utilities
   public static partial class Utilities
   {
     // ulong didn't have a built-in Sum LINQ, possibly since if you are summing such big number, it bound to overflow
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong Sum(this IEnumerable<ulong> arr) =>
       arr.IsNullOrEmpty() ? 0 : arr.Aggregate((sum, val) => sum + val);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Reverse<T>(IList<T> list, int begin, int end)
     {
       while (begin < end)
@@ -34,43 +31,35 @@ namespace MMOR.NET.Utilities
     //-+-+-+-+-+-+-+-+
     // Null || Empty Check
     //-+-+-+-+-+-+-+-+
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNullOrEmpty<T>(
         [NotNullWhen(false)] this IEnumerable<T>? arr) => arr == null || arr.Count() <= 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNullOrEmpty(
         [NotNullWhen(false)] this string str) => string.IsNullOrWhiteSpace(str);
 
     //-+-+-+-+-+-+-+-+
     // Creation
     //-+-+-+-+-+-+-+-+
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static List<T> InitList<T>(int length, T value = default)
       where T : struct => Enumerable.Repeat(value, length).ToList();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static List<T> InitList<T>(int length, Func<T> constructor)
       where T : class => Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToList();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] InitArr<T>(int length, T value = default)
       where T : struct => Enumerable.Repeat(value, length).ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] InitArr<T>(int length, Func<T> constructor)
       where T : class => Enumerable.Range(0, length).Select(_ => constructor.Invoke()).ToArray();
 
     //-+-+-+-+-+-+-+-+
     // Fill & Clear
     //-+-+-+-+-+-+-+-+
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Clear<T>(this T[] inArr)
     {
       Array.Clear(inArr, 0, inArr.Length);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Fill<T>(this IList<T> list, T fillValue)
       where T : struct
     {
@@ -79,7 +68,6 @@ namespace MMOR.NET.Utilities
         list[i] = fillValue;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Fill<T>(this IList<T> list, Func<T> fillConstructor)
       where T : class
     {
@@ -88,7 +76,6 @@ namespace MMOR.NET.Utilities
         list[i] = fillConstructor.Invoke();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ConvertElements<T>(this IList<T> list, Func<IList<T>, int, T> function)
     {
       int len = list.Count;
@@ -96,7 +83,6 @@ namespace MMOR.NET.Utilities
         list[i] = function(list, i);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ConvertElements<TKey, TValue>(
       this IDictionary<TKey, TValue> dict,
       Func<IDictionary<TKey, TValue>, TKey, TValue> function
@@ -117,7 +103,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - Takes optional <see cref="IRandom" /> for custom RNGs.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ShuffleInplace<T>(this IList<T> list, IRandom? rng = null)
     {
       rng ??= PCG.global;
@@ -135,7 +120,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - This one returns a copy instead of shuffling the original.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IList<T> Shuffle<T>(this IReadOnlyList<T> list, IRandom? rng = null)
     {
       List<T> outList = list.ToList();
@@ -167,7 +151,6 @@ namespace MMOR.NET.Utilities
     ///     == <see langword="false" />, index will roll-over based on range.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T SafeGet<T>(this IEnumerable<T> list, int index, bool clamps = false)
     {
       switch (list)
@@ -206,7 +189,6 @@ namespace MMOR.NET.Utilities
     ///     , returns <b><paramref name="dictionary" />[<paramref name="defaultT1" />]</b>.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static TValue SafeGet<TKey, TValue>(
       this IReadOnlyDictionary<TKey, TValue> dictionary,
       TKey key,
@@ -218,7 +200,6 @@ namespace MMOR.NET.Utilities
     //-+-+-+-+-+-+-+-+
     // Transformation
     //-+-+-+-+-+-+-+-+
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[][] Transpose<T>(this IReadOnlyList<IReadOnlyList<T>> arr)
       where T : struct
     {
@@ -242,7 +223,6 @@ namespace MMOR.NET.Utilities
       return resArr;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[][] Transpose<T>(this IReadOnlyList<T> inArr)
       where T : struct
     {
@@ -254,7 +234,6 @@ namespace MMOR.NET.Utilities
       return resArr;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Queue<T> toQueue<T>(this IEnumerable<T> list, Queue<T>? result = null)
     {
       result ??= new Queue<T>();
@@ -381,7 +360,6 @@ namespace MMOR.NET.Utilities
     ///     <br /> - Equipped with a cast, for better compatibility with <see cref="object" />.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static TValue GetCastedValueOrDefault<TKey, TValue>(
       this IDictionary<TKey, object> dictionary,
       TKey key,
@@ -393,7 +371,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="GetCastedValueOrDefault{TKey, TValue}(IDictionary{TKey, object}, TKey, Func{object, TValue}, TValue)" />
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string GetCastedValueOrDefault<TKey>(
       this IDictionary<TKey, object> dictionary,
       TKey key,
@@ -404,7 +381,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="GetCastedValueOrDefault{TKey, TValue}(IDictionary{TKey, object}, TKey, Func{object, TValue}, TValue)" />
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint GetCastedValueOrDefault<TKey>(
       this IDictionary<TKey, object> dictionary,
       TKey key,
@@ -415,7 +391,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="GetCastedValueOrDefault{TKey, TValue}(IDictionary{TKey, object}, TKey, Func{object, TValue}, TValue)" />
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetCastedValueOrDefault<TKey>(
       this IDictionary<TKey, object> dictionary,
       TKey key,
@@ -426,7 +401,6 @@ namespace MMOR.NET.Utilities
     ///     <inheritdoc
     ///         cref="GetCastedValueOrDefault{TKey, TValue}(IDictionary{TKey, object}, TKey, Func{object, TValue}, TValue)" />
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double GetCastedValueOrDefault<TKey>(
       this IDictionary<TKey, object> dictionary,
       TKey key,
