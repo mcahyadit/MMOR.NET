@@ -1,9 +1,7 @@
 using System;
 
-namespace MMOR.NET.Utilities
-{
-  public static partial class Utilities
-  {
+namespace MMOR.NET.Utilities {
+  public static partial class Utilities {
     public delegate bool TryParseDelegate<T>(string s, out T result);
 
     /// <summary>
@@ -18,12 +16,10 @@ namespace MMOR.NET.Utilities
     /// <param name="parseFunc"></param>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public static T ConsoleSafeRead<T>(
-      TryParseDelegate<T> parseFunc,
-      Func<T, bool>? predicate = null
-    )
-    {
-      predicate ??= _ => true;
+    public static T ConsoleSafeRead<T>(TryParseDelegate<T> parseFunc,
+        Func<T, bool>? predicate = null) {
+      predicate ??=
+          _ => true;
       while (true)
         if (parseFunc(Console.ReadLine(), out T result) && predicate(result))
           return result;
@@ -32,12 +28,8 @@ namespace MMOR.NET.Utilities
     /// <summary>
     ///     <inheritdoc cref="ConsoleSafeRead{T}(TryParseDelegate{T}, Func{T, bool})" />
     /// </summary>
-    public static void ConsoleSafeRead<T>(
-      out T result,
-      TryParseDelegate<T> parseFunc,
-      Func<T, bool>? predicate = null
-    )
-    {
+    public static void ConsoleSafeRead<T>(out T result, TryParseDelegate<T> parseFunc,
+        Func<T, bool>? predicate = null) {
       result = ConsoleSafeRead(parseFunc, predicate);
     }
 
@@ -47,12 +39,11 @@ namespace MMOR.NET.Utilities
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
     /// </summary>
     public static T ConsoleSafeRead<T>(out T result, Func<T, bool>? predicate = null)
-      where T : struct, Enum
-    {
-      predicate ??= _ => true;
-      int max = MaxFlag<T>();
-      while (true)
-      {
+        where T : struct, Enum {
+      predicate ??=
+          _   => true;
+      int max  = MaxFlag<T>();
+      while (true) {
         ConsoleSafeRead(out int tmpInt, int.TryParse, x => x >= 0 && x <= max);
         result = (T)Enum.ToObject(typeof(T), tmpInt);
         if (predicate(result))
@@ -64,13 +55,11 @@ namespace MMOR.NET.Utilities
   /// <summary>
   ///     <br /> - Robust <see cref="Console.WriteLine()" /> for printing in same area.
   /// </summary>
-  public class ConsoleStationaryPrint
-  {
+  public class ConsoleStationaryPrint {
     private int posEnd;
     private int? posSta;
 
-    public void Print(in string text)
-    {
+    public void Print(in string text) {
       if (text.IsNullOrEmpty())
         return;
 
@@ -78,16 +67,14 @@ namespace MMOR.NET.Utilities
 
       Console.SetCursorPosition(0, posSta.Value);
       string[] lines = text.Split(Environment.NewLine);
-      var newLines = 0;
-      foreach (string line in lines)
-      {
-        int len = line.Length;
+      var newLines   = 0;
+      foreach (string line in lines) {
+        int len         = line.Length;
         int bufferWidth = Console.BufferWidth;
-        var cursor = 0;
+        var cursor      = 0;
 
         // Handle wrapped texts
-        while (cursor <= len)
-        {
+        while (cursor <= len) {
           int subLen = Math.Min(bufferWidth, len - cursor);
           Console.WriteLine(line.Substring(cursor, subLen).PadRight(bufferWidth));
           cursor += bufferWidth;
@@ -103,8 +90,7 @@ namespace MMOR.NET.Utilities
       Console.SetCursorPosition(0, posSta.Value + posEnd);
     }
 
-    public void Clear()
-    {
+    public void Clear() {
       posSta = null;
       posEnd = 0;
     }
