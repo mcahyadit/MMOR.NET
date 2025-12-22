@@ -32,9 +32,6 @@ namespace MMOR.NET.Random
     }
 
     public abstract uint NextUInt(); // Primary Result
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public uint NextUInt(uint minInclusive, uint maxExclusive)
     {
       if (minInclusive >= maxExclusive)
@@ -54,9 +51,6 @@ namespace MMOR.NET.Random
       return minInclusive + result % range;
     }
 
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public int NextInt(int minInclusive, int maxExclusive)
     {
       if (minInclusive >= maxExclusive)
@@ -67,9 +61,6 @@ namespace MMOR.NET.Random
       return minInclusive + (int)NextUInt(0, range);
     }
 
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public float NextFloat(float minInclusive = 0, float maxExclusive = 1)
     {
       if (MathExt.Approximately(minInclusive, maxExclusive))
@@ -81,9 +72,6 @@ namespace MMOR.NET.Random
       return minInclusive + (float)NextUInt() / uint.MaxValue * (maxExclusive - minInclusive);
     }
 
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public double NextDouble(double minInclusive = 0, double maxExclusive = 1)
     {
       if (MathExt.Approximately(minInclusive, maxExclusive))
@@ -114,9 +102,6 @@ namespace MMOR.NET.Random
 
     public override string ToString() => $".NET-0x{Seed:X}";
 
-#if !DEBUG && !UNITY_EDITOR
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
     public override uint NextUInt()
     {
       var first = (uint)random.Next();
