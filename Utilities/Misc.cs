@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using MMOR.NET.Mathematics;
 using Newtonsoft.Json;
 
