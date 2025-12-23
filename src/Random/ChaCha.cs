@@ -2,11 +2,12 @@ using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Random
 {
-  /// <summary>
-  ///     <see cref="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
-  /// </summary>
-  public class ChaCha20 : IRandom<ChaCha20>
-  {
+  /**
+   * <summary>
+   * Based on
+   * <see href="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
+   * </summary>
+   * */
     protected uint[] block = new uint[16];
     protected ulong blockDex;
 
