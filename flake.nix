@@ -26,6 +26,8 @@
             vscode-json-languageserver
             prettierd
 
+            just
+
             nixd # LSP for Nix
             nixfmt
           ];
