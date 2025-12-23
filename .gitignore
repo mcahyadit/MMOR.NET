@@ -8,6 +8,7 @@
 # LspSetup Generated
 [Oo]bj/
 [Bb]in/
+[Bb]uild/
 *.csproj
 *.sln
 *.slnx
@@ -19,3 +20,4 @@
 .direnv/
 .pixi/*
 !.pixi/config.toml
+

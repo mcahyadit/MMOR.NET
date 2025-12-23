@@ -22,6 +22,10 @@
             roslyn-ls
             clang-tools
 
+            docfx
+            vscode-json-languageserver
+            prettierd
+
             nixd # LSP for Nix
             nixfmt
           ];
