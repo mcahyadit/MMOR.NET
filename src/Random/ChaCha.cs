@@ -8,6 +8,7 @@ namespace MMOR.NET.Random
    * <see href="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
    * </summary>
    * */
+  public class ChaCha20 : IRandom<ChaCha20> {
     protected uint[] block = new uint[16];
     protected ulong blockDex;
 
