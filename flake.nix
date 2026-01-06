@@ -26,7 +26,7 @@
 
             just
 
-            pre-commit
+            prek
             nixd # LSP for Nix
             nixfmt
           ];
