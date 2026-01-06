@@ -14,9 +14,7 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        devShells.default = pkgs.mkShell {
+        fragment = {
           packages = with pkgs; [
             dotnet-sdk_9
             roslyn-ls
@@ -33,6 +31,10 @@
             nixfmt
           ];
         };
+      in
+      {
+        devShellFragments.default = fragment;
+        devShells.default = pkgs.mkShellNoCC fragment;
       }
     );
 }
