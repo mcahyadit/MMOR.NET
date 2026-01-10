@@ -4,17 +4,17 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs =
-    {
-      nixpkgs,
-      flake-utils,
-      ...
-    }:
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    ...
+  }:
     flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        fragment = {
+      system: let
+        pkgs = import nixpkgs {inherit system;};
+      in {
+        devShellFragments.default = {
           packages = with pkgs; [
             dotnet-sdk_9
             roslyn-ls
@@ -25,16 +25,14 @@
             prettierd
 
             just
+            just-lsp
 
             prek
-            nixd # LSP for Nix
-            nixfmt
+            nixd
+            alejandra
           ];
         };
-      in
-      {
-        devShellFragments.default = fragment;
-        devShells.default = pkgs.mkShellNoCC fragment;
+        devShells.default = pkgs.mkShellNoCC self.devShellFragments.${system}.default;
       }
     );
 }
