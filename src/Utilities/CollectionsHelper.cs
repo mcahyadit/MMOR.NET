@@ -33,7 +33,7 @@ namespace MMOR.NET.Utilities {
         [NotNullWhen(false)] this IEnumerable<T>? arr) => arr == null || arr.Count() <= 0;
 
     public static bool IsNullOrEmpty(
-        [NotNullWhen(false)] this string str) => string.IsNullOrWhiteSpace(str);
+        [NotNullWhen(false)] this string? str) => string.IsNullOrWhiteSpace(str);
 
     //-+-+-+-+-+-+-+-+
     // Creation
