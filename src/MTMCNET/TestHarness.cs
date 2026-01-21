@@ -164,6 +164,16 @@ namespace MMOR.NET.MTMC {
             thread_data.Unpause();
           }
           //================
+          // Fail Safe Exit
+          /// This error is most likely caused by
+          /// ..the imperfect implementation of <see cref="atomic_uint64_t"/>.
+          /// ..as there are cases where <see cref="completed_iterations_"/>
+          /// ..is less than <see cref="full_sim_data"/>'s total_iteration.
+          //================
+          if (full_sim_data.total_iterations >= last_check) {
+            break;
+          };
+          //================
           // Mark Time
           //================
           TimeSpan elapsed_time = stop_watch.Elapsed - last_check_time;
