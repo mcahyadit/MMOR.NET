@@ -221,11 +221,11 @@ namespace MMOR.NET.MTMC {
         thread_data.Pause();
         try {
           full_sim_data.Combine_(thread_data);
-          thread_data.Dispose_();
         } catch (Exception ex) {
           OnExceptionCatch?.Invoke(ex, "TestHarness: Exception caught during combine and clear.");
         }
         thread_data.Unpause();
+        thread_data.Dispose_();
       }
       //================
       // Finishing Up
