@@ -116,16 +116,20 @@ namespace MMOR.NET.MTMC {
       stop_watch.Start();
       completed_iterations_ = 0;
 
-      for (var i = 0; i < sim_config.thread_count; ++i) {
-        ulong iterations           = thread_iteration + (i == 0 ? thread_leftover : 0);
-        IRandom rng_algo           = sim_config.rng_ctor[i]();
-        T thread_data              = sim_config.sim_obj_ctor(rng_algo);
-        thread_data.kRngIdentifier = rng_algo.ToString();
-        rng_identifiers_.Add(rng_algo.ToString());
-        thread_data_list_.Add(thread_data);
-        thread_list.Add(Task.Factory.StartNew(() => SimulateChunk(thread_data, iterations),
-            TaskCreationOptions.LongRunning));
-      }
+      try {
+        for (var i = 0; i < sim_config.thread_count; ++i) {
+          ulong iterations           = thread_iteration + (i == 0 ? thread_leftover : 0);
+          IRandom rng_algo           = sim_config.rng_ctor[i]();
+          T thread_data              = sim_config.sim_obj_ctor(rng_algo);
+          thread_data.kRngIdentifier = rng_algo.ToString();
+          rng_identifiers_.Add(rng_algo.ToString());
+          thread_data_list_.Add(thread_data);
+          thread_list.Add(Task.Factory.StartNew(() => SimulateChunk(thread_data, iterations),
+              TaskCreationOptions.LongRunning));
+        }
+      } catch (Exception ex) {
+        OnExceptionCatch?.Invoke(ex, "Test Harness: Exception caught during instantiation of SimulationObject.");
+      };
 
       // Fire Event
       OnStart?.Invoke();
@@ -139,7 +143,7 @@ namespace MMOR.NET.MTMC {
       ulong next_report_threshold = sim_config.initial_sprint.GetValueOrDefault(100);
       TimeSpan smart_wait         = sim_config.minimum_wait;
 
-      full_sim_data  = sim_config.sim_obj_ctor(null!);
+      full_sim_data    = sim_config.sim_obj_ctor(null!);
       ulong last_check = sim_config.target_iteration - check_threshold;
 
       while (completed_iterations_ < last_check) {
