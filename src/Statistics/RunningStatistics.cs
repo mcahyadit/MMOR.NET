@@ -56,13 +56,15 @@ namespace MMOR.NET.Statistics {
     // █ █▄░█ ▀█▀ █▀▀ █▀█ █▄░█ ▄▀█ █░░ 
     // █ █░▀█ ░█░ ██▄ █▀▄ █░▀█ █▀█ █▄▄ 
     //=================================
-    protected ulong count_;
-    protected ulong count_0_;
-    protected double min_val_ = double.PositiveInfinity;
-    protected double max_val_ = double.NegativeInfinity;
-    protected ulong count_max_;
-    protected double mean_;
-    protected double moment_2_;
+    protected ulong count_   = 0;
+    protected ulong count_0_ = 0;
+
+    protected double min_val_  = double.PositiveInfinity;
+    protected double max_val_  = double.NegativeInfinity;
+    protected ulong count_max_ = 0;
+
+    protected double mean_     = 0;
+    protected double moment_2_ = 0;
 
     /** <summary>
      * Resets the RunningStatistics to it's default state.
@@ -72,12 +74,12 @@ namespace MMOR.NET.Statistics {
       count_   = 0;
       count_0_ = 0;
 
-      min_val_ = double.PositiveInfinity;
-      max_val_ = double.NegativeInfinity;
-
+      min_val_   = double.PositiveInfinity;
+      max_val_   = double.NegativeInfinity;
       count_max_ = 0;
-      mean_      = 0;
-      moment_2_  = 0;
+
+      mean_     = 0;
+      moment_2_ = 0;
     }
     //=======================
     // █ █▄░█ █▀█ █░█ ▀█▀ █▀
@@ -130,6 +132,21 @@ namespace MMOR.NET.Statistics {
      * <param name="stats">The RunningStatistics which data is to be added from.</param>
      * */
     public void Push(RunningStatistics stats) {
+      if (stats.count_ == 0) {
+        return;
+      } else if (count_ == 0) {
+        count_   = stats.count_;
+        count_0_ = stats.count_0_;
+
+        min_val_   = stats.min_val_;
+        max_val_   = stats.max_val_;
+        count_max_ = stats.count_max_;
+
+        mean_     = stats.mean_;
+        moment_2_ = stats.moment_2_;
+        return;
+      }
+
       ulong total_count = count_ + stats.count_;
       double delta      = stats.mean_ - mean_;
       double delta_sq   = delta * delta;

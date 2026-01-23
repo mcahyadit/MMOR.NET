@@ -52,12 +52,12 @@ namespace MMOR.NET.Statistics {
     // █ █░▀█ ░█░ ██▄ █▀▄ █░▀█ █▀█ █▄▄ 
     // MARK: Internal
     //=================================
-    protected double moment_3_;
-    protected double moment_4_;
+    protected double moment_3_ = 0;
+    protected double moment_4_ = 0;
 
-    protected double mean_geometric_;
-    protected double mean_harmonics_;
-    protected double mean_rms_;
+    protected double mean_geometric_ = 0;
+    protected double mean_harmonics_ = 0;
+    protected double mean_rms_       = 0;
 
     //=======================
     // █ █▄░█ █▀█ █░█ ▀█▀ █▀
@@ -98,6 +98,27 @@ namespace MMOR.NET.Statistics {
     }
 
     public void Push(RunningStatisticsAdvanced stats) {
+      if (stats.count_ == 0) {
+        return;
+      } else if (count_ == 0) {
+        count_   = stats.count_;
+        count_0_ = stats.count_0_;
+
+        min_val_   = stats.min_val_;
+        max_val_   = stats.max_val_;
+        count_max_ = stats.count_max_;
+
+        mean_     = stats.mean_;
+        moment_2_ = stats.moment_2_;
+        moment_3_ = stats.moment_3_;
+        moment_4_ = stats.moment_4_;
+
+        mean_geometric_ = stats.mean_geometric_;
+        mean_harmonics_ = stats.mean_harmonics_;
+        mean_rms_       = stats.mean_rms_;
+        return;
+      }
+
       ulong total_count = count_ + stats.count_;
       double delta      = stats.mean_ - mean_;
       double delta2     = delta * delta;
