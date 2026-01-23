@@ -1,139 +1,141 @@
 using System;
-using System.Runtime.CompilerServices;
 
-namespace MMOR.NET.Statistics
-{
-  /// <summary>
-  ///     <strong>Running Statistics Advanced</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Expanded version of <see cref="RunningStatistics" />.
-  ///     <br /> - includes:
-  ///     <list type="bullet">
-  ///         <br /> <item><see cref="Skewness">Skewness</see>,</item>
-  ///         <br /> <item><see cref="Kurtosis">Kurtosis</see>,</item>
-  ///         <br /> <item><see cref="GeometricMean">Geometric Mean</see>,</item>
-  ///         <br /> <item><see cref="HarmonicMean">Harmonic Mean</see>,</item>
-  ///         <br />
-  ///         <item>
-  ///             <see cref="RootMeanSquare">Root Mean Square</see>
-  ///         </item>
-  ///     </list>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
-  public class RunningStatisticsAdvanced : RunningStatistics
-  {
-    /// <summary>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Adds <paramref name="value" /> by <paramref name="count" /> times to the calculated statistics.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>i
-    /// <param name="value"></param>
-    /// <param name="count"></param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override void Push(double value, uint count = 1)
-    {
-      double oldCount = _n;
-      _n += count;
-      double d = value - _m1;
-      double s = d / _n * count;
-      double s2 = s * s / count;
-      double t = d * s * oldCount;
-
-      _m1 += s;
-      _m4 += t * s2 * (_n * _n - 3 * _n + 3) + 6 * s2 * _m2 - 4 * s * _m3;
-      _m3 += t * s * (_n - 2) - 3 * s * _m2;
-      _m2 += t;
-
-      _h += 1.0 / value * count;
-      _g += Math.Log(value) * count;
-      _r += (value * value - _r) * count / _n;
-
-      // Update Max Min
-      _max = value > _max ? value : _max;
-      _min = value < _min ? value : _min;
-    }
-
-    /// <summary>
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    ///     <br /> - Combines with another <see cref="RunningStatisticsAdvanced" />.
-    ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    /// </summary>
-    /// <param name="stats"></param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Push(RunningStatisticsAdvanced stats)
-    {
-      long n = _n + stats._n;
-      double d = stats._m1 - _m1;
-      double d2 = d * d;
-      double d3 = d2 * d;
-      double d4 = d2 * d2;
-
-      double m1 = (_n * _m1 + stats._n * stats._m1) / n;
-      double m2 = _m2 + stats._m2 + d2 * _n * stats._n / n;
-      double m3 =
-        _m3
-        + stats._m3
-        + d3 * _n * stats._n * (_n - stats._n) / (n * n)
-        + 3 * d * (_n * stats._m2 - stats._n * _m2) / n;
-      double m4 =
-        _m4
-        + stats._m4
-        + d4 * _n * stats._n * (_n * _n - _n * stats._n + stats._n * stats._n) / (n * n * n)
-        + 6 * d2 * (_n * _n * stats._m2 + stats._n * stats._n * _m2) / (n * n)
-        + 4 * d * (_n * stats._m3 - stats._n * _m3) / n;
-
-      // Update Max Min
-      _max = stats._max > _max ? stats._max : _max;
-      _min = stats._min < _min ? stats._min : _min;
-
-      _n = n;
-      _m1 = m1;
-      _m2 = m2;
-      _m3 = m3;
-      _m4 = m4;
-    }
-
-    //-+-+-+-+-+-+-+-+
-    // Internal Calculation Containers
-    //-+-+-+-+-+-+-+-+
-    #region Internal Calucaltion Containers
-    protected double _m3;
-    protected double _m4;
-
-    protected double _g;
-    protected double _h;
-
-    protected double _r;
-    //-+-+-+-+-+-+-+-+
-    #endregion
-    //-+-+-+-+-+-+-+-+
-    // Public Readables
-    //-+-+-+-+-+-+-+-+
-    #region Public Readables
+namespace MMOR.NET.Statistics {
+  /** <summary>
+   * <br/> Extended version of <see cref="RunningStatistics"/>.
+   * <br/> Additionally includes:
+   * <list type="bullet">
+   *  <item><see cref="Skewness">Skewness</see>,</item>
+   *  <item><see cref="Kurtosis">Kurtosis</see>,</item>
+   *  <item><see cref="GeometricMean">Geometric Mean</see>,</item>
+   *  <item><see cref="HarmonicMean">Harmonic Mean</see>,</item>
+   *  <item><see cref="RootMeanSquare">Root Mean Square</see></item>
+   * </list>
+   * </summary>
+   * */
+  public class RunningStatisticsAdvanced : RunningStatistics {
+    //====================================
+    // █ █▄░█ ▀█▀ █▀▀ █▀█ █▀▀ ▄▀█ █▀▀ █▀▀
+    // █ █░▀█ ░█░ ██▄ █▀▄ █▀░ █▀█ █▄▄ ██▄
+    // MARK: Interface
+    //====================================
     /// <inheritdoc cref="TotalStatistics.Skewness" />
-    public double Skewness =>
-      _n < 3
-        ? double.NaN
-        : _n * _m3 * Math.Sqrt(_m2 / (_n - 1)) / (_m2 * _m2 * (_n - 2)) * (_n - 1);
+    public double Skewness {
+      get {
+        if (count_ < 3)
+          return double.NaN;
+        return count_ * moment_3_ * Math.Sqrt(moment_2_ / (count_ - 1)) /
+               (moment_2_ * moment_2_ * (count_ - 2)) * (count_ - 1);
+      }
+    }
 
     /// <inheritdoc cref="TotalStatistics.Kurtosis" />
-    public double Kurtosis =>
-      _n < 4
-        ? double.NaN
-        : ((double)_n * _n - 1)
-          / ((_n - 2) * (_n - 3))
-          * (_n * _m4 / (_m2 * _m2) - 3 + 6.0 / (_n + 1));
+    public double Kurtosis {
+      get {
+        if (count_ < 4)
+          return double.NaN;
+        return ((double)count_ * count_ - 1) / ((count_ - 2) * (count_ - 3)) *
+               (count_ * moment_4_ / (moment_2_ * moment_2_) - 3 + 6.0 / (count_ + 1));
+      }
+    }
 
-    /// <inheritdoc cref="StreamingStatistics.GeometricMean" />
-    public double GeometricMean => _n < 1 ? double.NaN : Math.Exp(_g / _n);
+    /// <inheritdoc cref="StreamingStatistics.GeometricMean"/>
+    public double GeometricMean => count_ < 1 ? double.NaN : Math.Exp(mean_geometric_ / count_);
 
-    /// <inheritdoc cref="StreamingStatistics.HarmonicMean" />
-    public double HarmonicMean => _n < 1 ? double.NaN : _n / _h;
+    /// <inheritdoc cref="StreamingStatistics.HarmonicMean"/>
+    public double HarmonicMean => count_ < 1 ? double.NaN : count_ / mean_harmonics_;
 
-    /// <inheritdoc cref="StreamingStatistics.RootMeanSquare" />
-    public double RootMeanSquare => _n < 1 ? double.NaN : Math.Sqrt(_r);
+    /// <inheritdoc cref="StreamingStatistics.RootMeanSquare"/>
+    public double RootMeanSquare => count_ < 1 ? double.NaN : Math.Sqrt(mean_rms_);
+    //=================================
+    // █ █▄░█ ▀█▀ █▀▀ █▀█ █▄░█ ▄▀█ █░░ 
+    // █ █░▀█ ░█░ ██▄ █▀▄ █░▀█ █▀█ █▄▄ 
+    // MARK: Internal
+    //=================================
+    protected double moment_3_;
+    protected double moment_4_;
 
-    //-+-+-+-+-+-+-+-+
-    #endregion
+    protected double mean_geometric_;
+    protected double mean_harmonics_;
+    protected double mean_rms_;
+
+    //=======================
+    // █ █▄░█ █▀█ █░█ ▀█▀ █▀
+    // █ █░▀█ █▀▀ █▄█ ░█░ ▄█
+    // MARK: Inputs
+    //=======================
+    public override void Push(double value, ulong count = 1) {
+      if (count == 0)
+        return;
+
+      double old_count = count_;
+      count_ += count;
+      double d  = value - mean_;
+      double s  = d / count_ * count;
+      double s2 = s * s / count;
+      double t  = d * s * old_count;
+
+      mean_ += s;
+      moment_4_ +=
+          t * s2 * (count_ * count_ - 3 * count_ + 3) + 6 * s2 * moment_2_ - 4 * s * moment_3_;
+      moment_3_ += t * s * (count_ - 2) - 3 * s * moment_2_;
+      moment_2_ += t;
+
+      mean_harmonics_ += 1.0 / value * count;
+      mean_geometric_ += Math.Log(value) * count;
+      mean_rms_ += (value * value - mean_rms_) * count / count_;
+
+      //================
+      // Update MinMax
+      //================
+      min_val_ = Math.Min(min_val_, value);
+      if (value > max_val_) {
+        max_val_   = value;
+        count_max_ = count;
+      } else if (value == max_val_) {
+        count_max_ += count;
+      }
+    }
+
+    public void Push(RunningStatisticsAdvanced stats) {
+      ulong total_count = count_ + stats.count_;
+      double delta      = stats.mean_ - mean_;
+      double delta2     = delta * delta;
+      double delta3     = delta2 * delta;
+      double delta4     = delta2 * delta2;
+
+      double mean     = (count_ * mean_ + stats.count_ * stats.mean_) / total_count;
+      double moment_2 = moment_2_ + stats.moment_2_ + delta2 * count_ * stats.count_ / total_count;
+      double moment_3 =
+          moment_3_ + stats.moment_3_ +
+          delta3 * count_ * stats.count_ * (count_ - stats.count_) / (total_count * total_count) +
+          3 * delta * (count_ * stats.moment_2_ - stats.count_ * moment_2_) / total_count;
+      double moment_4 =
+          moment_4_ + stats.moment_4_ +
+          delta4 * count_ * stats.count_ *
+              (count_ * count_ - count_ * stats.count_ + stats.count_ * stats.count_) /
+              (total_count * total_count * total_count) +
+          6 * delta2 *
+              (count_ * count_ * stats.moment_2_ + stats.count_ * stats.count_ * moment_2_) /
+              (total_count * total_count) +
+          4 * delta * (count_ * stats.moment_3_ - stats.count_ * moment_3_) / total_count;
+
+      //================
+      // Update MinMax
+      //================
+      min_val_ = Math.Min(min_val_, stats.min_val_);
+      if (stats.max_val_ > max_val_) {
+        max_val_   = stats.max_val_;
+        count_max_ = stats.count_max_;
+      } else if (stats.max_val_ == max_val_) {
+        count_max_ += stats.count_max_;
+      }
+
+      count_    = total_count;
+      mean_     = mean;
+      moment_2_ = moment_2;
+      moment_3_ = moment_3;
+      moment_4_ = moment_4;
+    }
   }
 }
