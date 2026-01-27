@@ -46,6 +46,14 @@ namespace MMOR.NET.MTMC {
         stop_source_.Cancel();
     }
 
+    private TaskCompletionSource<bool> poke_report_ =
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public void PokeReport() {
+      if (!CurrentlyTesting)
+        return;
+      poke_report_.TrySetResult(true);
+    }
+
     private Exception? ErrorCheck(SimulationConfig<T> sim_config) {
       if (sim_config.sim_obj_ctor == null)
         throw new Exception("SimulationObject<T> constructor is not set.");
@@ -96,8 +104,11 @@ namespace MMOR.NET.MTMC {
       }
 
       OnHoldInput?.Invoke();
-      CurrentlyTesting = true;
-      stop_source_     = new CancellationTokenSource();
+      CurrentlyTesting                      = true;
+      stop_source_                          = new CancellationTokenSource();
+      // Needed to allow Report Poking
+      TaskCompletionSource<bool> stop_tcs = new();
+      stop_source_.Token.Register(() => stop_tcs.TrySetResult(true));
       //================
       // Interpret Data
       //================
@@ -128,7 +139,8 @@ namespace MMOR.NET.MTMC {
               TaskCreationOptions.LongRunning));
         }
       } catch (Exception ex) {
-        OnExceptionCatch?.Invoke(ex, "Test Harness: Exception caught during instantiation of SimulationObject.");
+        OnExceptionCatch?.Invoke(ex,
+            "Test Harness: Exception caught during instantiation of SimulationObject.");
       };
 
       // Fire Event
@@ -150,7 +162,13 @@ namespace MMOR.NET.MTMC {
         if (stop_source_.IsCancellationRequested)
           break;
 
-        if (completed_iterations_ >= next_report_threshold) {
+        bool poke_report = poke_report_.Task.IsCompleted;
+        if (poke_report || completed_iterations_ >= next_report_threshold) {
+          // if (completed_iterations_ >= next_report_threshold) {
+          if (poke_report) {
+            poke_report_ = new(TaskCreationOptions.RunContinuationsAsynchronously);
+          }
+
           OnHoldInput?.Invoke();
           ulong last_iteration_count = full_sim_data.total_iterations;
           //================
@@ -203,12 +221,7 @@ namespace MMOR.NET.MTMC {
           }
           OnReleaseInput?.Invoke();
         }
-        try {
-          await Task.Delay(smart_wait, stop_source_.Token);
-        } catch (OperationCanceledException) {
-          // The fact that I need to catch it feels weird
-          break;
-        }
+        await Task.WhenAny(Task.Delay(smart_wait), stop_tcs.Task, poke_report_.Task);
       }
 
       //================
