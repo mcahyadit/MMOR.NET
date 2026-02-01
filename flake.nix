@@ -4,35 +4,32 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    ...
-  }:
-    flake-utils.lib.eachDefaultSystem (
+  outputs = {self, ...} @ inputs:
+    inputs.flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = import nixpkgs {inherit system;};
+        pkgs = import inputs.nixpkgs {inherit system;};
       in {
-        devShellFragments.default = {
-          packages = with pkgs; [
-            dotnet-sdk_9
-            roslyn-ls
-            clang-tools
+        devShells.default = pkgs.mkShellNoCC {
+          packages =
+            [self.formatter.${system}]
+            ++ (with pkgs; [
+              dotnetCorePackages.sdk_9_0
+              roslyn-ls
+              clang-tools
 
-            docfx
-            vscode-json-languageserver
-            prettierd
+              docfx
+              vscode-json-languageserver
+              prettierd
 
-            just
-            just-lsp
+              just
+              just-lsp
 
-            prek
-            nixd
-            alejandra
-          ];
+              prek
+              nixd
+              alejandra
+            ]);
         };
-        devShells.default = pkgs.mkShellNoCC self.devShellFragments.${system}.default;
+        formatter = pkgs.alejandra;
       }
     );
 }
