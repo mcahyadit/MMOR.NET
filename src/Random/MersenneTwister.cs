@@ -17,7 +17,6 @@ namespace MMOR.NET.Random {
     protected readonly uint[] mt_val_ = new uint[N];
     protected int mt_dex_             = N + 1;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       if (mt_dex_ >= N) {
         for (var k = 0; k < N - M; k++) {

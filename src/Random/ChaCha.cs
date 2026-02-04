@@ -15,7 +15,6 @@ namespace MMOR.NET.Random {
     protected uint[] keysetup_ = new uint[8];
     protected uint stream_;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void GenerateBlock() {
       for (var i = 0; i < 4; ++i) input_[i] = constants_[i];
       for (var i = 0; i < 8; ++i) input_[4 + i] = keysetup_[i];
@@ -28,10 +27,8 @@ namespace MMOR.NET.Random {
       for (var i = 0; i < 16; ++i) block_[i] += input_[i];
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static uint ROTL(uint v, int n) => (v << n) | (v >> (32 - n));
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static void QuarterRound(uint[] x, int a, int b, int c, int d) {
       x[a] += x[b];
       x[d] ^= x[a];
@@ -47,7 +44,6 @@ namespace MMOR.NET.Random {
       x[b] = ROTL(x[b], 7);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void ChaChaCore() {
       for (var i = 0; i < 10; i += 2) {
         QuarterRound(block_, 0, 4, 8, 12);
@@ -61,7 +57,6 @@ namespace MMOR.NET.Random {
       }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       ulong nextBlockDex = ctr_ / 16;
       ulong dexInBlock   = ctr_ % 16;

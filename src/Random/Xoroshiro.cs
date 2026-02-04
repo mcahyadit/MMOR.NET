@@ -33,12 +33,10 @@ namespace MMOR.NET.Random {
   public class Xoroshiro : IRandom<Xoroshiro> {
     protected (uint x, uint y) s;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual uint RotateLeft(uint x, int k) => (x << k) | (x >> (64 - k));
 
     public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       uint s0     = s.x;
       uint s1     = s.y;
@@ -77,7 +75,6 @@ namespace MMOR.NET.Random {
 
     public override string ToString() => @$"XSR_64s-0x{Seed:X}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       uint s0     = s.x;
       uint s1     = s.y;
@@ -102,7 +99,6 @@ namespace MMOR.NET.Random {
   public class Xoroshiro64ss : Xoroshiro64s {
     public override string ToString() => @$"XSR_64ss-0x{Seed:X}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       uint s0     = s.x;
       uint s1     = s.y;
@@ -126,7 +122,6 @@ namespace MMOR.NET.Random {
   public class Xoroshiro128ss : Xoroshiro {
     public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       uint s0     = s.x;
       uint s1     = s.y;
@@ -150,7 +145,6 @@ namespace MMOR.NET.Random {
   public class Xoroshiro128p : Xoroshiro {
     public override string ToString() => @$"XSR_128p-0x{Seed:X}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       uint s0     = s.x;
       uint s1     = s.y;

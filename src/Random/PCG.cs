@@ -16,7 +16,6 @@ namespace MMOR.NET.Random {
 
     protected ulong state_;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
       ulong state_prev = state_;
       state_           = unchecked(state_prev * kMultiplier + inc_);
