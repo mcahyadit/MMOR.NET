@@ -31,22 +31,22 @@ namespace MMOR.NET.Random {
    * </remarks>
    * */
   public class Xoroshiro : IRandom<Xoroshiro> {
-    protected (uint x, uint y) s;
+    protected (ulong x, ulong y) s;
 
-    protected virtual uint RotateLeft(uint x, int k) => (x << k) | (x >> (64 - k));
+    protected virtual ulong RotateLeft(ulong x, int k) => (x << k) | (x >> (64 - k));
 
     public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
 
     public override uint NextUInt() {
-      uint s0     = s.x;
-      uint s1     = s.y;
-      uint result = unchecked(RotateLeft(unchecked(s0 + s1), 17) + s0);
+      ulong s0     = s.x;
+      ulong s1     = s.y;
+      ulong result = unchecked(RotateLeft(unchecked(s0 + s1), 17) + s0);
 
       s1 ^= s0;
       s.x = RotateLeft(s0, 49) ^ s1 ^ (s1 << 21);
       s.y = RotateLeft(s1, 28);
 
-      return result;
+      return (uint)(result >> 32);
     }
 
     public Xoroshiro() : this(DefaultReSeed()) {}
@@ -70,8 +70,10 @@ namespace MMOR.NET.Random {
    * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
    * </remarks>
    * */
-  public class Xoroshiro64s : Xoroshiro {
-    protected override uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
+  public class Xoroshiro64s : IRandom<Xoroshiro> {
+    protected (uint x, uint y) s;
+
+    protected uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
 
     public override string ToString() => @$"XSR_64s-0x{Seed:X}";
 
@@ -123,15 +125,15 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
 
     public override uint NextUInt() {
-      uint s0     = s.x;
-      uint s1     = s.y;
-      uint result = unchecked(RotateLeft(unchecked(s0 * 5), 7) * 9);
+      ulong s0     = s.x;
+      ulong s1     = s.y;
+      ulong result = unchecked(RotateLeft(unchecked(s0 * 5), 7) * 9);
 
       s1 ^= s0;
       s.x = RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
       s.y = RotateLeft(s1, 37);
 
-      return result;
+      return (uint)(result >> 32);
     }
   }
 
@@ -146,15 +148,15 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_128p-0x{Seed:X}";
 
     public override uint NextUInt() {
-      uint s0     = s.x;
-      uint s1     = s.y;
-      uint result = unchecked(s0 + s1);
+      ulong s0     = s.x;
+      ulong s1     = s.y;
+      ulong result = unchecked(s0 + s1);
 
       s1 ^= s0;
       s.x = RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
       s.y = RotateLeft(s1, 37);
 
-      return result;
+      return (uint)(result >> 32);
     }
   }
 }
