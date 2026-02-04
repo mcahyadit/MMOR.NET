@@ -1,33 +1,41 @@
 using System;
-using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Random {
   internal class SplitMix64 {
-    private ulong x;
+    private ulong x_;
 
-    public SplitMix64(ulong seed) => x = seed;
+    public SplitMix64(ulong seed) => x_ = seed;
 
     public ulong Next() {
-      ulong z = x += 0x9e3779b97f4a7c15;
+      ulong z = x_ += 0x9e3779b97f4a7c15;
       z       = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
       z       = (z ^ (z >> 27)) * 0x94d049bb133111eb;
       return z ^ (z >> 31);
     }
   }
 
-  /// <summary>
-  ///     <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate 128++</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Have period of 2^128 ~ 3.4e+38
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  /**
+   * <summary>
+   * <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate</strong>
+   * <br/> - Developed by David Blackman and Sebastiano Vigna (2018).
+   * <br/> - Statistical improvement from xorshift.
+   * </summary>
+   * */
+  internal interface IXoroshiroDocs {}
+
+  /**
+   * <inheritdoc cref="IXoroshiroDocs"/>
+   * <remarks>
+   * <br/> 128++ Variant.
+   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+   * </remarks>
+   * */
   public class Xoroshiro : IRandom<Xoroshiro> {
     protected (uint x, uint y) s;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual uint RotateLeft(uint x, int k) => (x << k) | (x >> (64 - k));
 
-    //-+-+-+-+-+-+-+-+
     public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -43,11 +51,6 @@ namespace MMOR.NET.Random {
       return result;
     }
 
-    //-+-+-+-+-+-+-+-+
-    // Initialization
-
-#region Initialization
-    //-+-+-+-+-+-+-+-+
     public Xoroshiro() : this(DefaultReSeed()) {}
 
     public Xoroshiro(ulong seed, ulong? mix = null) {
@@ -60,17 +63,15 @@ namespace MMOR.NET.Random {
         s = new ValueTuple<uint, uint>((uint)seed, (uint)mix.Value);
       }
     }
-
-//-+-+-+-+-+-+-+-+
-#endregion
   }
 
-  /// <summary>
-  ///     <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate 64*</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Have period of 2^64 ~ 1.8e+19
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  /**
+   * <inheritdoc cref="IXoroshiroDocs"/>
+   * <remarks>
+   * <br/> 64* Variant.
+   * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
+   * </remarks>
+   * */
   public class Xoroshiro64s : Xoroshiro {
     protected override uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
 
@@ -90,12 +91,14 @@ namespace MMOR.NET.Random {
     }
   }
 
-  /// <summary>
-  ///     <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate 64**</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Have period of 2^64 ~ 1.8e+19
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  //
+  /**
+   * <inheritdoc cref="IXoroshiroDocs"/>
+   * <remarks>
+   * <br/> 64** Variant.
+   * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
+   * </remarks>
+   * */
   public class Xoroshiro64ss : Xoroshiro64s {
     public override string ToString() => @$"XSR_64ss-0x{Seed:X}";
 
@@ -113,12 +116,13 @@ namespace MMOR.NET.Random {
     }
   }
 
-  /// <summary>
-  ///     <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate 128**</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Have period of 2^128 ~ 3.4e+38
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  /**
+   * <inheritdoc cref="IXoroshiroDocs"/>
+   * <remarks>
+   * <br/> 128** Variant.
+   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+   * </remarks>
+   * */
   public class Xoroshiro128ss : Xoroshiro {
     public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
 
@@ -136,12 +140,13 @@ namespace MMOR.NET.Random {
     }
   }
 
-  /// <summary>
-  ///     <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate 128+</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Have period of 2^128 ~ 3.4e+38
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  /**
+   * <inheritdoc cref="IXoroshiroDocs"/>
+   * <remarks>
+   * <br/> 128+ Variant.
+   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+   * </remarks>
+   * */
   public class Xoroshiro128p : Xoroshiro {
     public override string ToString() => @$"XSR_128p-0x{Seed:X}";
 

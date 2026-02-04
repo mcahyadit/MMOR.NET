@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace MMOR.NET.Random {
   /**
    * <summary>
@@ -8,26 +6,26 @@ namespace MMOR.NET.Random {
    * </summary>
    * */
   public class ChaCha20 : IRandom<ChaCha20> {
-    protected uint[] block = new uint[16];
-    protected ulong blockDex;
+    protected uint[] block_ = new uint[16];
+    protected ulong block_dex_;
 
-    protected uint[] constants = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
-    protected ulong ctr;
-    protected uint[] input    = new uint[16];
-    protected uint[] keysetup = new uint[8];
-    protected uint stream;
+    protected uint[] constants_ = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
+    protected ulong ctr_;
+    protected uint[] input_    = new uint[16];
+    protected uint[] keysetup_ = new uint[8];
+    protected uint stream_;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void GenerateBlock() {
-      for (var i = 0; i < 4; ++i) input[i] = constants[i];
-      for (var i = 0; i < 8; ++i) input[4 + i] = keysetup[i];
-      input[12] = (uint)(blockDex & 0xffffffffu);
-      input[13] = (uint)(blockDex >> 32);
-      input[14] = input[15] = 0xdeadbeef;  // Could use 128-bit counter.
+      for (var i = 0; i < 4; ++i) input_[i] = constants_[i];
+      for (var i = 0; i < 8; ++i) input_[4 + i] = keysetup_[i];
+      input_[12] = (uint)(block_dex_ & 0xffffffffu);
+      input_[13] = (uint)(block_dex_ >> 32);
+      input_[14] = input_[15] = 0xdeadbeef;  // Could use 128-bit counter.
 
-      for (var i = 0; i < 16; ++i) block[i] = input[i];
+      for (var i = 0; i < 16; ++i) block_[i] = input_[i];
       ChaChaCore();
-      for (var i = 0; i < 16; ++i) block[i] += input[i];
+      for (var i = 0; i < 16; ++i) block_[i] += input_[i];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,29 +50,29 @@ namespace MMOR.NET.Random {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void ChaChaCore() {
       for (var i = 0; i < 10; i += 2) {
-        QuarterRound(block, 0, 4, 8, 12);
-        QuarterRound(block, 1, 5, 9, 13);
-        QuarterRound(block, 2, 6, 10, 14);
-        QuarterRound(block, 3, 7, 11, 15);
-        QuarterRound(block, 0, 5, 10, 15);
-        QuarterRound(block, 1, 6, 11, 12);
-        QuarterRound(block, 2, 7, 8, 13);
-        QuarterRound(block, 3, 4, 9, 14);
+        QuarterRound(block_, 0, 4, 8, 12);
+        QuarterRound(block_, 1, 5, 9, 13);
+        QuarterRound(block_, 2, 6, 10, 14);
+        QuarterRound(block_, 3, 7, 11, 15);
+        QuarterRound(block_, 0, 5, 10, 15);
+        QuarterRound(block_, 1, 6, 11, 12);
+        QuarterRound(block_, 2, 7, 8, 13);
+        QuarterRound(block_, 3, 4, 9, 14);
       }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override uint NextUInt() {
-      ulong nextBlockDex = ctr / 16;
-      ulong dexInBlock   = ctr % 16;
-      if (nextBlockDex != blockDex) {
-        blockDex = nextBlockDex;
+      ulong nextBlockDex = ctr_ / 16;
+      ulong dexInBlock   = ctr_ % 16;
+      if (nextBlockDex != block_dex_) {
+        block_dex_ = nextBlockDex;
         GenerateBlock();
       }
 
-      ++ctr;
+      ++ctr_;
 
-      return block[dexInBlock];
+      return block_[dexInBlock];
     }
 
 //-+-+-+-+-+-+-+-+
@@ -86,30 +84,30 @@ namespace MMOR.NET.Random {
     public ChaCha20(ulong seed, ulong? stream = null) {
       Seed = seed;
 
-      ctr      = 0;
-      blockDex = ulong.MaxValue;
+      ctr_      = 0;
+      block_dex_ = ulong.MaxValue;
 
       uint seedVal;
       if (stream == null) {
         SplitMix64 sm = new(seed);
         seedVal       = (uint)sm.Next();
-        this.stream   = (uint)sm.Next();
+        this.stream_   = (uint)sm.Next();
 
         Seed = seedVal;
       } else {
         seedVal     = (uint)seed;
-        this.stream = (uint)stream;
+        this.stream_ = (uint)stream;
       }
 
-      keysetup[0] = seedVal & 0xffffffffu;
-      keysetup[1] = (uint)(seed >> 32);
-      keysetup[2] = keysetup[3] = 0xdeadbeef;
-      keysetup[4]               = this.stream & 0xffffffffu;
-      keysetup[5]               = (uint)(seed >> 32);
-      keysetup[6] = keysetup[7] = 0xdeadbeef;
+      keysetup_[0] = seedVal & 0xffffffffu;
+      keysetup_[1] = (uint)(seed >> 32);
+      keysetup_[2] = keysetup_[3] = 0xdeadbeef;
+      keysetup_[4]               = this.stream_ & 0xffffffffu;
+      keysetup_[5]               = (uint)(seed >> 32);
+      keysetup_[6] = keysetup_[7] = 0xdeadbeef;
     }
 
-    public override string ToString() => $"ChaCha-0x{Seed:X}-0x{stream:X}";
+    public override string ToString() => $"ChaCha-0x{Seed:X}-0x{stream_:X}";
 
 //-+-+-+-+-+-+-+-+
 #endregion

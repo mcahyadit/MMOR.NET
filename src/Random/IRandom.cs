@@ -9,13 +9,12 @@ namespace MMOR.NET.Random {
     public static T global => _global ??= Activator.CreateInstance<T>();
   }
 
-  /// <summary>
-  ///     <strong>abstract vRandom</strong>
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ///     <br /> - Abstract for RNG Algorithms.
-  ///     <br /> - Allows easy switching.
-  ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  /// </summary>
+  /**
+   * <summary>
+   * <strong>Generic Pseudo Random Number Generator abstraction.</strong>
+   * <br/> - For easily swapping out different algorithm when needed.
+   * </summary>
+   * */
   public abstract class IRandom {
     public ulong Seed { get; protected set; }
 
@@ -27,12 +26,12 @@ namespace MMOR.NET.Random {
     }
 
     public abstract uint NextUInt();  // Primary Result
-    public uint NextUInt(uint minInclusive, uint maxExclusive) {
-      if (minInclusive >= maxExclusive)
+    public uint NextUInt(uint min_inclusive, uint max_exclusive) {
+      if (min_inclusive >= max_exclusive)
         throw new Exception(
-            $"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
+            $"max_exclusive {max_exclusive} must be greater than min_inclusive {min_inclusive}");
 
-      uint range = maxExclusive - minInclusive;
+      uint range = max_exclusive - min_inclusive;
       uint limit = uint.MaxValue - uint.MaxValue % range;
       uint result;
 
@@ -40,33 +39,33 @@ namespace MMOR.NET.Random {
         result = NextUInt();
       } while (result >= limit);
 
-      return minInclusive + result % range;
+      return min_inclusive + result % range;
     }
 
-    public int NextInt(int minInclusive, int maxExclusive) {
-      if (minInclusive >= maxExclusive)
+    public int NextInt(int min_inclusive, int max_exclusive) {
+      if (min_inclusive >= max_exclusive)
         throw new Exception(
-            $"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
-      var range = (uint)(maxExclusive - minInclusive);
-      return minInclusive + (int)NextUInt(0, range);
+            $"max_exclusive {max_exclusive} must be greater than min_inclusive {min_inclusive}");
+      var range = (uint)(max_exclusive - min_inclusive);
+      return min_inclusive + (int)NextUInt(0, range);
     }
 
-    public float NextFloat(float minInclusive = 0, float maxExclusive = 1) {
-      if (MathExt.Approximately(minInclusive, maxExclusive))
-        return minInclusive;
-      if (minInclusive > maxExclusive)
+    public float NextFloat(float min_inclusive = 0, float max_exclusive = 1) {
+      if (MathExt.Approximately(min_inclusive, max_exclusive))
+        return min_inclusive;
+      if (min_inclusive > max_exclusive)
         throw new Exception(
-            $"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
-      return minInclusive + (float)NextUInt() / uint.MaxValue * (maxExclusive - minInclusive);
+            $"max_exclusive {max_exclusive} must be greater than min_inclusive {min_inclusive}");
+      return min_inclusive + (float)NextUInt() / uint.MaxValue * (max_exclusive - min_inclusive);
     }
 
-    public double NextDouble(double minInclusive = 0, double maxExclusive = 1) {
-      if (MathExt.Approximately(minInclusive, maxExclusive))
-        return minInclusive;
-      if (minInclusive > maxExclusive)
+    public double NextDouble(double min_inclusive = 0, double max_exclusive = 1) {
+      if (MathExt.Approximately(min_inclusive, max_exclusive))
+        return min_inclusive;
+      if (min_inclusive > max_exclusive)
         throw new Exception(
-            $"maxExclusive {maxExclusive} must be greater than minInclusive {minInclusive}");
-      return minInclusive + (double)NextUInt() / uint.MaxValue * (maxExclusive - minInclusive);
+            $"max_exclusive {max_exclusive} must be greater than min_inclusive {min_inclusive}");
+      return min_inclusive + (double)NextUInt() / uint.MaxValue * (max_exclusive - min_inclusive);
     }
   }
 
