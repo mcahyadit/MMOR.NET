@@ -71,7 +71,7 @@ namespace MMOR.NET.Random {
    * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
    * </remarks>
    * */
-  public class Xoroshiro64s : IRandom<Xoroshiro> {
+  public class Xoroshiro64s : IRandom<Xoroshiro64s> {
     protected (uint x, uint y) s;
 
     protected uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
