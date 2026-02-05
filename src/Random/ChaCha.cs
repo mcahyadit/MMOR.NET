@@ -58,6 +58,7 @@ namespace MMOR.NET.Random {
     }
 
     public override uint NextUInt() {
+      ++StateCount;
       ulong next_block_dex = ctr_ / 16;
       ulong dex_in_block   = ctr_ % 16;
       if (next_block_dex != block_dex_) {
@@ -108,5 +109,9 @@ namespace MMOR.NET.Random {
 
 //-+-+-+-+-+-+-+-+
 #endregion
+    public override void Jump(ulong delta) {
+      ctr_ += delta;
+      StateCount += delta;
+    }
   }
 }
