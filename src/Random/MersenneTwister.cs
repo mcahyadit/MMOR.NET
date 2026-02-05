@@ -16,6 +16,7 @@ namespace MMOR.NET.Random {
     protected int mt_dex_             = N + 1;
 
     public override uint NextUInt() {
+      ++StateCount;
       if (mt_dex_ >= N) {
         for (var k = 0; k < N - M; k++) {
           uint y     = (mt_val_[k] & upper_mask_) | (mt_val_[k + 1] & lower_mask_);

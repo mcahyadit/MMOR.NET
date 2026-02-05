@@ -38,6 +38,7 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
 
     public override uint NextUInt() {
+      ++StateCount;
       ulong s0     = s.x;
       ulong s1     = s.y;
       ulong result = unchecked(RotateLeft(unchecked(s0 + s1), 17) + s0);
@@ -78,6 +79,7 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_64s-0x{Seed:X}";
 
     public override uint NextUInt() {
+      ++StateCount;
       uint s0     = s.x;
       uint s1     = s.y;
       uint result = unchecked(s0 * 0x9E3779BBU);
@@ -102,6 +104,7 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_64ss-0x{Seed:X}";
 
     public override uint NextUInt() {
+      ++StateCount;
       uint s0     = s.x;
       uint s1     = s.y;
       uint result = unchecked(RotateLeft(unchecked(s0 * 0x9E3779BBU), 5) * 5);
@@ -125,6 +128,7 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
 
     public override uint NextUInt() {
+      ++StateCount;
       ulong s0     = s.x;
       ulong s1     = s.y;
       ulong result = unchecked(RotateLeft(unchecked(s0 * 5), 7) * 9);
@@ -148,6 +152,7 @@ namespace MMOR.NET.Random {
     public override string ToString() => @$"XSR_128p-0x{Seed:X}";
 
     public override uint NextUInt() {
+      ++StateCount;
       ulong s0     = s.x;
       ulong s1     = s.y;
       ulong result = unchecked(s0 + s1);
