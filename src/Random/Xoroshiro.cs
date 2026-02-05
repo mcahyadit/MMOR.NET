@@ -57,9 +57,9 @@ namespace MMOR.NET.Random {
 
       if (mix == null) {
         SplitMix64 sm = new(seed);
-        s             = new ValueTuple<uint, uint>((uint)sm.Next(), (uint)sm.Next());
+        s             = new(sm.Next(), sm.Next());
       } else {
-        s = new ValueTuple<uint, uint>((uint)seed, (uint)mix.Value);
+        s = new(seed, mix.Value);
       }
     }
   }
