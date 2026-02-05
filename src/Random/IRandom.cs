@@ -1,5 +1,5 @@
-using System;
 using System.Threading;
+using System.Transactions;
 using MMOR.NET.Mathematics;
 
 namespace MMOR.NET.Random {
@@ -66,6 +66,20 @@ namespace MMOR.NET.Random {
         throw new Exception(
             $"max_exclusive {max_exclusive} must be greater than min_inclusive {min_inclusive}");
       return min_inclusive + (double)NextUInt() / uint.MaxValue * (max_exclusive - min_inclusive);
+    }
+
+    public ulong StateCount { get; protected set; }
+
+    public virtual void Jump(ulong steps) {
+      for(ulong i = 0; i < steps; i++)
+        NextUInt();
+    }
+
+    public void JumpTo(ulong state_count_target) {
+      if (state_count_target < StateCount)
+        throw new InvalidOperationException($"Jumping Backwards is unsupported. Current state is {StateCount}, while the target state is {state_count_target}");
+
+      Jump(state_count_target - StateCount);
     }
   }
 

@@ -15,6 +15,7 @@ namespace MMOR.NET.Random {
     protected ulong state_;
 
     public override uint NextUInt() {
+      ++StateCount;
       ulong state_prev = state_;
       state_           = unchecked(state_prev * kMultiplier + inc_);
       var xor_shift    = (uint)(((state_prev >> 18) ^ state_prev) >> 27);
@@ -38,5 +39,27 @@ namespace MMOR.NET.Random {
     }
 
     public override string ToString() => $"PCG-0x{Seed:X}-0x{inc_:X}";
+
+    public override void Jump(ulong steps) {
+      if (steps == 0)
+        return;
+
+      ulong curr_mult = kMultiplier;
+      ulong curr_plus = inc_;
+      ulong acc_mult  = 1;
+      ulong acc_plus  = 0;
+
+      for (ulong d = steps; d > 0; d >>= 1) {
+        if ((d & 1) != 0) {
+          acc_mult = unchecked(acc_mult * curr_mult);
+          acc_plus = unchecked(acc_plus * curr_mult + curr_plus);
+        }
+        curr_plus = unchecked(curr_plus * (curr_mult + 1));
+        curr_mult = unchecked(curr_mult * curr_mult);
+      }
+
+      state_ = unchecked(acc_mult * state_ + acc_plus);
+      StateCount += steps;
+    }
   }
 }
