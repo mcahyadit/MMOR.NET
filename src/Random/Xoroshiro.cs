@@ -1,5 +1,3 @@
-using System;
-
 namespace MMOR.NET.Random {
   internal class SplitMix64 {
     private ulong x_;

@@ -28,7 +28,7 @@ namespace MMOR.NET.Random {
           mt_val_[k] = mt_val_[k + (M - N)] ^ (y >> 1) ^ ((y & 0x1) * matrix_a_);
         }
 
-        uint last_y     = (mt_val_[N - 1] & upper_mask_) | (mt_val_[0] & lower_mask_);
+        uint last_y    = (mt_val_[N - 1] & upper_mask_) | (mt_val_[0] & lower_mask_);
         mt_val_[N - 1] = mt_val_[M - 1] ^ (last_y >> 1) ^ ((last_y & 0x1) * matrix_a_);
 
         mt_dex_ = 0;
