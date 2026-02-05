@@ -5,4 +5,6 @@ ColumnLimit: 100
 AlignArrayOfStructures: Right
 AlignConsecutiveAssignments: true
 AlignAfterOpenBracket: DontAlign
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 ...
