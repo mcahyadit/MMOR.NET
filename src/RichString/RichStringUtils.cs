@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MMOR.NET.RichString {
   public static partial class RichStringUtils {
