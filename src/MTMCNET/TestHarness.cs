@@ -152,7 +152,7 @@ namespace MMOR.NET.MTMC {
       // checking
       //================
       TimeSpan last_check_time    = stop_watch.Elapsed;
-      ulong next_report_threshold = sim_config.initial_sprint.GetValueOrDefault(100);
+      ulong next_report_threshold = Math.Max(1ul, sim_config.initial_sprint.GetValueOrDefault(100));
       TimeSpan smart_wait         = sim_config.minimum_wait;
 
       full_sim_data    = sim_config.sim_obj_ctor(null!);
