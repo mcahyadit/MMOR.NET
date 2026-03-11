@@ -98,5 +98,49 @@ namespace MMOR.NET.RichString {
     }
 
     public static RichStringPlain AsRichString(this string str) => str;
+
+    /**
+     * <summary>
+     *  <br/> Appends, line-by-line, two or more <see cref="IRichString"/> next to each other,
+     *    separated by <paramref name="separator"/>.
+     *  <br/> Sees most use when using Rich Strings to print out Table like data.
+     * </summary>
+     * <param name="rich_strs">Sets of <see cref="IRichString"/> to be combined.</param>
+     * <param name="separator">A string in between each RichString. Defaults to 3 spaces.</param>
+     * <returns>
+     *  Single RichString containing all contents of <paramref name="rich_strs"/> next to each other
+     *  horizontally, separated by <paramref name="separator"/>.
+     * </returns>
+     * */
+    public static IRichString AppendHorizontal(this IReadOnlyList<IRichString> rich_strs,
+        IRichString? separator = null) {
+      separator ??= new RichStringPlain("   ");
+      int count   = rich_strs.Count;
+
+      List<int> col_widths                        = new(count);
+      List<IReadOnlyList<IRichString>> rich_lines = new(count);
+      int max_lines                               = 0;
+      foreach (IRichString rich_str in rich_strs) {
+        IList<IRichString> rich_line = rich_str.SplitByNewLine();
+        rich_lines.Add((IReadOnlyList<IRichString>)rich_line);
+
+        max_lines = Math.Max(rich_line.Count, max_lines);
+        col_widths.Add(rich_line.Max(x => x.Length));
+      }
+
+      RichStringBuilder str_builder = new();
+      for (int row = 0; row < max_lines; ++row) {
+        for (int col = 0; col < count; ++col) {
+          if (row < rich_lines[col].Count)
+            str_builder.Append(rich_lines[col][row].PadRight(col_widths[col]));
+          else
+            str_builder.Append(new string(' ', col_widths[col]));
+          str_builder.Append(separator);
+        }
+        str_builder.AppendLine();
+      }
+
+      return str_builder;
+    }
   }
 }
