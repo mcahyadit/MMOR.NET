@@ -9,7 +9,6 @@
 [Oo]bj/
 [Bb]in/
 [Bb]uild/
-*.csproj
 *.sln
 *.slnx
 
