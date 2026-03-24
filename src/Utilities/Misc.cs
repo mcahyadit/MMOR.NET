@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using MMOR.NET.Mathematics;
 using Newtonsoft.Json;
 
@@ -106,5 +107,64 @@ namespace MMOR.NET.Utilities {
     [Pure]
     public static T? CheapCopy<T>(this T source) => JsonConvert.DeserializeObject<T>(
         JsonConvert.SerializeObject(source));
+    /**
+     * <summary>
+     * <br/> Removes all comments from a json string.
+     * </summary>
+     * <param name="string">The json data in form of a string.</param>
+     * <returns>A string, containing the json data, free of comments.</returns>
+     * */
+    [Pure]
+    public static string JsoncRemoveComments(in string json_contents) {
+      int len              = json_contents.Length;
+      StringBuilder result = new(len);
+
+      for (int curr_pos = 0; curr_pos < len;) {
+        char curr = json_contents[curr_pos];
+        // Opening of String
+        if (curr == '"') {
+          // Find Closing Quote
+          int memo_pos = curr_pos + 1;
+          int pair_pos = json_contents.IndexOf('"', memo_pos);
+          while (pair_pos > curr_pos) {
+            // Escaped Quotes
+            int esc_count = 0;
+            for (int look_pos = pair_pos - 1; look_pos >= memo_pos; --look_pos) {
+              if (json_contents[look_pos] == '\\')
+                ++esc_count;
+              else
+                break;
+            }
+            if (esc_count % 2 == 1)
+              pair_pos = json_contents.IndexOf('"', pair_pos + 1);
+            else
+              break;
+          }
+          int count = pair_pos - curr_pos + 1;  // Include Closing Quote
+          result.Append(json_contents, curr_pos, count);
+          curr_pos = pair_pos + 1;
+        } else if (curr == '/' && curr_pos + 1 < len) {
+          // Since division and multiplication logic cannot be in JSON
+          // Let's assume it is guaranteed to be a comment
+          int skip   = 0;
+          bool multi = json_contents[curr_pos + 1] == '*';
+          int end;
+          if (multi) {
+            end  = json_contents.IndexOf("*/", curr_pos + 2);
+            skip = 2;
+          } else {
+            end = json_contents.IndexOf('\n', curr_pos + 2);
+            if (end == -1)
+              end += len;
+          }
+          curr_pos = end + skip;
+        } else {
+          result.Append(curr);
+          ++curr_pos;
+        }
+      }
+
+      return result.ToString();
+    }
   }
 }
