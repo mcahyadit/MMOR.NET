@@ -187,7 +187,7 @@ namespace MMOR.NET.Utilities {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int PopCount(ulong x) {
 #if UNITY_5_3_OR_NEWER || UNITY_2017_1_OR_NEWER
-      return math.bitcount(x);
+      return math.countbits(x);
 #else
       return BitOperations.PopCount(x);
 #endif
