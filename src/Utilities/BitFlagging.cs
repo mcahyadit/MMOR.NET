@@ -274,22 +274,26 @@ namespace MMOR.NET.Utilities {
      * <summary>
      * Converts the bitmask to a List of booleans.
      * </summary>
+     * <param name="size">
+     *  <br/> Target Size for the List, in case where all 64 bits are not needed.
+     *  <br/> Defaults to 64.
+     * </param>
      * */
-    public static void ToBoolList(this ulong bitmask, IList<bool> bools) {
+    public static void ToBoolList(this ulong bitmask, IList<bool> bools, int size = 64) {
       bools.Clear();
       if (bools is List<bool> list) {
-        if (list.Capacity < 64)
-          list.Capacity = 64;
+        if (list.Capacity < size)
+          list.Capacity = size;
       }
-      for (int i = 0; i < 64; ++i) {
+      for (int i = 0; i < size; ++i) {
         bools.Add((bitmask & (1ul << i)) != 0);
       }
     }
 
     /// <inheritdoc cref="ToBoolList(ulong, IList{bool})"/>
-    public static List<bool> ToBoolList(this ulong bitmask) {
-      List<bool> result = new(PopCount(bitmask));
-      bitmask.ToBoolList(result);
+    public static List<bool> ToBoolList(this ulong bitmask, int size = 64) {
+      List<bool> result = new(size);
+      bitmask.ToBoolList(result, size);
       return result;
     }
   }
