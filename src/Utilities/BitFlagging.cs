@@ -265,7 +265,7 @@ namespace MMOR.NET.Utilities {
 
     /// <inheritdoc cref="MaskToIndices(ulong, IList{int})"/>
     public static List<int> MaskToIndices(this ulong bitmask) {
-      List<int> result = new(64);
+      List<int> result = new(PopCount(bitmask));
       bitmask.MaskToIndices(result);
       return result;
     }
