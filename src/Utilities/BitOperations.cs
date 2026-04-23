@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MMOR.NET.Random;
 
 #if UNITY_5_3_OR_NEWER || UNITY_2017_1_OR_NEWER
 using Unity.Mathematics;
@@ -121,6 +122,33 @@ public static partial class Utilities {
     List<bool> result = new(size);
     bitmask.ToBoolList(result, size);
     return result;
+  }
+
+  /**
+   * <summary>
+   *  Randomly selects an active bit in a bitmask and returns the position.
+   * </summary>
+   * <param name="bitmask">The bitmask to select from.</param>
+   * <param name="rng">The random engine.</param>
+   * <returns>
+   *  <c>-1</c> if <paramref name="bitmask"/> is <c>0</c>,
+   *  otherwise the index of the randomly selected active bit.
+   * </returns>
+   * */
+  public static int GetRandomActiveBit(ulong bitmask, IRandom rng) {
+    if (bitmask == 0)
+      return -1;
+
+    int count = PopCount(bitmask);  // Get number of active bit
+    if (count > 1) {
+      int target = rng.NextInt(0, count);
+
+      // empty out the right side until the desired target
+      for (int i = 0; i < target - 1; ++i) {
+        bitmask &= bitmask - 1;
+      }
+    }  // Otherwise, only 1, return immediately
+    return CountRZero(bitmask);
   }
 }
 }
