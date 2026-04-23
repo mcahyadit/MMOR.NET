@@ -139,15 +139,12 @@ public static partial class Utilities {
     if (bitmask == 0)
       return -1;
 
-    int count = PopCount(bitmask);  // Get number of active bit
-    if (count > 1) {
-      int target = rng.NextInt(0, count);
+    int count  = PopCount(bitmask);
+    int target = rng.NextInt(0, count);
+    for (int i = 0; i < target; ++i) {
+      bitmask &= bitmask - 1;
+    }
 
-      // empty out the right side until the desired target
-      for (int i = 0; i < target - 1; ++i) {
-        bitmask &= bitmask - 1;
-      }
-    }  // Otherwise, only 1, return immediately
     return CountRZero(bitmask);
   }
 }
