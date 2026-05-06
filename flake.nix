@@ -51,6 +51,50 @@
             };
           });
 
+          docs = let
+            xmldoc2md = pkgs.buildDotnetGlobalTool {
+              pname = "XMLDoc2Markdown";
+              version = "5.0.0";
+
+              nugetHash = "sha256-RVVgaLgQ5Z8olPBrYvrXsjb1WSTe/EuwxRxJPhh5Le4=";
+
+              executables = ["xmldoc2md"];
+
+              meta = {
+                description = "Tool to generate markdown from C# XML documentation.";
+                homepage = "https://charlesdevandiere.github.io/xmldoc2md";
+                license = pkgs.lib.licenses.mit;
+                mainProgram = "xmldoc2md";
+              };
+            };
+          in
+            pkgs.stdenvNoCC.mkDerivation {
+              name = "${pname}-docs";
+              packNupkg = false;
+
+              src = pkgs.lib.cleanSource ./.;
+
+              buildInputs = [
+                pkgs.zensical
+                xmldoc2md
+              ];
+
+              buildPhase = ''
+                xmldoc2md "${
+                  self.packages.${system}.default.overrideAttrs (old: {
+                    dotnetFlags = old.dotnetFlags ++ [" -p:GenerateDocumentationFile=true"];
+                  })
+                }/lib/${pname}/${pname}.dll" --output ./docs/api
+                zensical build
+                # docfx ./docs/docfx.json --output ./out/docs
+              '';
+
+              installPhase = ''
+                mkdir -p "$out"
+                cp -r ./site/** "$out/"
+              '';
+            };
+
           dotnet-8 = self.packages.${system}.default.overrideAttrs (old: {
             packNupkg = false;
             doCheck = true;
@@ -67,6 +111,14 @@
             dotnetFlags = "-p:TargetFramework=net9.0";
             dotnetInstallFlags = "";
           });
+        };
+
+        apps.docs = {
+          type = "app";
+          program = "${pkgs.writeShellScriptBin "serve" ''
+            ${pkgs.python3}/bin/python3 -m http.server 8000 \
+              --directory ${self.packages.${system}.docs}
+          ''}/bin/serve";
         };
 
         checks = {
