@@ -9,8 +9,8 @@
   <Compile Remove="**/*.meta" />
   <Content Remove="**/*.meta" />
   <None Remove="**/*.meta" />
-  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-  <PackageReference Include="System.Collections.Immutable" Version="10.0.2" />
+  <PackageReference Include="Newtonsoft.Json" Version="13.0.*" />
+  <PackageReference Include="System.Collections.Immutable" Version="10.0.*" />
  </ItemGroup>
  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
   <PackageReference Include="Shim.System.Numerics" Version="6.0.0" />

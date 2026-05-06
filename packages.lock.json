@@ -4,7 +4,7 @@
     ".NETStandard,Version=v2.1": {
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[13.0.4, )",
+        "requested": "[13.0.*, )",
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
@@ -20,9 +20,9 @@
       },
       "System.Collections.Immutable": {
         "type": "Direct",
-        "requested": "[10.0.2, )",
-        "resolved": "10.0.2",
-        "contentHash": "ty6kCaqyoh/M/jKV5yojgta+nf7T8zkkjpRI1beLQkrTC+9R6LS1eCEc+3ED2YUlRyA0g0PXExESnxnW3HcVVQ==",
+        "requested": "[10.0.*, )",
+        "resolved": "10.0.7",
+        "contentHash": "0Ti4Jv1ga3eurH5HaCVsPybcBl+08YfzM9smqAJzHvqV494xK+0pSbytGrMTWhph+zsyKIaoGNiR5u3by5bj+A==",
         "dependencies": {
           "System.Memory": "4.6.3",
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
@@ -42,29 +42,29 @@
     "net8.0": {
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[13.0.4, )",
+        "requested": "[13.0.*, )",
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
       "System.Collections.Immutable": {
         "type": "Direct",
-        "requested": "[10.0.2, )",
-        "resolved": "10.0.2",
-        "contentHash": "ty6kCaqyoh/M/jKV5yojgta+nf7T8zkkjpRI1beLQkrTC+9R6LS1eCEc+3ED2YUlRyA0g0PXExESnxnW3HcVVQ=="
+        "requested": "[10.0.*, )",
+        "resolved": "10.0.7",
+        "contentHash": "0Ti4Jv1ga3eurH5HaCVsPybcBl+08YfzM9smqAJzHvqV494xK+0pSbytGrMTWhph+zsyKIaoGNiR5u3by5bj+A=="
       }
     },
     "net9.0": {
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[13.0.4, )",
+        "requested": "[13.0.*, )",
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
       "System.Collections.Immutable": {
         "type": "Direct",
-        "requested": "[10.0.2, )",
-        "resolved": "10.0.2",
-        "contentHash": "ty6kCaqyoh/M/jKV5yojgta+nf7T8zkkjpRI1beLQkrTC+9R6LS1eCEc+3ED2YUlRyA0g0PXExESnxnW3HcVVQ=="
+        "requested": "[10.0.*, )",
+        "resolved": "10.0.7",
+        "contentHash": "0Ti4Jv1ga3eurH5HaCVsPybcBl+08YfzM9smqAJzHvqV494xK+0pSbytGrMTWhph+zsyKIaoGNiR5u3by5bj+A=="
       }
     }
   }
