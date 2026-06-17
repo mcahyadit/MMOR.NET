@@ -9,7 +9,25 @@ using MMOR.NET.RichString;
 using MMOR.NET.Utilities;
 
 namespace MMOR.NET.MTMC {
-public class TestHarness<T>
+
+public interface ITestHarness {
+  // Sets of more generalized TestHarness calls
+  // ..for where T cannot be provided
+
+  /**
+   * <summary>
+   *  Triggers the a proper <seealso cref="TestHarness{T}.OnReport"/>
+   *  OnReport regardless of progress.
+   * </summary>
+   */
+  public void PokeReport();
+
+  public void StopTest();
+
+  public bool CurrentlyTesting { get; }
+}
+
+public class TestHarness<T> : ITestHarness
     where T : SimulationObject<T> {
   public event Action<Exception, string>? OnExceptionCatch;
   public event Action? OnStart;
