@@ -2,7 +2,7 @@
   pkgs,
   pname,
   version,
-  baselib,
+  assemblies,
   ...
 }: let
   xmldoc2md = pkgs.buildDotnetGlobalTool {
@@ -70,19 +70,21 @@ in
     '';
 
     buildPhase = ''
-      SRC="${baselib}/lib"
-      for lib in $(fd --extension xml --base-directory "$SRC"); do
-        name="''${lib##*/}" # basename
-        name="''${name%.*}" # remove extension
-        xmldoc2md "$SRC/''${lib//xml/dll}" --output "./docs/api/$name"
-        for doc in $(fd --extension md --base-directory "./docs/api/$name"); do
-          # Ignore index.md
-          full_path="./docs/api/$name/$doc"
-          basename="''${doc##*/}"
-          [ "$basename" != "index.md" ] || continue
+      for assembly in ${toString assemblies}; do
+        SRC="$assembly/lib"
+        for lib in $(fd --extension xml --base-directory "$SRC"); do
+          name="''${lib##*/}" # basename
+          name="''${name%.*}" # remove extension
+          xmldoc2md "$SRC/''${lib//xml/dll}" --output "./docs/api/$name"
+          for doc in $(fd --extension md --base-directory "./docs/api/$name"); do
+            # Ignore index.md
+            full_path="./docs/api/$name/$doc"
+            basename="''${doc##*/}"
+            [ "$basename" != "index.md" ] || continue
 
-          sed -i 's|`csharp|`cs|' "$full_path"
-          sed -i 's|`[[:digit:]]||g' "$full_path"
+            sed -i 's|`csharp|`cs|' "$full_path"
+            sed -i 's|`[[:digit:]]||g' "$full_path"
+          done
         done
       done
 

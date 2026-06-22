@@ -62,7 +62,7 @@
           # TODO:
           # docs = pkgs.callPackage ./nix/docs.nix {
           #   inherit pkgs pname version;
-          #   baselib = self.packages.${system}.dotnet-10;
+          #   assemblies = [self.packages.${system}.dotnet-8];
           # };
 
           dotnet-8 = self.packages.${system}.default.overrideAttrs (old: {
