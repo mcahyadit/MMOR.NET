@@ -138,16 +138,16 @@ public static partial class Utilities {
    * */
   public static string ToStringAll<T>(this T bitmask, in string separator = " | ")
       where T : struct, Enum {
-    var not_first            = false;
+    bool first_active        = true;
     StringBuilder str_result = new();
     // Add flags as string
-    foreach (T flag in Enum.GetValues(typeof(T)))
+    foreach (T flag in Enum.GetValues<T>())
       if (bitmask.ContainsFlag(flag)) {
-        if (not_first) {
-          not_first = true;
+        if (!first_active) {
           str_result.Append(separator);
         }
         str_result.Append(flag.ToString());
+        first_active = false;
       }
     // If no flags were added, attach the default flag
     if (str_result.Length <= 0)
