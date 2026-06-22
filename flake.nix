@@ -13,34 +13,42 @@
     inputs.flake-utils.lib.eachDefaultSystem (
       system: let
         pname = "MMOR.NET";
+        version = "2.2.16.0";
         pkgs = import inputs.nixpkgs {inherit system;};
       in {
         packages = {
           default = pkgs.buildDotnetModule (finalAttrs: {
-            inherit pname;
-            version = "2.2.14.1";
-            src = pkgs.lib.cleanSource ./.;
-            packNupkg = true;
+            inherit pname version;
+            src = pkgs.lib.fileset.toSource {
+              root = ./.;
+              fileset = pkgs.lib.fileset.intersection (pkgs.lib.fileset.fromSource (pkgs.lib.sources.cleanSource ./.)) (
+                pkgs.lib.fileset.unions [
+                  ./src
+                  ./MMOR.NET.csproj
+                  ./packages.lock.json
+                ]
+              );
+            };
 
-            # Still haven't figured out how to only install nupkg without lib
-            # ..for now just install the most portable one
-            dotnetInstallFlags = "--framework=netstandard2.1";
+            packNupkg = true;
+            dontPublish = true;
 
             dotnet-sdk = with pkgs.dotnetCorePackages;
               combinePackages [
+                sdk_10_0
                 sdk_9_0
                 sdk_8_0
               ];
-            dotnet-runtime = with pkgs.dotnetCorePackages;
-              combinePackages [
-                runtime_9_0
-                runtime_8_0
-              ];
+            dotnet-runtime = finalAttrs.dotnet-sdk;
+            # Needed by checkPhase to find the dotnet in path
             DOTNET_ROOT = "${finalAttrs.dotnet-sdk}/share/dotnet";
+
+            # dotnet-10 removed netstandard2.1 as tfm
+            # https://github.com/dotnet/source-build/discussions/5329
+            dotnetFlags = ''-p:TargetFrameworks="net8.0;net9.0;net10.0"'';
 
             nugetDeps = inputs.nuget-packageslock2nix.lib {
               inherit system;
-              name = pname;
               lockfiles = [
                 ./packages.lock.json
               ];
@@ -51,65 +59,35 @@
             };
           });
 
-          docs = let
-            xmldoc2md = pkgs.buildDotnetGlobalTool {
-              pname = "XMLDoc2Markdown";
-              version = "5.0.0";
-
-              nugetHash = "sha256-RVVgaLgQ5Z8olPBrYvrXsjb1WSTe/EuwxRxJPhh5Le4=";
-
-              executables = ["xmldoc2md"];
-
-              meta = {
-                description = "Tool to generate markdown from C# XML documentation.";
-                homepage = "https://charlesdevandiere.github.io/xmldoc2md";
-                license = pkgs.lib.licenses.mit;
-                mainProgram = "xmldoc2md";
-              };
-            };
-          in
-            pkgs.stdenvNoCC.mkDerivation {
-              name = "${pname}-docs";
-              packNupkg = false;
-
-              src = pkgs.lib.cleanSource ./.;
-
-              buildInputs = [
-                pkgs.zensical
-                xmldoc2md
-              ];
-
-              buildPhase = ''
-                xmldoc2md "${
-                  self.packages.${system}.default.overrideAttrs (old: {
-                    dotnetFlags = old.dotnetFlags ++ [" -p:GenerateDocumentationFile=true"];
-                  })
-                }/lib/${pname}/${pname}.dll" --output ./docs/api
-                zensical build
-                # docfx ./docs/docfx.json --output ./out/docs
-              '';
-
-              installPhase = ''
-                mkdir -p "$out"
-                cp -r ./site/** "$out/"
-              '';
-            };
+          # TODO:
+          # docs = pkgs.callPackage ./nix/docs.nix {
+          #   inherit pkgs pname version;
+          #   baselib = self.packages.${system}.dotnet-10;
+          # };
 
           dotnet-8 = self.packages.${system}.default.overrideAttrs (old: {
             packNupkg = false;
+            dontPublish = false;
             doCheck = true;
             dotnet-sdk = pkgs.dotnetCorePackages.sdk_8_0;
             dotnet-runtime = pkgs.dotnetCorePackages.runtime_8_0;
             dotnetFlags = "-p:TargetFramework=net8.0";
-            dotnetInstallFlags = "";
           });
           dotnet-9 = self.packages.${system}.default.overrideAttrs (old: {
             packNupkg = false;
+            dontPublish = false;
             doCheck = true;
             dotnet-sdk = pkgs.dotnetCorePackages.sdk_9_0;
             dotnet-runtime = pkgs.dotnetCorePackages.runtime_9_0;
             dotnetFlags = "-p:TargetFramework=net9.0";
-            dotnetInstallFlags = "";
+          });
+          dotnet-10 = self.packages.${system}.default.overrideAttrs (old: {
+            packNupkg = false;
+            dontPublish = false;
+            doCheck = true;
+            dotnet-sdk = pkgs.dotnetCorePackages.sdk_10_0;
+            dotnet-runtime = pkgs.dotnetCorePackages.runtime_10_0;
+            dotnetFlags = "-p:TargetFramework=net10.0";
           });
         };
 
@@ -134,6 +112,7 @@
               roslyn-ls
               vscode-langservers-extracted
               clang-tools
+              xmlformat
 
               prettierd
 
