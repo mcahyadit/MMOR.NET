@@ -108,7 +108,7 @@ namespace MMOR.NET.Random {
      *  Random <see cref="float"/> between <paramref name="min_inclusive"/> and
      *  <paramref name="max_inclusive"/>.
      * </returns>
-     * <inception cref="ArgumentException">
+     * <exception cref="ArgumentException">
      *  Thrown when <paramref name="max_inclusive"/> is less than
      *  <paramref name="min_inclusive"/>.
      * </exception>
@@ -133,7 +133,7 @@ namespace MMOR.NET.Random {
      *  Random <see cref="float"/> between <paramref name="min_inclusive"/> and
      *  <paramref name="max_inclusive"/>.
      * </returns>
-     * <inception cref="ArgumentException">
+     * <exception cref="ArgumentException">
      *  Thrown when <paramref name="max_inclusive"/> is less than
      *  <paramref name="min_inclusive"/>.
      * </exception>

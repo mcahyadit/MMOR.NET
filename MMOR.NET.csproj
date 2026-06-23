@@ -5,7 +5,12 @@
   <Nullable>enable</Nullable>
   <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  <NoWarn>$(NoWarn);1591</NoWarn>
+  <NoWarn>
+   $(NoWarn);
+   1573;    <!-- Missing parameter XML tag -->
+   1587;    <!-- XML comment is not placed on a valid language element -->
+   1591;    <!-- Missing XML comment -->
+  </NoWarn>
   <RestoreUseLegacyDependencyResolver>true</RestoreUseLegacyDependencyResolver>
  </PropertyGroup>
  <ItemGroup>

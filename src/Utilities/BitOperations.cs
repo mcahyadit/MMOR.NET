@@ -117,7 +117,7 @@ public static partial class Utilities {
     }
   }
 
-  /// <inheritdoc cref="ToBoolList(ulong, IList{bool})"/>
+  /// <inheritdoc cref="ToBoolList(ulong, IList{bool}, int)"/>
   public static List<bool> ToBoolList(this ulong bitmask, int size = 64) {
     List<bool> result = new(size);
     bitmask.ToBoolList(result, size);

@@ -11,7 +11,7 @@ namespace MMOR.NET.Statistics {
    *        href="https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Statistics/RunningStatistics.cs">
    *        Math.NET.Numerics
    *      </see> (MIT License).
-   * <br/> Expanded for compability with frequency mapping / histogram based data.
+   * <br/> Expanded for compatibility with frequency mapping / histogram based data.
    * </summary>
    * */
   public class RunningStatistics {
@@ -91,9 +91,9 @@ namespace MMOR.NET.Statistics {
      * <param name="value">Value of the data.</param>
      * <param name="count">
      *  Number of times <paramref name="value"/> is being added. <br/>
-     *  Each will be considered indiviual entries. <br/>
+     *  Each will be considered individual entries. <br/>
      *  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>
-     *  This parameter is often used to input massive amount of duplicate datas.
+     *  This parameter is often used to input massive amount of duplicate data.
      * </param>
      * */
     public virtual void Push(double value, ulong count = 1) {
@@ -189,7 +189,7 @@ namespace MMOR.NET.Statistics {
     /** <summary>
      * Adds in values from a value-frequency pairs to the RunningStatistics.
      * </summary>
-     * <param name="list">List of values.</param>
+     * <param name="map">List of values.</param>
      * */
     public void Push(IEnumerable<(double, ulong)> map) {
       foreach ((double, ulong)kvp in map) Push(kvp.Item1, kvp.Item2);
@@ -201,7 +201,7 @@ namespace MMOR.NET.Statistics {
       Push(map.Select(x => (x.Key.ToDouble(null), x.Value)));
     }
 
-    /// <inheritdoc cref="Push(IEnumerable{ValueTuple{double, uint}})"/>
+    /// <inheritdoc cref="Push(IEnumerable{ValueTuple{double, ulong}})"/>
     public void Push<T>(IEnumerable<KeyValuePair<T, uint>> map)
         where T : IConvertible {
       Push(map.Select(x => (x.Key.ToDouble(null), (ulong)x.Value)));

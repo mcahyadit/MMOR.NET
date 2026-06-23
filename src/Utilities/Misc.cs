@@ -111,7 +111,7 @@ namespace MMOR.NET.Utilities {
      * <summary>
      * <br/> Removes all comments from a json string.
      * </summary>
-     * <param name="string">The json data in form of a string.</param>
+     * <param name="json_contents">The json data in form of a string.</param>
      * <returns>A string, containing the json data, free of comments.</returns>
      * */
     [Pure]

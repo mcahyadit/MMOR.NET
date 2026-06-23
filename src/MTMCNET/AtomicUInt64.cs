@@ -2,7 +2,7 @@ using System.Threading;
 
 namespace MMOR.NET.MTMC {
 /// <summary>
-/// There was no native Atomic<uint64> in NET Standard 2.1
+/// There was no native Atomic{uint64} in NET Standard 2.1
 /// </summary>
 internal class atomic_uint64_t {
   private long _value;

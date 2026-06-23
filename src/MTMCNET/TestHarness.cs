@@ -279,7 +279,15 @@ public class TestHarness<T> : ITestHarness
   //================
   // Print Handlers
   //================
+  /**
+   * <summary>
+   *  Sends two <see cref="IRichString"/> periodically, each the result of
+   *  <see cref="SimulationObject{T}.PrettyPrintHeader()"/> and
+   *  <see cref="SimulationObject{T}.PrettyPrintBody()"/> respectively.
+   * </summary>
+   */
   public event Action<IRichString, IRichString>? OnReport;
+
   private void ReportFull(ulong target_iteration, in TimeSpan total_time_elapsed, double speed,
       in T sim_data, bool print_body = false) {
     IRichString header = GenerateHeaderText(target_iteration, total_time_elapsed, speed, sim_data);
