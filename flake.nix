@@ -1,7 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    systems.url = "github:nix-systems/default";
+    flake-parts.url = "github:hercules-ci/flake-parts";
 
     nuget-packageslock2nix = {
       url = "github:mdarocha/nuget-packageslock2nix";
@@ -9,12 +10,35 @@
     };
   };
 
-  outputs = {self, ...} @ inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (
-      system: let
+  outputs = {...} @ inputs:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = import inputs.systems;
+      perSystem = {
+        self',
+        pkgs,
+        system,
+        ...
+      }: let
         pname = "MMOR.NET";
-        version = "2.2.16.0";
-        pkgs = import inputs.nixpkgs {inherit system;};
+        version = "2.2.16.2";
+
+        dotnet-sdk = with pkgs.dotnetCorePackages;
+          combinePackages [
+            sdk_10_0
+            sdk_9_0
+            sdk_8_0
+          ];
+        DOTNET_ROOT = "${dotnet-sdk}/share/dotnet";
+
+        mkDotnetLib = tfm:
+          self'.packages.default.overrideAttrs (old: {
+            packNupkg = false;
+            dontPublish = false;
+            doCheck = true;
+            dotnet-sdk = pkgs.dotnetCorePackages.${"sdk_${tfm}_0"};
+            dotnet-runtime = pkgs.dotnetCorePackages.${"runtime_${tfm}_0"};
+            dotnetFlags = "-p:TargetFramework=net${tfm}.0";
+          });
       in {
         packages = {
           default = pkgs.buildDotnetModule (finalAttrs: {
@@ -33,21 +57,17 @@
             packNupkg = true;
             dontPublish = true;
 
-            dotnet-sdk = with pkgs.dotnetCorePackages;
-              combinePackages [
-                sdk_10_0
-                sdk_9_0
-                sdk_8_0
-              ];
+            inherit dotnet-sdk;
             dotnet-runtime = finalAttrs.dotnet-sdk;
             # Needed by checkPhase to find the dotnet in path
-            DOTNET_ROOT = "${finalAttrs.dotnet-sdk}/share/dotnet";
+            inherit DOTNET_ROOT;
 
             # dotnet-10 removed netstandard2.1 as tfm
             # https://github.com/dotnet/source-build/discussions/5329
             dotnetFlags = ''-p:TargetFrameworks="net8.0;net9.0;net10.0"'';
 
             nugetDeps = inputs.nuget-packageslock2nix.lib {
+              name = "${pname}-${version}-nugetDeps";
               inherit system;
               lockfiles = [
                 ./packages.lock.json
@@ -62,57 +82,36 @@
           # TODO:
           # docs = pkgs.callPackage ./nix/docs.nix {
           #   inherit pkgs pname version;
-          #   assemblies = [self.packages.${system}.dotnet-8];
+          #   assemblies = [self'.packages.dotnet-8];
           # };
 
-          dotnet-8 = self.packages.${system}.default.overrideAttrs (old: {
-            packNupkg = false;
-            dontPublish = false;
-            doCheck = true;
-            dotnet-sdk = pkgs.dotnetCorePackages.sdk_8_0;
-            dotnet-runtime = pkgs.dotnetCorePackages.runtime_8_0;
-            dotnetFlags = "-p:TargetFramework=net8.0";
-          });
-          dotnet-9 = self.packages.${system}.default.overrideAttrs (old: {
-            packNupkg = false;
-            dontPublish = false;
-            doCheck = true;
-            dotnet-sdk = pkgs.dotnetCorePackages.sdk_9_0;
-            dotnet-runtime = pkgs.dotnetCorePackages.runtime_9_0;
-            dotnetFlags = "-p:TargetFramework=net9.0";
-          });
-          dotnet-10 = self.packages.${system}.default.overrideAttrs (old: {
-            packNupkg = false;
-            dontPublish = false;
-            doCheck = true;
-            dotnet-sdk = pkgs.dotnetCorePackages.sdk_10_0;
-            dotnet-runtime = pkgs.dotnetCorePackages.runtime_10_0;
-            dotnetFlags = "-p:TargetFramework=net10.0";
-          });
+          dotnet-8 = mkDotnetLib "8";
+          dotnet-9 = mkDotnetLib "9";
+          dotnet-10 = mkDotnetLib "10";
         };
 
-        apps.docs = {
-          type = "app";
-          program = "${pkgs.writeShellScriptBin "serve" ''
-            ${pkgs.python3}/bin/python3 -m http.server 8000 \
-              --directory ${self.packages.${system}.docs}
-          ''}/bin/serve";
-        };
+        # TODO:
+        # apps.docs = {
+        #   type = "app";
+        #   program = "${pkgs.writeShellScriptBin "serve" ''
+        #     ${pkgs.python3}/bin/python3 -m http.server 8000 \
+        #       --directory ${self'.packages.docs}
+        #   ''}/bin/serve";
+        # };
 
         checks = {
-          dotnet-8-tests = self.packages.${system}.dotnet-8;
-          dotnet-9-tests = self.packages.${system}.dotnet-9;
+          default = self'.packages.default;
         };
 
         devShells.default = pkgs.mkShellNoCC {
-          inputsFrom = builtins.attrValues self.packages.${system};
+          inputsFrom = builtins.attrValues self'.packages;
           packages =
-            [self.formatter.${system}]
+            [self'.formatter]
             ++ (with pkgs; [
               roslyn-ls
               vscode-langservers-extracted
               clang-tools
-              xmlformat
+              xmlstarlet
 
               prettierd
 
@@ -122,8 +121,9 @@
               prek
               nixd
             ]);
+          env = {inherit DOTNET_ROOT;};
         };
         formatter = pkgs.alejandra;
-      }
-    );
+      };
+    };
 }
