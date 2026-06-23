@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+#pragma warning disable CA2263
+// Prefer generic overload when type is known
+// not an API in netstandar2.1
 namespace MMOR.NET.Utilities {
 public static partial class Utilities {
   /**
@@ -141,7 +144,7 @@ public static partial class Utilities {
     bool first_active        = true;
     StringBuilder str_result = new();
     // Add flags as string
-    foreach (T flag in Enum.GetValues<T>())
+    foreach (T flag in Enum.GetValues(typeof(T)))
       if (bitmask.ContainsFlag(flag)) {
         if (!first_active) {
           str_result.Append(separator);
