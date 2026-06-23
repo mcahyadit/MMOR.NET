@@ -1,0 +1,173 @@
+[project]
+site_name = "MMOR.NET"
+site_author = "mcahyadit"
+repo_url = "https://github.com/mcahyadit/MMOR.NET"
+
+copyright = """
+Copyright &copy; 2026 mcahyadit
+"""
+
+docs_dir = "docs"
+# The path provided should be relative to the "docs_dir".
+extra_css = [
+  "stylesheets/extra.css",
+  "stylesheets/nerd-fonts-generated.min.css"
+]
+extra_javascript = [
+  "javascripts/extra.js",
+  "https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"  # LaTeX Render
+]
+
+use_directory_urls = true
+
+# Others
+[project.theme]
+language = "en"
+
+# For More Context, go to https://zensical.org/docs/setup/basics/
+features = [
+  # ==============================
+  #  ▄▀█ █▀█ ▀█▀ █ █▀▀ █░░ █▀▀ █▀
+  #  █▀█ █▀▄ ░█░ █ █▄▄ █▄▄ ██▄ ▄█
+  # MARK: Articles
+  # ==============================
+  "content.tabs.link",
+  "content.tooltips",
+  "content.footnote.tooltips",
+
+  # =======================================
+  #  █▀▀ █▀█ █▀▄ █▀▀   █▄▄ █░░ █▀█ █▀▀ █▄▀
+  #  █▄▄ █▄█ █▄▀ ██▄   █▄█ █▄▄ █▄█ █▄▄ █░█
+  #  MARK: Code Block
+  # =======================================
+  "content.code.annotate",
+  "content.code.copy",
+  "content.code.select",
+
+  # ========================================
+  #  █▄░█ ▄▀█ █░█ █ █▀▀ ▄▀█ ▀█▀ █ █▀█ █▄░█
+  #  █░▀█ █▀█ ▀▄▀ █ █▄█ █▀█ ░█░ █ █▄█ █░▀█
+  # MARK: Navigation
+  # ========================================
+  # The Next & Prev Page on bottom
+  "navigation.footer",
+  # For index.md
+  "navigation.indexes",
+  # Back to Top Button
+  "navigation.top",
+
+  "navigation.path",
+
+  # "navigation.sections",
+
+  # "navigation.tabs",
+  # "navigation.tabs.sticky",
+
+  # ========================
+  #  █▀█ ▀█▀ █░█ █▀▀ █▀█ █▀
+  #  █▄█ ░█░ █▀█ ██▄ █▀▄ ▄█
+  # ========================
+  "search.highlight",
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.instant.progress",
+  "navigation.tracking",
+]
+
+# MARK: Additonal Theming
+# logo = "assets/logo.png"
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+# Light Mode Palette
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "red"
+accent = "amber"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+# Dark Mode Palette
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "red"
+accent = "amber"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+[project.theme.icon]
+# logo = "lucide/smile"
+repo = "fontawesome/brands/forgejo"
+
+# ========================================
+#  █▀▀ ▀▄▀ ▀█▀ █▀▀ █▄░█ █▀ █ █▀█ █▄░█ █▀
+#  ██▄ █░█ ░█░ ██▄ █░▀█ ▄█ █ █▄█ █░▀█ ▄█
+# MARK: Extensions
+# ========================================
+[project.markdown_extensions.abbr]
+
+[project.markdown_extensions.admonition]
+
+[project.markdown_extensions.attr_list]
+
+[project.markdown_extensions.def_list]
+
+[project.markdown_extensions.footnotes]
+
+[project.markdown_extensions.md_in_html]
+
+[project.markdown_extensions.toc]
+permalink = true
+
+# LaTeX Rendering
+[project.markdown_extensions.pymdownx.arithmatex]
+generic = true
+
+[project.markdown_extensions.pymdownx.betterem]
+
+[project.markdown_extensions.pymdownx.caret]
+
+[project.markdown_extensions.pymdownx.details]
+
+[project.markdown_extensions.pymdownx.emoji]
+emoji_generator = "zensical.extensions.emoji.to_svg"
+emoji_index = "zensical.extensions.emoji.twemoji"
+
+[project.markdown_extensions.pymdownx.highlight]
+anchor_linenums = true
+line_spans = "__span"
+pygments_lang_class = true
+
+[project.markdown_extensions.pymdownx.inlinehilite]
+
+[project.markdown_extensions.pymdownx.keys]
+
+[project.markdown_extensions.pymdownx.magiclink]
+
+[project.markdown_extensions.pymdownx.mark]
+
+[project.markdown_extensions.pymdownx.smartsymbols]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+]
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+combine_header_slug = true
+
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true
+
+[project.markdown_extensions.pymdownx.tilde]

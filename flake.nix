@@ -79,25 +79,23 @@
             };
           });
 
-          # TODO:
-          # docs = pkgs.callPackage ./nix/docs.nix {
-          #   inherit pkgs pname version;
-          #   assemblies = [self'.packages.dotnet-8];
-          # };
+          docs = pkgs.callPackage ./nix/docs.nix {
+            inherit pkgs pname version;
+            assemblies = [self'.packages.dotnet-8];
+          };
 
           dotnet-8 = mkDotnetLib "8";
           dotnet-9 = mkDotnetLib "9";
           dotnet-10 = mkDotnetLib "10";
         };
 
-        # TODO:
-        # apps.docs = {
-        #   type = "app";
-        #   program = "${pkgs.writeShellScriptBin "serve" ''
-        #     ${pkgs.python3}/bin/python3 -m http.server 8000 \
-        #       --directory ${self'.packages.docs}
-        #   ''}/bin/serve";
-        # };
+        apps.docs = {
+          type = "app";
+          program = "${pkgs.writeShellScriptBin "serve" ''
+            ${pkgs.python3}/bin/python3 -m http.server 8000 \
+              --directory ${self'.packages.docs}
+          ''}/bin/serve";
+        };
 
         checks = {
           default = self'.packages.default;
