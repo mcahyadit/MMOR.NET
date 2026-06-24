@@ -50,6 +50,19 @@ public static partial class Utilities {
     return result;
   }
 
+  /// <inheritdoc cref="IndicesToMask(IReadOnlyList{int})"/>
+  public static ulong IndicesToMask(this ReadOnlySpan<int> indices) {
+    ulong result = 0;
+    foreach (int index in indices) {
+      if (index < 0 || index >= 64) {
+        throw new ArgumentOutOfRangeException(nameof(indices), index,
+            $"List contains index: {index} that cannot be stored in a UInt64.");
+      }
+      result |= 1ul << index;
+    }
+    return result;
+  }
+
   /**
    * <summary>
    * Converts a list of booleans into its bitmask representation.
@@ -60,6 +73,21 @@ public static partial class Utilities {
    * */
   public static ulong ToBitmask(this IReadOnlyList<bool> bools) {
     int len = bools.Count;
+    if (len > 64) {
+      throw new ArgumentOutOfRangeException(nameof(bools),
+          $"Tried to convert a List of boolean that is too big (Count: {len}) for UInt64.");
+    }
+    ulong result = 0;
+    for (int i = 0; i < len; ++i) {
+      if (bools[i])
+        result |= 1ul << i;
+    }
+    return result;
+  }
+
+  /// <inheritdoc cref="ToBitmask(IReadOnlyList{bool})"/>
+  public static ulong ToBitmask(this ReadOnlySpan<bool> bools) {
+    int len = bools.Length;
     if (len > 64) {
       throw new ArgumentOutOfRangeException(nameof(bools),
           $"Tried to convert a List of boolean that is too big (Count: {len}) for UInt64.");
