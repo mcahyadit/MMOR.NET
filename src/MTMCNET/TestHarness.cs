@@ -39,7 +39,7 @@ public class TestHarness<T> : ITestHarness
   private CancellationTokenSource? stop_source_;
   public bool CurrentlyTesting { get; private set; }
 
-  private atomic_uint64_t completed_iterations_ = 0u;
+  private AtomicUInt64 completed_iterations_ = 0u;
 
   private void SimulateChunk(T thread_data, ulong iterations) {
     ulong current_iteration = 0;
@@ -48,7 +48,7 @@ public class TestHarness<T> : ITestHarness
         if (stop_source_!.Token.IsCancellationRequested)
           break;
         thread_data.SingleSim_(stop_source_.Token);
-        ++completed_iterations_;
+        completed_iterations_.Increment();
       }
     } catch (Exception ex) {
       OnExceptionCatch?.Invoke(ex,
@@ -176,12 +176,12 @@ public class TestHarness<T> : ITestHarness
     full_sim_data    = sim_config.sim_obj_ctor(null!);
     ulong last_check = sim_config.target_iteration - check_threshold;
 
-    while (completed_iterations_ < last_check) {
+    while (completed_iterations_.Value < last_check) {
       if (stop_source_.IsCancellationRequested)
         break;
 
       bool poke_report = poke_report_.Task.IsCompleted;
-      if (poke_report || completed_iterations_ >= next_report_threshold) {
+      if (poke_report || completed_iterations_.Value >= next_report_threshold) {
         // if (completed_iterations_ >= next_report_threshold) {
         if (poke_report) {
           poke_report_ = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -202,16 +202,16 @@ public class TestHarness<T> : ITestHarness
           }
           thread_data.Unpause();
         }
-        //================
-        // Fail Safe Exit
-        /// This error is most likely caused by
-        /// ..the imperfect implementation of <see cref="atomic_uint64_t"/>.
-        /// ..as there are cases where <see cref="completed_iterations_"/>
-        /// ..is less than <see cref="full_sim_data"/>'s total_iteration.
-        //================
-        if (full_sim_data.total_iterations >= last_check) {
-          break;
-        };
+        // //================
+        // // Fail Safe Exit
+        // /// This error is most likely caused by
+        // /// ..the imperfect implementation of <see cref="AtomicUInt64"/>.
+        // /// ..as there are cases where <see cref="completed_iterations_"/>
+        // /// ..is less than <see cref="full_sim_data"/>'s total_iteration.
+        // //================
+        // if (full_sim_data.total_iterations >= last_check) {
+        //   break;
+        // };
         //================
         // Mark Time
         //================
