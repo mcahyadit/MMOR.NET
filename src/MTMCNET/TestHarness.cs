@@ -35,7 +35,7 @@ public class TestHarness<T> : ITestHarness
   public event Action? OnHoldInput;
   public event Action? OnReleaseInput;
 
-  private static readonly ushort kMaxThread = (ushort)(Environment.ProcessorCount - 1);
+  private static readonly int kMaxThread = Environment.ProcessorCount - 1;
   private CancellationTokenSource? stop_source_;
   public bool CurrentlyTesting { get; private set; }
 
@@ -76,7 +76,7 @@ public class TestHarness<T> : ITestHarness
     if (sim_config.sim_obj_ctor == null)
       throw new Exception("SimulationObject<T> constructor is not set.");
     if (sim_config.thread_count < 1 || sim_config.thread_count > kMaxThread) {
-      var half                = (ushort)((kMaxThread + 1) / 2);
+      int half                = (kMaxThread + 1) / 2;
       sim_config.thread_count = half;
     }
     if (!sim_config.rng_ctor.Any()) {
@@ -131,8 +131,8 @@ public class TestHarness<T> : ITestHarness
     // Interpret Data
     //================
     var check_threshold    = (ulong)(sim_config.check_rate * sim_config.target_iteration);
-    ulong thread_iteration = sim_config.target_iteration / sim_config.thread_count;
-    ulong thread_leftover  = sim_config.target_iteration % sim_config.thread_count;
+    ulong thread_iteration = sim_config.target_iteration / (uint)sim_config.thread_count;
+    ulong thread_leftover  = sim_config.target_iteration % (uint)sim_config.thread_count;
     //================
     // Multi-thread Setup
     //================
