@@ -2,6 +2,20 @@ using System.Threading;
 using MMOR.NET.RichString;
 
 namespace MMOR.NET.MTMC {
+/**
+ * <summary>
+ *  <para>
+ *    CRTP base for thread-safe simulation data.
+ *    <see cref="TestHarness{T}"/> calls <see cref="InterlockedSingleSim"/>,
+ *    <see cref="InterlockedCombine"/>, <see cref="InterlockedClear"/>
+ *    which manage locking internally.
+ *  </para>
+ *  <para>
+ *    Override <see cref="SingleSim"/>, <see cref="Combine"/>,
+ *    and <see cref="Clear"/> to define simulation logic.
+ *  </para>
+ * </summary>
+ */
 public abstract class SimulationObject<T>
     where T : SimulationObject<T> {
   //================
@@ -21,24 +35,29 @@ public abstract class SimulationObject<T>
   //================
   // Methods
   //================
-  public void Combine_(T addData) {
+  public void InterlockedCombine(T add_data) {
     process_lock_.Wait();
     try {
-      addData.process_lock_.Wait();
+      add_data.process_lock_.Wait();
       try {
-        Combine(addData);
-        total_iterations += addData.total_iterations;
+        Combine(add_data);
+        total_iterations += add_data.total_iterations;
       } finally {
-        addData.process_lock_.Release();
+        add_data.process_lock_.Release();
       }
     } finally {
       process_lock_.Release();
     }
   }
 
-  protected abstract void Combine(T addData);
+  /**
+   * <summary>
+   *  Defines how two separate <see cref="SimulationObject{T}"/> combines their data.
+   * </summary>
+   */
+  protected abstract void Combine(T add_data);
 
-  internal void Clear_() {
+  internal void InterlockedClear() {
     process_lock_.Wait();
     try {
       Clear();
@@ -50,9 +69,8 @@ public abstract class SimulationObject<T>
 
   protected abstract void Clear();
 
-  internal void SingleSim_(CancellationToken? cancellationToken = null) {
-    cancellationToken ??= CancellationToken.None;
-    pause_gate_.Wait(cancellationToken.Value);
+  internal void InterlockedSingleSim(CancellationToken cancel_token) {
+    pause_gate_.Wait(cancel_token);
 
     process_lock_.Wait();
     try {
@@ -65,7 +83,7 @@ public abstract class SimulationObject<T>
 
   protected abstract void SingleSim();
 
-  internal void Dispose_() {
+  internal void InterlockedDispose() {
     Clear();
     Dispose();
     pause_gate_.Dispose();

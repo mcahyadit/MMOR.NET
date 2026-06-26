@@ -10,6 +10,10 @@ namespace MMOR.NET.MTMC {
  * </summary>
  */
 internal sealed class AtomicUInt64 {
+  // Since `Interlocked.Increment` doesn't work with `ulong`,
+  // .. we rely on `long` as the backing data and converts it
+  // .. along with any data overflow.
+
   private long _value;
 
   public AtomicUInt64(ulong initial_value = 0) => _value = (long)initial_value;
