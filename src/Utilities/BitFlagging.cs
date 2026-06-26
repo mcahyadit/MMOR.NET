@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -48,7 +49,15 @@ public static partial class Utilities {
    * </returns>
    * */
   public static int MaxFlag<T>()
-      where T : struct, Enum => (Enum.GetValues(typeof(T)).Cast<int>().Max() << 1) - 1;
+      where T : struct, Enum {
+    int max = 0;
+    foreach (var flag in Enum.GetValues(typeof(T))) {
+      int as_int = ((IConvertible)flag).ToInt32(null);
+      if (as_int > max)
+        max = as_int;
+    }
+    return (max << 1) - 1;
+  }
 
   /// <inheritdoc cref="MaxFlag{T}" />
   public static T MaxFlagCasted<T>()
