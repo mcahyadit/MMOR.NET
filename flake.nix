@@ -62,9 +62,15 @@
             # Needed by checkPhase to find the dotnet in path
             inherit DOTNET_ROOT;
 
-            # dotnet-10 removed netstandard2.1 as tfm
-            # https://github.com/dotnet/source-build/discussions/5329
-            dotnetFlags = ''-p:TargetFrameworks="net8.0;net9.0;net10.0"'';
+            buildInputs = [
+              (pkgs.dotnetCorePackages.fetchNupkg {
+                # Issue with nixpkgs.dotnet-sdk-10
+                # Patch in NETStandard2.1
+                pname = "NETStandard.Library.Ref";
+                version = "2.1.0";
+                hash = "sha256-Ruovy9EKgXaFuFr3zgw5fRKUS9yBIJ4nLeHgXv0zx4o=";
+              })
+            ];
 
             nugetDeps = inputs.nuget-packageslock2nix.lib {
               name = "${pname}-${version}-nugetDeps";
