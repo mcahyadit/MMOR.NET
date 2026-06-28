@@ -1,0 +1,16 @@
+FROM registry.fedoraproject.org/fedora-minimal:rawhide
+
+ARG USER=vscode
+ARG UID=1000
+ARG GID=${UID}
+
+RUN dnf install --setopt=install_weak_deps=False -y \
+    tar gzip \
+    git direnv \
+    nix --exclude nix-daemon
+
+RUN groupadd --gid ${GID} ${USER} \
+    && useradd --uid ${UID} --gid ${GID} --groups nixbld \
+        --create-home ${USER}
+
+RUN echo 'eval "$(direnv hook bash)"' >>/etc/bashrc

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/refs/heads/main/schemas/devContainer.schema.json",
+  "build": {
+    "dockerfile": "Containerfile",
+    "args": {
+      "USER": "${localEnv:USER}"
+    }
+  },
+  "runArgs": ["--userns=keep-id"],
+
+  "containerUser": "${localEnv:USER}",
+  "remoteUser": "${localEnv:USER}",
+  "updateRemoteUserUID": true,
+  // "mounts": [
+  //   "source=${localEnv:HOME}${localEnv:USERPROFILE},target=/home/${localEnv:USER},type=bind,consistency=cached"
+  // ],
+
+  "postStartCommand": "direnv allow ${containerWorkspaceFolder}"
+}
