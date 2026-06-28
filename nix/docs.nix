@@ -94,5 +94,10 @@ in
     installPhase = ''
       mkdir -p "$out"
       cp -r ./site/** "$out/"
+      chmod +x "$out/bin/serve.py"
     '';
+
+    meta = {
+      mainProgram = "serve.py";
+    };
   }

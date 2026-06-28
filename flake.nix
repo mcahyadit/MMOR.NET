@@ -103,14 +103,6 @@
           dotnet-10 = mkDotnetLib "net10.0";
         };
 
-        apps.docs = {
-          type = "app";
-          program = "${pkgs.writeShellScriptBin "serve" ''
-            ${pkgs.python3}/bin/python3 -m http.server 8000 \
-              --directory ${self'.packages.docs}
-          ''}/bin/serve";
-        };
-
         checks = {
           default = self'.packages.default;
         };
