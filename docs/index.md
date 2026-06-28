@@ -2,10 +2,8 @@
 _layout: landing
 ---
 
-# This is the **HOMEPAGE**.
+# MMOR.NET
 
-Refer to [Markdown](http://daringfireball.net/projects/markdown/) for how to write markdown files.
+A bunch of C# functions and classes that I use often.
 
-## Quick Start Notes:
-
-1. Add images to the *images* folder if the file is referencing an image.
+Targeted towards .NET Standard 2.1 and C# 9.0 for compatibility with Unity.
