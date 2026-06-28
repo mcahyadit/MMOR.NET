@@ -3,6 +3,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/default";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nuget-packageslock2nix = {
       url = "github:mdarocha/nuget-packageslock2nix";
@@ -12,8 +16,13 @@
 
   outputs = {...} @ inputs:
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [
+        inputs.treefmt-nix.flakeModule
+      ];
+
       systems = import inputs.systems;
       perSystem = {
+        config,
         self',
         pkgs,
         system,
@@ -108,26 +117,47 @@
         };
 
         devShells.default = pkgs.mkShellNoCC {
-          inputsFrom = builtins.attrValues self'.packages;
-          packages =
-            [self'.formatter]
-            ++ (with pkgs; [
-              roslyn-ls
-              vscode-langservers-extracted
-              clang-tools
-              xmlstarlet
+          inputsFrom = builtins.attrValues self'.packages ++ [config.treefmt.build.devShell];
+          packages = with pkgs; [
+            roslyn-ls
+            lemminx
+            vscode-json-languageserver
 
-              prettierd
+            basedpyright
+            ruff
 
-              just
-              just-lsp
-
-              prek
-              nixd
-            ]);
+            prek
+            nixd
+          ];
           env = {inherit DOTNET_ROOT;};
         };
-        formatter = pkgs.alejandra;
+
+        treefmt = {
+          programs = {
+            clang-format = {
+              enable = true;
+              includes = ["*.cs"];
+            };
+            statix.enable = true;
+            alejandra.enable = true;
+            prettier = {
+              enable = true;
+              excludes = ["packages.lock.json"];
+            };
+            xmllint = {
+              enable = true;
+              includes = ["*.csproj" "*.props"];
+            };
+          };
+          settings = {
+            # https://github.com/numtide/treefmt-nix/pull/466
+            toml = {
+              command = "${pkgs.lib.getExe pkgs.tombi}";
+              option = ["format"];
+              includes = ["*.toml"];
+            };
+          };
+        };
       };
     };
 }
