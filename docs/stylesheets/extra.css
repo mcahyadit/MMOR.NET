@@ -1,0 +1,14 @@
+@import url('https://api.fonts.coollabs.io/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap');
+
+:root {
+  --md-text-font: "NerdFontsSymbols Nerd Font", "Inter";
+  --md-code-font: "NerdFontsSymbols Nerd Font", "Cascadia Code";
+}
+
+/* Enable Ligatures in Code Blocks */
+.md-typeset code,
+.md-typeset kbd,
+.md-typeset pre {
+  font-feature-settings: "calt" 1, "ss01" 1, "ss02" 1, "ss03" 1, "ss19" 1, "ss20" 1;
+}
+

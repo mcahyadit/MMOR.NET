@@ -8,6 +8,12 @@
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
+      "PolySharp": {
+        "type": "Direct",
+        "requested": "[1.16.0, )",
+        "resolved": "1.16.0",
+        "contentHash": "3kdIIceBPumwjw279FuiVMfVENT2cGASXJgcigdySsbX2dJB8ofUgG6i47yqF/k1qu6fvNR3csrSekZPviR6kQ=="
+      },
       "Shim.System.Numerics": {
         "type": "Direct",
         "requested": "[6.0.0, )",
@@ -46,6 +52,12 @@
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
+      "PolySharp": {
+        "type": "Direct",
+        "requested": "[1.16.0, )",
+        "resolved": "1.16.0",
+        "contentHash": "3kdIIceBPumwjw279FuiVMfVENT2cGASXJgcigdySsbX2dJB8ofUgG6i47yqF/k1qu6fvNR3csrSekZPviR6kQ=="
+      },
       "System.Collections.Immutable": {
         "type": "Direct",
         "requested": "[10.0.*, )",
@@ -60,6 +72,12 @@
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
+      "PolySharp": {
+        "type": "Direct",
+        "requested": "[1.16.0, )",
+        "resolved": "1.16.0",
+        "contentHash": "3kdIIceBPumwjw279FuiVMfVENT2cGASXJgcigdySsbX2dJB8ofUgG6i47yqF/k1qu6fvNR3csrSekZPviR6kQ=="
+      },
       "System.Collections.Immutable": {
         "type": "Direct",
         "requested": "[10.0.*, )",
@@ -73,6 +91,12 @@
         "requested": "[13.0.*, )",
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
+      },
+      "PolySharp": {
+        "type": "Direct",
+        "requested": "[1.16.0, )",
+        "resolved": "1.16.0",
+        "contentHash": "3kdIIceBPumwjw279FuiVMfVENT2cGASXJgcigdySsbX2dJB8ofUgG6i47yqF/k1qu6fvNR3csrSekZPviR6kQ=="
       },
       "System.Collections.Immutable": {
         "type": "Direct",

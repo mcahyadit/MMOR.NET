@@ -75,18 +75,19 @@ in
         for lib in $(fd --extension xml --base-directory "$SRC"); do
           name="''${lib##*/}" # basename
           name="''${name%.*}" # remove extension
-          xmldoc2md "$SRC/''${lib//xml/dll}" --output "./docs/api/$name"
-          for doc in $(fd --extension md --base-directory "./docs/api/$name"); do
+          mkdir -p "./docs/API-References"
+          xmldoc2md "$SRC/''${lib//xml/dll}" --output "./docs/API-References/$name"
+        done
+      done
+
+          for doc in $(fd --extension md --base-directory "./docs/API-References"); do
             # Ignore index.md
-            full_path="./docs/api/$name/$doc"
+            full_path="./docs/API-References/$doc"
             basename="''${doc##*/}"
-            [ "$basename" != "index.md" ] || continue
 
             sed -i 's|`csharp|`cs|' "$full_path"
             sed -i 's|`[[:digit:]]||g' "$full_path"
           done
-        done
-      done
 
       zensical build
     '';

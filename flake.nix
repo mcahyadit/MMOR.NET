@@ -29,7 +29,7 @@
         ...
       }: let
         pname = "MMOR.NET";
-        version = "2.2.16.2";
+        version = "2.3.0.0";
 
         dotnet-sdk = with pkgs.dotnetCorePackages;
           combinePackages [

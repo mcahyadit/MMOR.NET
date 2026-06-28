@@ -1,11 +1,11 @@
 using System;
 using MMOR.NET.RichString;
 
-namespace MMOR.NET.MTMC {
+namespace MMOR.NET.MultiThreadSimulation {
 /**
  * <summary>
  *  <br/> Sets of the more generic <see cref="TestHarness{T}"/> methods.
- *  <br/> Can be used when need to interact regardless of the <see cref="SimulationObject{T}"/>
+ *  <br/> Can be used when need to interact regardless of the <see cref="ISimulationObject{T}"/>
  * </summary>
  */
 public interface ITestHarness {
@@ -39,7 +39,7 @@ public interface ITestHarness {
   /**
    * <summary>
    *  <br/> Raised once when all threads have finished.
-   *  <br/> The last <see cref="OnReport"/> will be raised first before this.
+   *  <br/> The last <see cref="ISimulationObject{T}"/> will be raised first before this.
    * </summary>
    */
   public event Action? OnFinish;
@@ -68,14 +68,5 @@ public interface ITestHarness {
    * </summary>
    */
   public event Action? OnReleaseInput;
-
-  /**
-   * <summary>
-   *  Sends two <see cref="IRichString"/> periodically, each the result of
-   *  <see cref="SimulationObject{T}.PrettyPrintHeader()"/> and
-   *  <see cref="SimulationObject{T}.PrettyPrintBody()"/> respectively.
-   * </summary>
-   */
-  public event Action<IRichString, IRichString>? OnReport;
 }
 }
