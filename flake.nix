@@ -55,6 +55,7 @@
                 pkgs.lib.fileset.unions [
                   ./src
                   ./MMOR.NET.csproj
+                  ./Directory.Build.props
                   ./packages.lock.json
                 ]
               );
