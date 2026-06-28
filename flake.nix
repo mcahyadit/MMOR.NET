@@ -43,10 +43,7 @@
           self'.packages.default.overrideAttrs (old: {
             packNupkg = false;
             dontPublish = false;
-            doCheck = true;
-            dotnet-sdk = pkgs.dotnetCorePackages.${"sdk_${tfm}_0"};
-            dotnet-runtime = pkgs.dotnetCorePackages.${"runtime_${tfm}_0"};
-            dotnetFlags = "-p:TargetFramework=net${tfm}.0";
+            dotnetInstallFlags = "-p:TargetFramework=${tfm}";
           });
       in {
         packages = {
@@ -99,9 +96,10 @@
             assemblies = [self'.packages.dotnet-8];
           };
 
-          dotnet-8 = mkDotnetLib "8";
-          dotnet-9 = mkDotnetLib "9";
-          dotnet-10 = mkDotnetLib "10";
+          netstandard = mkDotnetLib "netstandard2.1";
+          dotnet-8 = mkDotnetLib "net8.0";
+          dotnet-9 = mkDotnetLib "net9.0";
+          dotnet-10 = mkDotnetLib "net10.0";
         };
 
         apps.docs = {
