@@ -49,6 +49,9 @@ in
       pkgs.fd
       pkgs.zensical
       pkgs.woff2
+      (pkgs.python3.withPackages (pypi: [
+        pypi.obsidian-callouts
+      ]))
       xmldoc2md
     ];
 
