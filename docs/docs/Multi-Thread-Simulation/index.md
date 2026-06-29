@@ -43,10 +43,10 @@ The first amongst them is the `#!cs SimulationMetadata sim_meta`. In exchange us
 contains the data required by the Simulator. For the most part you just need to call a simple
 `#!cs sim_meta = new()` during the class' constructor.
 
-!!! warning
-
-    All the data inside are **publicly** accessible on purpose for library consumers who would like more
-    control. Do so at your own risk of making the Simulation non-deterministic.
+> [!WARNING]
+>
+> All the data inside are **publicly** accessible on purpose for library consumers who would like more
+> control. Do so at your own risk of making the Simulation non-deterministic.
 
 Among these metadata, are the same mutex locks that the TestHarness uses, so it is possible while
 not recommended to slip in extra operations.
