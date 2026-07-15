@@ -83,7 +83,11 @@ public static class SimulationExtensions {
       where T : ISimulationObject<T> {
     sim_obj.sim_meta.pause_gate.Wait(cancel_token);
 
+#pragma warning disable CA2016
+    // CA2016: Forward the 'CancellationToken' parameter to methods
+    // This is not valid as the CancellationToken is for a different purpose
     sim_obj.sim_meta.process_lock.Wait();
+#pragma warning restore CA2016
     try {
       sim_obj.SingleSim();
       ++sim_obj.sim_meta.total_iterations;
