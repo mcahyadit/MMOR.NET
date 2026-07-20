@@ -55,12 +55,6 @@ internal record struct TypeMarshalOverloadModel {
     type_args   = method.TypeParameters.Select(Roslynutils.TypeArgsToStringPair).ToEquatableArray();
     modifiers   = decl.Modifiers.Select(x => x.ToString()).ToEquatableArray();
 
-    attributes = method.GetAttributes()
-                     .Where(x => x.AttributeClass!.ToDisplayString() !=
-                                 "System.Runtime.CompilerServices.MethodImplAttribute")
-                     .Select(Roslynutils.AttrToString)
-                     .ToEquatableArray();
-
     using MD5 md5 = MD5.Create();
     byte[] hash   = md5.ComputeHash(Encoding.UTF8.GetBytes(decl.ToFullString()));
     simp_hash     = Convert.ToBase64String(hash).Replace('/', '_').StripSuffix("==");
