@@ -1,9 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Mathematics {
 public static partial class Combinatorics {
+  [TypeMarshalOverload(typeof(Span<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
   public static int MixedRadixIndices(Span<int> buffer, ReadOnlySpan<int> radices, int length) {
     Debug.Assert(radices.Length == length);
     int combins = 1;
@@ -28,6 +35,11 @@ public static partial class Combinatorics {
     return combins;
   }
 
+  [TypeMarshalOverload(typeof(Span<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
   public static int MixedRadixIndices(Span<int> buffer, int radix, int length) {
     Debug.Assert(radix > 0);
     int combins = 1;
@@ -50,6 +62,11 @@ public static partial class Combinatorics {
     return combins;
   }
 
+  [TypeMarshalOverload(typeof(Span<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
   public static int CartesianProduct<T>(Span<T> buffer, ReadOnlySpan<T> values, int length)
       where T : unmanaged {
     Debug.Assert(!values.IsEmpty);

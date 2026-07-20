@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Random;
+using MMOR.Roslyn;
+using System.Collections.Immutable;
 
 #if UNITY_5_3_OR_NEWER || UNITY_2017_1_OR_NEWER
 using Unity.Mathematics;
@@ -38,6 +40,9 @@ public static partial class Utilities {
    *  negative value.
    * </exception>
    */
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
   public static ulong IndicesToMask(this ReadOnlySpan<int> indices) {
     ulong result = 0;
     foreach (int index in indices) {
@@ -58,6 +63,9 @@ public static partial class Utilities {
    * Thrown when the size of <paramref name="bools"/> is greater than 64;
    * </exception>
    */
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
+      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
   public static ulong ToBitmask(this ReadOnlySpan<bool> bools) {
     int len = bools.Length;
     if (len > 64) {
