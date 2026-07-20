@@ -77,6 +77,11 @@
                 version = "2.1.0";
                 hash = "sha256-Ruovy9EKgXaFuFr3zgw5fRKUS9yBIJ4nLeHgXv0zx4o=";
               })
+              (pkgs.callPackage ./third_party/Bcl.CollectionsMarshal/default.nix {
+                inherit pkgs;
+                dotnet-sdk = finalAttrs.dotnet-sdk;
+                dotnet-runtime = finalAttrs.dotnet-runtime;
+              })
             ];
 
             nugetDeps = inputs.nuget-packageslock2nix.lib {

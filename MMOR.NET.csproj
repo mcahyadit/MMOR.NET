@@ -16,6 +16,9 @@
     <SourceRoot>./src</SourceRoot>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="third_party/**"/>
+    <Content Remove="third_party/**"/>
+    <None Remove="third_party/**"/>
     <Compile Remove="**/*.meta"/>
     <Content Remove="**/*.meta"/>
     <None Remove="**/*.meta"/>
@@ -28,5 +31,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="Shim.System.Numerics" Version="6.0.0"/>
+    <ProjectReference Include="./third_party/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal.csproj"/>
+    <PackageReference Include="Bcl.CollectionsMarshal" Version="2.1.0.0" Condition="'$(ContinuousIntegrationBuild)'=='true'"/>
   </ItemGroup>
 </Project>
