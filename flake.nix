@@ -53,6 +53,7 @@
               root = ./.;
               fileset = pkgs.lib.fileset.intersection (pkgs.lib.fileset.fromSource (pkgs.lib.sources.cleanSource ./.)) (
                 pkgs.lib.fileset.unions [
+                  ./analyzers
                   ./src
                   ./MMOR.NET.csproj
                   ./Directory.Build.props
@@ -89,6 +90,7 @@
               inherit system;
               lockfiles = [
                 ./packages.lock.json
+                ./analyzers/SourceGen/packages.lock.json
               ];
             };
 

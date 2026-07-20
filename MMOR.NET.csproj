@@ -12,10 +12,18 @@
      1587;    <!-- XML comment is not placed on a valid language element -->
      1591;    <!-- Missing XML comment -->
     </NoWarn>
+    <WarningsAsErrors>
+      $(WarningAsErrors);
+      CS8785;
+    </WarningsAsErrors>
     <RestoreUseLegacyDependencyResolver>true</RestoreUseLegacyDependencyResolver>
     <SourceRoot>./src</SourceRoot>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="analyzers/**"/>
+    <Content Remove="analyzers/**"/>
+    <None Remove="analyzers/**"/>
     <Compile Remove="third_party/**"/>
     <Content Remove="third_party/**"/>
     <None Remove="third_party/**"/>
@@ -24,6 +32,7 @@
     <None Remove="**/*.meta"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.*"/>
     <PackageReference Include="System.Collections.Immutable" Version="10.0.*"/>
+    <ProjectReference Include="analyzers/SourceGen/MMOR.NET.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <PackageReference Include="PolySharp" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -31,7 +40,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="Shim.System.Numerics" Version="6.0.0"/>
-    <ProjectReference Include="./third_party/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal.csproj"/>
-    <PackageReference Include="Bcl.CollectionsMarshal" Version="2.1.0.0" Condition="'$(ContinuousIntegrationBuild)'=='true'"/>
+    <ProjectReference Include="./third_party/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal.csproj" PrivateAssets="all"/>
+    <PackageReference Include="Bcl.CollectionsMarshal" Version="2.1.0.0" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="all"/>
   </ItemGroup>
 </Project>
