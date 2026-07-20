@@ -47,13 +47,37 @@
           });
       in {
         packages = {
+          sourcegen = pkgs.buildDotnetModule (finalAttrs: {
+            pname = "${pname}.SourceGen";
+            inherit version;
+            src = pkgs.lib.sources.cleanSource ./analyzers/SourceGen;
+
+            packNupkg = true;
+            dontPublish = true;
+
+            inherit dotnet-sdk;
+            dotnet-runtime = finalAttrs.dotnet-sdk;
+            # Needed by checkPhase to find the dotnet in path
+            inherit DOTNET_ROOT;
+
+            nugetDeps = inputs.nuget-packageslock2nix.lib {
+              name = "${pname}.SourceGen-${version}-nugetDeps";
+              inherit system;
+              lockfiles = [
+                ./analyzers/SourceGen/packages.lock.json
+              ];
+            };
+
+            meta = {
+              license = pkgs.lib.licenses.mit;
+            };
+          });
           default = pkgs.buildDotnetModule (finalAttrs: {
             inherit pname version;
             src = pkgs.lib.fileset.toSource {
               root = ./.;
               fileset = pkgs.lib.fileset.intersection (pkgs.lib.fileset.fromSource (pkgs.lib.sources.cleanSource ./.)) (
                 pkgs.lib.fileset.unions [
-                  ./analyzers
                   ./src
                   ./MMOR.NET.csproj
                   ./Directory.Build.props
@@ -71,6 +95,7 @@
             inherit DOTNET_ROOT;
 
             buildInputs = [
+              self'.packages.sourcegen
               (pkgs.dotnetCorePackages.fetchNupkg {
                 # Issue with nixpkgs.dotnet-sdk-10
                 # Patch in NETStandard2.1
@@ -90,7 +115,6 @@
               inherit system;
               lockfiles = [
                 ./packages.lock.json
-                ./analyzers/SourceGen/packages.lock.json
               ];
             };
 
