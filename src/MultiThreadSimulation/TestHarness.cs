@@ -58,7 +58,7 @@ public partial class TestHarness<T> : ITestHarness
     List<Task> tasks    = new(sim_config.thread_count);
     List<T> sim_objects = new(sim_config.thread_count);
     List<string> rngs   = new(sim_config.thread_count);
-    Barrier barrier     = new(sim_config.thread_count);
+    Barrier barrier     = new(sim_config.thread_count + 1);
 
     completed_iterations_ = 0;
     try {
@@ -86,6 +86,7 @@ public partial class TestHarness<T> : ITestHarness
     Stopwatch stop_watch = new();
     stop_watch.Start();
     OnStart?.Invoke();
+    barrier.SignalAndWait();  // Wait for All to be ready before dispose
     barrier.Dispose();
 
     //================
