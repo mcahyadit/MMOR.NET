@@ -48,6 +48,7 @@ internal sealed class TypeMarshalOverloadAttribute : Attribute {
     return node is MethodDeclarationSyntax;
   }
 
+  public const string kMethodImplDecl = "System.Runtime.CompilerServices.MethodImplAttribute";
   internal static TypeMarshalOverloadModel ParseSpanMethod(GeneratorAttributeSyntaxContext ctx,
       CancellationToken ct) {
     if (ctx.TargetNode is not MethodDeclarationSyntax method_decl)
@@ -72,8 +73,8 @@ internal sealed class TypeMarshalOverloadAttribute : Attribute {
 
       string attr_name = attr.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
       if (attr_name != $"global::{kMetadataName}" && attr_name != kMetadataName) {
-        if (attr_name != "System.Runtime.CompilerServices.MethodImplAttribute")
-          resolved_attrs.Add(attr_name);
+        if (attr_name != kMethodImplDecl && attr_name != $"global::{kMethodImplDecl}")
+          resolved_attrs.Add($"[{attr_name}]");
         continue;
       }
 
@@ -111,23 +112,20 @@ internal sealed class TypeMarshalOverloadAttribute : Attribute {
     ulong marked         = 0;
 
     for (int i = 0; i < parameters.Length; ++i) {
-      IParameterSymbol param = parameters[i];
-
-      if (param.Type is not INamedTypeSymbol named)
-        continue;
-
-      if (param.RefKind is not RefKind.None)
-        continue;
-
-      INamedTypeSymbol def = named.OriginalDefinition;
-      string x             = def.ToDisplayString();
-
+      IParameterSymbol param       = parameters[i];
       List<Typemap> param_typemaps = [];
-      foreach (Typemap typemap in typemaps) {
-        if (x.StartsWith(typemap.from_type) || x.StartsWith($"global::{typemap.from_type}")) {
-          param_typemaps.Add(typemap);
+
+      if (param.Type is INamedTypeSymbol named && param.RefKind is RefKind.None) {
+        INamedTypeSymbol def = named.OriginalDefinition;
+        string x             = def.ToDisplayString();
+
+        foreach (Typemap typemap in typemaps) {
+          if (x.StartsWith(typemap.from_type) || x.StartsWith($"global::{typemap.from_type}")) {
+            param_typemaps.Add(typemap);
+          }
         }
       }
+
       solved_params[i] = new TypeMarshalOverloadParameterModel {
         attributes = param.GetAttributes()
             .Select(
