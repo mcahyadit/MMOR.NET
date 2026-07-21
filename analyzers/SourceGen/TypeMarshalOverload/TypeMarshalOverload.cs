@@ -115,7 +115,8 @@ internal sealed class TypeMarshalOverloadAttribute : Attribute {
       IParameterSymbol param       = parameters[i];
       List<Typemap> param_typemaps = [];
 
-      if (param.Type is INamedTypeSymbol named && param.RefKind is RefKind.None) {
+      if (param.Type is INamedTypeSymbol named && param.RefKind is RefKind.None &&
+          !param.HasExplicitDefaultValue) {
         INamedTypeSymbol def = named.OriginalDefinition;
         string x             = def.ToDisplayString();
 
