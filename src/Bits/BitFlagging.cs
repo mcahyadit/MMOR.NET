@@ -1,7 +1,6 @@
 // TODO: Move namespace
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -78,10 +77,10 @@ public static partial class Utilities {
    * The matched value, or the value mapped to the default key if no applicable flag is found.
    * </returns>
    * */
-  public static TElement SafeGetFlag<TFlag, TElement>(
+  public static TElement? SafeGetFlag<TFlag, TElement>(
       this IReadOnlyDictionary<TFlag, TElement> dictionary, TFlag flag)
       where TFlag : struct, Enum {
-    if (dictionary.TryGetValue(flag, out TElement value))
+    if (dictionary.TryGetValue(flag, out TElement? value))
       return value;
     foreach (KeyValuePair<TFlag, TElement> kvp in dictionary)
       if (flag.ContainsFlag(kvp.Key))
@@ -116,7 +115,7 @@ public static partial class Utilities {
 
     for (var i = 1; i <= max_flag; ++i) {
       TFlag flag = (TFlag)Enum.ToObject(type, i);
-      if (dictionary.TryGetValue(flag, out TElement match)) {
+      if (dictionary.TryGetValue(flag, out TElement? match)) {
         result.Add(flag, match);
         continue;
       }

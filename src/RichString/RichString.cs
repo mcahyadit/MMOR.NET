@@ -62,7 +62,7 @@ namespace MMOR.NET.RichString
   {
     public readonly string str;
 
-    public RichStringPlain(object obj) => str = obj.ToString();
+    public RichStringPlain(object obj) => str = obj.ToString()!;
 
     public static implicit operator RichStringPlain(string str) => new(str);
 

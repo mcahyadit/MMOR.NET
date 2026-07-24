@@ -170,10 +170,10 @@ namespace MMOR.NET.Utilities {
     ///     , returns <b><paramref name="dictionary" />[<paramref name="default_key" />]</b>.
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
-    public static TValue SafeGet<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary,
+    public static TValue? SafeGet<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary,
         TKey key, TKey default_key = default!)
         where TKey : notnull {
-      if (dictionary.TryGetValue(key, out TValue get)) {
+      if (dictionary.TryGetValue(key, out TValue? get)) {
         return get;
       }
       return dictionary[default_key];
@@ -277,7 +277,7 @@ namespace MMOR.NET.Utilities {
     public static void Upsert<TKey, TValue>(this IDictionary<TKey, TValue> list, TKey index,
         Func<TValue, TValue> update)
         where TKey : struct {
-      if (list.TryGetValue(index, out TValue value))
+      if (list.TryGetValue(index, out TValue? value))
         list[index] = update(value);
       else
         list.Add(index, update(default!));
@@ -316,8 +316,8 @@ namespace MMOR.NET.Utilities {
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     /// </summary>
     public static TValue GetCastedValueOrDefault<TKey, TValue>(
-        this IDictionary<TKey, object> dictionary, TKey key, Func<object, TValue> castDefinition,
-        TValue defaultValue = default!) => dictionary.TryGetValue(key, out object rawValue)
+        this IDictionary<TKey, object> dictionary, TKey key, Func<object?, TValue> castDefinition,
+        TValue defaultValue = default!) => dictionary.TryGetValue(key, out object? rawValue)
                                                ? castDefinition(rawValue)
                                                : defaultValue;
 

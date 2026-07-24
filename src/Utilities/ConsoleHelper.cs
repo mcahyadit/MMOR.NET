@@ -2,7 +2,7 @@ using System;
 
 namespace MMOR.NET.Utilities {
   public static partial class Utilities {
-    public delegate bool TryParseDelegate<T>(string s, out T result);
+    public delegate bool TryParseDelegate<T>(string? s, out T result);
 
     /// <summary>
     ///     <br /> -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-

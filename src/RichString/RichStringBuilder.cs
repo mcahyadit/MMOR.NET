@@ -171,19 +171,19 @@ namespace MMOR.NET.RichString
 
     public RichStringBuilder Append(in object component)
     {
-      components_.Add((RichStringPlain)component.ToString());
+      components_.Add((RichStringPlain)component.ToString()!);
       return this;
     }
 
     public RichStringBuilder Prepend(in object component)
     {
-      components_.Insert(0, (RichStringPlain)component.ToString());
+      components_.Insert(0, (RichStringPlain)component.ToString()!);
       return this;
     }
 
     public RichStringBuilder AppendLine(in object component)
     {
-      components_.Add((RichStringPlain)component.ToString());
+      components_.Add((RichStringPlain)component.ToString()!);
       components_.Add(RichStringUtils.kRichLineBreak);
       return this;
     }
