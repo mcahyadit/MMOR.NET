@@ -8,8 +8,9 @@ namespace MMOR.NET.Bits {
 public static partial class BitOps {
   /**
    * <summary>
-   *  Calls <see cref="Bmi2.X64.ZeroHighBits"/> if supported. <br/>
+   *  Calls x86's Bmi2 <c>BZHI</c> if supported. <br/>
    *  Fallbacks to software implementation otherwise. <br/>
+   *  Reference <see href="https://www.felixcloutier.com/x86/bzhi"/>
    *  <br/>
    *  Returns <paramref name="value"/> with bits from indices higher
    *  than <paramref name="index"/> cleared out. <br/>
@@ -30,7 +31,7 @@ public static partial class BitOps {
 
   /**
    * <summary>
-   *  Software equivalent of BZHI instruction for u64. <br/>
+   *  Software equivalent of <c>BZHI</c> instruction for u64. <br/>
    *  <br/>
    *  Returns <paramref name="value"/> with bits from indices higher
    *  than <paramref name="index"/> cleared out. <br/>
@@ -47,8 +48,9 @@ public static partial class BitOps {
 
   /**
    * <summary>
-   *  Calls <see cref="Bmi2.ZeroHighBits"/> if supported. <br/>
+   *  Calls x86's Bmi2 <c>BZHI</c> if supported. <br/>
    *  Fallbacks to software implementation otherwise. <br/>
+   *  Reference <see href="https://www.felixcloutier.com/x86/bzhi"/>
    *  <br/>
    *  Returns <paramref name="value"/> with bits from indices higher
    *  than <paramref name="index"/> cleared out. <br/>
@@ -69,7 +71,7 @@ public static partial class BitOps {
 
   /**
    * <summary>
-   *  Software equivalent of BZHI instruction for u32. <br/>
+   *  Software equivalent of <c>BZHI</c> instruction for u32. <br/>
    *  <br/>
    *  Returns <paramref name="value"/> with bits from indices higher
    *  than <paramref name="index"/> cleared out. <br/>
@@ -86,8 +88,9 @@ public static partial class BitOps {
 
   /**
    * <summary>
-   *  Calls <see cref="Bmi2.X64.ParallelBitExtract"/> if supported. <br/>
+   *  Calls x86's <c>PEXT</c> if supported. <br/>
    *  Fallbacks to software implementation otherwise. <br/>
+   *  Reference <see href="https://www.felixcloutier.com/x86/pext"/>
    *  <br/>
    *  Extracts each bit value in <paramref name="value"/> which bit position
    *  in <paramref name="mask"/> is active and packs them into lower bits. <br/>
@@ -113,8 +116,9 @@ public static partial class BitOps {
 
   /**
    * <summary>
-   *  Calls <see cref="Bmi2.X64.ParallelBitDeposit"/> if supported. <br/>
+   *  Calls x86's <c>PDEP</c> if supported. <br/>
    *  Fallbacks to software implementation otherwise. <br/>
+   *  Reference <see href="https://www.felixcloutier.com/x86/pdep"/>
    *  <br/>
    *  Distributes packed lower bits of <paramref name="value"/> to active
    *  bit positions in <paramref name="mask"/>. <br/>
