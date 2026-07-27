@@ -58,31 +58,6 @@ public static partial class Utilities {
 
   /**
    * <summary>
-   * Converts a list of booleans into its bitmask representation.
-   * </summary>
-   * <exception cref="ArgumentOutOfRangeException">
-   * Thrown when the size of <paramref name="bools"/> is greater than 64;
-   * </exception>
-   */
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
-      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
-  public static ulong ToBitmask(this ReadOnlySpan<bool> bools) {
-    int len = bools.Length;
-    if (len > 64) {
-      throw new ArgumentOutOfRangeException(nameof(bools),
-          $"Tried to convert a List of boolean that is too big (Count: {len}) for UInt64.");
-    }
-    ulong result = 0;
-    for (int i = 0; i < len; ++i) {
-      if (bools[i])
-        result |= 1ul << i;
-    }
-    return result;
-  }
-
-  /**
-   * <summary>
    * Converts the bitmask to a list. Listing position of each active bits.
    * </summary>
    * */
@@ -114,7 +89,8 @@ public static partial class Utilities {
    *  <br/> Target Size for the List, in case where all 64 bits are not needed.
    *  <br/> Defaults to 64.
    * </param>
-   * */
+   */
+  [Obsolete("Use BitOps.WriteToBoolArray() instead.")]
   public static void ToBoolList(this ulong bitmask, IList<bool> bools, int size = 64) {
     bools.Clear();
     if (bools is List<bool> list) {
@@ -127,6 +103,7 @@ public static partial class Utilities {
   }
 
   /// <inheritdoc cref="ToBoolList(ulong, IList{bool}, int)"/>
+  [Obsolete("Use BitOps.WriteToBoolArray() instead.")]
   public static List<bool> ToBoolList(this ulong bitmask, int size = 64) {
     List<bool> result = new(size);
     bitmask.ToBoolList(result, size);
