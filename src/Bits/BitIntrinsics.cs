@@ -1,6 +1,6 @@
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
-#if NET6_0_OR_GREATER
+#if !NETSTANDARD
 using System.Runtime.Intrinsics.X86;
 #endif
 
@@ -21,7 +21,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Bzhi64(ulong value, ulong index) {
-#if NET6_0_OR_GREATER
+#if !NETSTANDARD
     if (Bmi2.X64.IsSupported) {
       return Bmi2.X64.ZeroHighBits(value, index);
     }
@@ -61,7 +61,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static uint Bzhi32(uint value, uint index) {
-#if NET6_0_OR_GREATER
+#if !NETSTANDARD
     if (Bmi2.IsSupported) {
       return Bmi2.ZeroHighBits(value, index);
     }
@@ -106,7 +106,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Pext64(ulong value, ulong mask) {
-#if NET6_0_OR_GREATER
+#if !NETSTANDARD
     if (Bmi2.X64.IsSupported) {
       return Bmi2.X64.ParallelBitExtract(value, mask);
     }
@@ -134,7 +134,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Pdep64(ulong value, ulong mask) {
-#if NET6_0_OR_GREATER
+#if !NETSTANDARD
     if (Bmi2.X64.IsSupported) {
       return Bmi2.X64.ParallelBitDeposit(value, mask);
     }
