@@ -16,8 +16,8 @@ namespace MMOR.NET.Mathematics
     // Approximately
     // ..For safer comparator between floating values
     //-+-+-+-+-+-+-+-+
-    private const float absToleranceF = 8E-9f;
-    private const double absToleranceD = 8E-17;
+    public const float kAbsToleranceF  = 8E-9f;
+    public const double kAbsToleranceD = 8E-17;
 
     //-+-+-+-+-+-+-+-+
     // Log2
@@ -40,7 +40,7 @@ namespace MMOR.NET.Mathematics
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Approximately(float a, float b) =>
-      Math.Abs(a - b) < Math.Max(1E-06f * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceF);
+      Math.Abs(a - b) < Math.Max(1E-06f * Math.Max(Math.Abs(a), Math.Abs(b)), kAbsToleranceF);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Approximately(in Vector4 a, in Vector4 b) =>
@@ -55,7 +55,7 @@ namespace MMOR.NET.Mathematics
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Approximately(double a, double b) =>
-      Math.Abs(a - b) < Math.Max(1E-15 * Math.Max(Math.Abs(a), Math.Abs(b)), absToleranceD);
+      Math.Abs(a - b) < Math.Max(1E-15 * Math.Max(Math.Abs(a), Math.Abs(b)), kAbsToleranceD);
 
     //-+-+-+-+-+-+-+-+
     // Repeat
