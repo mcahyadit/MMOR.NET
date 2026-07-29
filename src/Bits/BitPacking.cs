@@ -91,7 +91,9 @@ public static partial class BitOps {
       ulong slice       = (bitmask >> i) & 0xFF;
       const ulong magic = 0x0102040810204080ul;
       chunk             = ((magic * slice) & mask) >> 7;
+#if !NETSTANDARD
     assign:
+#endif
       cast[0] = BitConverter.IsLittleEndian ? chunk : BinaryPrimitives.ReverseEndianness(chunk);
     }
     for (; i < alen; ++i) {
