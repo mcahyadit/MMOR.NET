@@ -1,10 +1,11 @@
 using System;
-using System.Runtime.InteropServices;
-using MMOR.Roslyn;
-using System.Collections.Immutable;
-using System.Collections.Generic;
 using System.Buffers.Binary;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
+using System.Runtime.InteropServices;
+using MMOR.NET.Collections;
+using MMOR.Roslyn;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics.X86;
@@ -21,9 +22,10 @@ public static partial class BitOps {
    * </exception>
    */
   [Pure]
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
-      "System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@)")]
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
   public static ulong ToBitmask(this ReadOnlySpan<bool> bools) {
     int len = bools.Length;
     if (len > 64) {
@@ -69,8 +71,8 @@ public static partial class BitOps {
    *  It will only write up to the provided length.
    * </remarks>
    */
-  [TypeMarshalOverload(typeof(Span<>), typeof(List<>),
-      "System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@)")]
+  [TypeMarshalOverload(typeof(Span<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
   public static void WriteToBoolArray(this ulong bitmask, Span<bool> buffer) {
     if (buffer.IsEmpty)
       throw new ArgumentException(nameof(buffer), "[ERROR]: passed buffer is empty.");

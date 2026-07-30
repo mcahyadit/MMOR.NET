@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)/VERSION.txt).TrimEnd())</Version>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <None Include="$(ArtifactsPath)/bin/MMOR.Roslyn.SourceGen/$(Configuration.ToLower())/MMOR.Roslyn.SourceGen.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+  </ItemGroup>
+</Project>

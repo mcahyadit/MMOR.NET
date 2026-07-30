@@ -1,8 +1,10 @@
 // TODO: Move namespace
+using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Random;
+using MMOR.NET.Collections;
 using MMOR.Roslyn;
 using System.Collections.Immutable;
 
@@ -41,9 +43,10 @@ public static partial class Utilities {
    *  negative value.
    * </exception>
    */
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>),
-      "@ is not null ? System.Runtime.InteropServices.CollectionsMarshal.AsSpan(@) : default")]
-  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), "@.AsSpan()")]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
   public static ulong IndicesToMask(this ReadOnlySpan<int> indices) {
     ulong result = 0;
     foreach (int index in indices) {

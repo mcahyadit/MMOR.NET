@@ -21,10 +21,15 @@
     <SourceRoot>./src</SourceRoot>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Label="Roslyn">
     <Compile Remove="analyzers/**"/>
     <Content Remove="analyzers/**"/>
     <None Remove="analyzers/**"/>
+    <ProjectReference Include="./analyzers/Roslyn/MMOR.Roslyn.csproj"/>
+    <ProjectReference Include="./analyzers/SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <PackageReference Include="MMOR.Roslyn" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="true"/>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="third_party/**"/>
     <Content Remove="third_party/**"/>
     <None Remove="third_party/**"/>
@@ -33,11 +38,6 @@
     <None Remove="**/*.meta"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.*"/>
     <PackageReference Include="System.Collections.Immutable" Version="10.0.*"/>
-    <ProjectReference Include="analyzers/SourceGen/MMOR.NET.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    <PackageReference Include="MMOR.NET.SourceGen" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'">
-      <IncludeAssets>analyzers</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="PolySharp" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

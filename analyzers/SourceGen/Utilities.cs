@@ -1,18 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Text;
 using ANcpLua.Roslyn.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace MMOR.Roslyn {
 
-public record struct MethodParameterModel {
-  internal EquatableArray<string> attributes;
-  public string ref_kind;
-  public string type;
-  public string name;
-  public string? default_value;
-}
-
-public static class Roslynutils {
+public static class SourceGenUtils {
   public static readonly SymbolEqualityComparer kCompare = SymbolEqualityComparer.Default;
 
   public static string RefKindToString(this RefKind rk) {
@@ -28,6 +25,7 @@ public static class Roslynutils {
     Stack<string> type_rec    = new();
     INamedTypeSymbol symb_rec = symb.ContainingType;
     StringBuilder sb          = new();
+
     while (symb_rec != null) {
       sb.Clear();
 
@@ -76,6 +74,9 @@ public static class Roslynutils {
 
   public static string AttrToString(AttributeData attr) {
     StringBuilder sb = new();
+
+    if (attr.AttributeClass is null)
+      return string.Empty;
 
     sb.Append('[');
     sb.Append(attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
@@ -129,5 +130,17 @@ public static class Roslynutils {
 
     return (t, $" where {t} : {string.Join(", ", constraints)} ");
   }
+
+  internal static EquatableArray<string> GetRootUsings(this SyntaxNode node) {
+    SyntaxNode root        = node.SyntaxTree.GetRoot();
+    HashSet<string> result = [];
+    foreach (SyntaxNode descent in root.DescendantNodes()) {
+      if (descent is UsingDirectiveSyntax using_dir) {
+        result.Add(using_dir.Name!.ToFullString());
+      }
+    }
+    return result.ToEquatableArray();
+  }
 }
+
 }

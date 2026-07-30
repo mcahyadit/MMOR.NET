@@ -130,6 +130,9 @@
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
+      },
+      "mmor.roslyn": {
+        "type": "Project"
       }
     }
   }
