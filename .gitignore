@@ -20,3 +20,5 @@
 .pixi/*
 !.pixi/config.toml
 
+
+*.g.cs

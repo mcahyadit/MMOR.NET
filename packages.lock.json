@@ -34,6 +34,12 @@
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
       },
+      "T4.Build": {
+        "type": "Direct",
+        "requested": "[0.2.5, )",
+        "resolved": "0.2.5",
+        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
+      },
       "System.Memory": {
         "type": "Transitive",
         "resolved": "4.6.3",
@@ -70,6 +76,12 @@
         "resolved": "10.0.10",
         "contentHash": "Ih5zrydoDc1H5I0eNP6f4Lzw3cjsPMN4Nikd86kbyi66y0flkM9GfjVo62aUbcxeTbypzBCFAFQ+/6RF2jRORg=="
       },
+      "T4.Build": {
+        "type": "Direct",
+        "requested": "[0.2.5, )",
+        "resolved": "0.2.5",
+        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
+      },
       "mmor.roslyn": {
         "type": "Project"
       }
@@ -93,6 +105,12 @@
         "resolved": "10.0.10",
         "contentHash": "Ih5zrydoDc1H5I0eNP6f4Lzw3cjsPMN4Nikd86kbyi66y0flkM9GfjVo62aUbcxeTbypzBCFAFQ+/6RF2jRORg=="
       },
+      "T4.Build": {
+        "type": "Direct",
+        "requested": "[0.2.5, )",
+        "resolved": "0.2.5",
+        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
+      },
       "mmor.roslyn": {
         "type": "Project"
       }
@@ -115,6 +133,12 @@
         "requested": "[10.0.*, )",
         "resolved": "10.0.10",
         "contentHash": "Ih5zrydoDc1H5I0eNP6f4Lzw3cjsPMN4Nikd86kbyi66y0flkM9GfjVo62aUbcxeTbypzBCFAFQ+/6RF2jRORg=="
+      },
+      "T4.Build": {
+        "type": "Direct",
+        "requested": "[0.2.5, )",
+        "resolved": "0.2.5",
+        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
       },
       "mmor.roslyn": {
         "type": "Project"
