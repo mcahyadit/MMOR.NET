@@ -1,4 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
 /** <summary>
@@ -13,7 +18,7 @@ namespace MMOR.NET.Statistics {
  * </list>
  * </summary>
  * */
-public class RunningStatisticsAdvanced : RunningStatistics {
+public partial class RunningStatisticsAdvanced : RunningStatistics {
   //====================================
   // █ █▄░█ ▀█▀ █▀▀ █▀█ █▀▀ ▄▀█ █▀▀ █▀▀
   // █ █░▀█ ░█░ ██▄ █▀▄ █▀░ █▀█ █▄▄ ██▄
@@ -156,6 +161,25 @@ public class RunningStatisticsAdvanced : RunningStatistics {
     moment_2_ = moment_2;
     moment_3_ = moment_3;
     moment_4_ = moment_4;
+  }
+
+  public override void Push(Vector<double> values, Vector<ulong> counts) {
+    // TODO:
+    throw new NotImplementedException();
+  }
+
+  public override void PushVector(Vector<double> values, Vector<ulong> counts) {
+    // TODO:
+    throw new NotImplementedException();
+  }
+
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  public override void Push(ReadOnlySpan<double> values, ReadOnlySpan<ulong> freqs = default) {
+    // TODO:
+    throw new NotImplementedException();
   }
 }
 }

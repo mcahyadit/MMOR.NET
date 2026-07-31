@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using MMOR.NET.Collections;
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
 /** <summary>
@@ -14,7 +19,7 @@ namespace MMOR.NET.Statistics {
  * <br/> Expanded for compatibility with frequency mapping / histogram based data.
  * </summary>
  * */
-public class RunningStatistics {
+public partial class RunningStatistics {
   //====================================
   // █ █▄░█ ▀█▀ █▀▀ █▀█ █▀▀ ▄▀█ █▀▀ █▀▀
   // █ █░▀█ ░█░ ██▄ █▀▄ █▀░ █▀█ █▄▄ ██▄
@@ -168,6 +173,110 @@ public class RunningStatistics {
     count_0_ += stats.count_0_;
     mean_     = mean;
     moment_2_ = mean_sq;
+  }
+
+  /// <inheritdoc cref="Push(double, ulong)"/>
+  public virtual void Push(Vector<double> values, Vector<ulong> counts) {
+    PushVector(values, counts);
+
+    for (int i = 0; i < Vector<double>.Count; ++i) {
+      ulong count = counts[i];
+      if (count == 0)
+        continue;
+
+      double value = values[i];
+      min_val_     = Math.Min(min_val_, value);
+      if (value > max_val_) {
+        max_val_   = value;
+        count_max_ = count;
+      } else if (value == max_val_) {
+        count_max_ += count;
+      }
+    }
+  }
+
+  /**
+   * <inheritdoc cref="Push(double, ulong)"/>
+   * <remarks>
+   *  WARNING: doesn't updates Min and Max information <br/>
+   *  use <see cref="Push(Vector{double}, Vector{ulong})"/> instead
+   *  unless you know what you are doing.
+   * </remarks>
+   */
+  public virtual void PushVector(Vector<double> values, Vector<ulong> counts) {
+    ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
+    if (b_cnt == 0)
+      return;
+
+    count_0_ += Vector.Dot(counts, Vector.AsVectorUInt64(Vector.BitwiseAnd(Vector<long>.One,
+                                       Vector.Equals(values, Vector<double>.Zero))));
+
+    Vector<double> counts_d = Vector.ConvertToDouble(counts);
+    double b_sum            = Vector.Dot(values, counts_d);
+    double b_mean           = b_sum / b_cnt;
+    Vector<double> b_dif    = values - new Vector<double>(b_mean);
+    double b_moment_2       = Vector.Dot(b_dif * b_dif * counts_d, Vector<double>.One);
+
+    double old_count = count_;
+    count_ += b_cnt;
+    double d = b_mean - mean_;
+    double s = d / count_ * b_cnt;
+    double t = b_moment_2 + d * s * old_count;
+
+    mean_ += s;
+    moment_2_ += t;
+  }
+
+  /**
+   * <summary>
+   *  Adds in multiple value-frequency pairs to the RunningStatistics.
+   * </summary>
+   */
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  public virtual void Push(ReadOnlySpan<double> values, ReadOnlySpan<ulong> freqs = default) {
+    if (!freqs.IsEmpty && freqs.Length != values.Length)
+      throw new ArgumentException(
+          string.Format("[ERROR]: freqs is not empty, but values.Length: {0} != freqs.Length: {1}",
+              values.Length, freqs.Length));
+
+    int vlen = Vector<double>.Count;
+    int alen = values.Length;
+    int rem  = alen - vlen;
+
+    Vector<double> min    = new(min_val_);
+    Vector<double> max    = new(max_val_);
+    Vector<ulong> max_acc = Vector<ulong>.Zero;
+
+    int i = 0;
+    for (; i <= rem; i += vlen) {
+      Vector<double> value = values.Slice(i, vlen).ToVector();
+      Vector<ulong> count  = freqs.IsEmpty ? Vector<ulong>.One : freqs.Slice(i, vlen).ToVector();
+      PushVector(value, count);
+
+      min     = Vector.Min(min, value);
+      max_acc = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.GreaterThan(value, max)),
+          Vector<ulong>.Zero, max_acc);
+      max     = Vector.Max(max, value);
+      max_acc += count * Vector.BitwiseAnd(Vector<ulong>.One,  //
+                             Vector.AsVectorUInt64(Vector.Equals(max, value)));
+    }
+
+    for (int j = 0; j < vlen; ++j) {
+      min_val_ = Math.Min(min_val_, min[j]);
+      if (max[j] > max_val_) {
+        max_val_   = max[j];
+        count_max_ = max_acc[j];
+      } else if (max_val_ == max[j]) {
+        count_max_ += max_acc[j];
+      }
+    }
+
+    for (; i < alen; ++i) {
+      Push(values[i], freqs[i]);
+    }
   }
 
   /** <summary>
