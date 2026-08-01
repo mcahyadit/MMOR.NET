@@ -118,16 +118,8 @@ public partial class RunningStatistics {
     mean_ += s;
     moment_2_ += t;
 
-    //================
-    // Update MinMax
-    //================
     min_val_ = Math.Min(min_val_, value);
-    if (value > max_val_) {
-      max_val_   = value;
-      count_max_ = count;
-    } else if (value == max_val_) {
-      count_max_ += count;
-    }
+    EvaluateMax(value, count);
   }
 
   /** <summary>
@@ -175,35 +167,27 @@ public partial class RunningStatistics {
     moment_2_ = mean_sq;
   }
 
-  /// <inheritdoc cref="Push(double, ulong)"/>
-  public virtual void Push(Vector<double> values, Vector<ulong> counts) {
-    PushVector(values, counts);
-
-    for (int i = 0; i < Vector<double>.Count; ++i) {
-      ulong count = counts[i];
-      if (count == 0)
-        continue;
-
-      double value = values[i];
-      min_val_     = Math.Min(min_val_, value);
-      if (value > max_val_) {
-        max_val_   = value;
-        count_max_ = count;
-      } else if (value == max_val_) {
-        count_max_ += count;
-      }
+  public void EvaluateMax(double value, ulong count) {
+    if (value > max_val_) {
+      max_val_   = value;
+      count_max_ = count;
+    } else if (value == max_val_) {
+      count_max_ += count;
     }
   }
 
   /**
    * <inheritdoc cref="Push(double, ulong)"/>
-   * <remarks>
-   *  WARNING: doesn't updates Min and Max information <br/>
-   *  use <see cref="Push(Vector{double}, Vector{ulong})"/> instead
-   *  unless you know what you are doing.
-   * </remarks>
+   * <param name="evaluate_minmax">
+   *  Can set be set to <c>false</c>, <br/>
+   *  <br/>
+   *  Since min max evaluation requires vector reduction,
+   *  using this in a loop will remove the advantage of
+   *  vectorized operation in the first place.
+   * </param>
    */
-  public virtual void PushVector(Vector<double> values, Vector<ulong> counts) {
+  public virtual void Push(Vector<double> values, Vector<ulong> counts,
+      bool evaluate_minmax = true) {
     ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
     if (b_cnt == 0)
       return;
@@ -225,6 +209,19 @@ public partial class RunningStatistics {
 
     mean_ += s;
     moment_2_ += t;
+
+    if (!evaluate_minmax)
+      return;
+
+    for (int i = 0; i < Vector<double>.Count; ++i) {
+      ulong count = counts[i];
+      if (count == 0)
+        continue;
+
+      double value = values[i];
+      min_val_     = Math.Min(min_val_, value);
+      EvaluateMax(value, count);
+    }
   }
 
   /**
@@ -254,7 +251,7 @@ public partial class RunningStatistics {
     for (; i <= rem; i += vlen) {
       Vector<double> value = values.Slice(i, vlen).ToVector();
       Vector<ulong> count  = freqs.IsEmpty ? Vector<ulong>.One : freqs.Slice(i, vlen).ToVector();
-      PushVector(value, count);
+      Push(value, count, false);
 
       min     = Vector.Min(min, value);
       max_acc = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.GreaterThan(value, max)),
@@ -266,12 +263,7 @@ public partial class RunningStatistics {
 
     for (int j = 0; j < vlen; ++j) {
       min_val_ = Math.Min(min_val_, min[j]);
-      if (max[j] > max_val_) {
-        max_val_   = max[j];
-        count_max_ = max_acc[j];
-      } else if (max_val_ == max[j]) {
-        count_max_ += max_acc[j];
-      }
+      EvaluateMax(max[j], max_acc[j]);
     }
 
     for (; i < alen; ++i) {
