@@ -17,6 +17,7 @@
         inherit system;
         lockfiles = [
           ../packages.lock.json
+          ../tests/packages.lock.json
         ];
       };
     in
@@ -28,6 +29,7 @@
             (pkgs.lib.sources.cleanSource ../.)) (
             pkgs.lib.fileset.unions [
               ../src
+              ../tests
               ../MMOR.NET.csproj
               ../Directory.Build.props
               ../packages.lock.json
@@ -61,9 +63,15 @@
         ];
         inherit nugetDeps;
 
+        testProject = "tests/MMOR.NET.Tests.csproj";
+        doCheck = true;
+
         meta = {
           license = pkgs.lib.licenses.mit;
         };
       });
+    checks = {
+      unit-test = self'.packages.mmor-net;
+    };
   };
 }
