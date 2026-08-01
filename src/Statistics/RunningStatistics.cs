@@ -267,7 +267,10 @@ public partial class RunningStatistics {
     }
 
     for (; i < alen; ++i) {
-      Push(values[i], freqs[i]);
+      if (freqs.IsEmpty)
+        Push(values[i], 1);
+      else
+        Push(values[i], freqs[i]);
     }
   }
 
