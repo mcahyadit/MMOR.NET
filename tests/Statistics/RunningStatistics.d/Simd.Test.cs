@@ -1,7 +1,7 @@
-
-namespace MMOR.NET.Statistics {
 using System;
 using Xunit;
+
+namespace MMOR.NET.Statistics {
 public partial class RunningStatisticsTest {
   public struct SimdParam {
     public string identifier { get; init; } = "Generic Test";

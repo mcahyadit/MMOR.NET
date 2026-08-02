@@ -9,21 +9,25 @@ public partial class RunningStatisticsTest {
           precision  = 15,
           values     = [278.8535969157674],
         },
+
         new SimdParam {
           identifier = "len2",
           precision  = 15,
           values     = [-949.9784895546661, -449.94136326176147],
         },
+
         new SimdParam {
           identifier = "len3",
           precision  = 15,
           values     = [-553.5785237023545, 472.9424283280248, 353.3989748458225],
         },
+
         new SimdParam {
           identifier = "len4",
           precision  = 14,
           values = [784.3591354096909, -826.1223347411677, -156.1563606294592, -940.4055611238593],
         },
+
         new SimdParam {
           identifier = "len5",
           precision  = 15,
@@ -33,6 +37,7 @@ public partial class RunningStatisticsTest {
                 299.76887555904636
               ],
         },
+
         new SimdParam {
           identifier = "len6",
           precision  = 15,
@@ -42,6 +47,7 @@ public partial class RunningStatisticsTest {
                 -987.002480643878, 611.6385036656159
               ],
         },
+
         new SimdParam {
           identifier = "len7",
           precision  = 15,
@@ -51,6 +57,7 @@ public partial class RunningStatisticsTest {
                 -326.8109097747465, -814.5083132397042, -806.567246333072
               ],
         },
+
         new SimdParam {
           identifier = "len8",
           precision  = 13,
@@ -60,6 +67,7 @@ public partial class RunningStatisticsTest {
                 72.45618290940138, 946.2315279587413, -242.93124558329305, 104.0812625464539
               ],
         },
+
         new SimdParam {
           identifier = "gauss1k",
           precision  = 13,
@@ -320,6 +328,7 @@ public partial class RunningStatisticsTest {
                 -0.12117985080724364, -0.19378340374814312, 1.7589821689866296, 0.1647154399018857
               ],
         },
+
         new SimdParam {
           identifier = "wide-range",
           tolerance  = 1E283,
@@ -498,6 +507,7 @@ public partial class RunningStatisticsTest {
                 -9.533137690584126e-63, -1.7683797320924628e+31
               ],
         },
+
         new SimdParam {
           identifier = "mixed-mag",
           tolerance  = 1E-4,
@@ -577,6 +587,7 @@ public partial class RunningStatisticsTest {
                 868.2736276961188, -1.2324633367392666e-05, 5.063778827518041e-06
               ],
         },
+
         new SimdParam {
           identifier = "with-zeros",
           precision  = 14,
@@ -650,6 +661,7 @@ public partial class RunningStatisticsTest {
                 -6.392864617863124, 0.0, 9.732807453993598, -8.839728235496061
               ],
         },
+
         new SimdParam {
           identifier = "denormals",
           tolerance  = 1E-13,
@@ -679,6 +691,7 @@ public partial class RunningStatisticsTest {
                 1.2359506299557164e-306
               ],
         },
+
         new SimdParam {
           identifier = "huge",
           tolerance  = 1E293,
@@ -720,6 +733,7 @@ public partial class RunningStatisticsTest {
                 3.015864273913651e+306
               ],
         },
+
         new SimdParam {
           identifier = "cancel",
           tolerance  = 1E-2,
@@ -977,6 +991,7 @@ public partial class RunningStatisticsTest {
                 783591902832.9683, 466377663507.5405, -957294334631.4136, -244462127116.807
               ],
         },
+
         new SimdParam {
           identifier = "const",
           precision  = 15,
@@ -988,6 +1003,7 @@ public partial class RunningStatisticsTest {
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25
               ],
         },
+
         new SimdParam {
           identifier = "long10k",
           precision  = 13,
@@ -3495,6 +3511,7 @@ public partial class RunningStatisticsTest {
                 -14.578856980235756, -30.20823756656823, -28.620064626146274, -9.528838759233267
               ],
         },
+
         new SimdParam {
           identifier = "exp-tail",
           precision  = 14,
@@ -3535,6 +3552,7 @@ public partial class RunningStatisticsTest {
                 0.4736440603394573, 1.5706681220871839, -0.7194503867819724
               ],
         },
+
       ];
 }
 }
