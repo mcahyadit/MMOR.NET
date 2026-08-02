@@ -12,6 +12,9 @@
 *.sln
 *.slnx
 
+# BenchmarkDotNet Generated
+BenchmarkDotNet.Artifacts/
+
 # IDE Generated
 .idea/
 .vscode/

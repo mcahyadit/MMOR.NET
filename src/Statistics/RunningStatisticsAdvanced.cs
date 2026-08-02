@@ -166,6 +166,8 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
     moment_4_ = moment_4;
   }
 
+  [Obsolete(
+      "WARNING: The Vectorized input for RunningStatisticsAdvanced is not properly optimized yet, prefer scalar Pushing.")]
   public override void Push(Vector<double> values, Vector<ulong> counts,
       bool evaluate_minmax = true) {
     ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
@@ -246,6 +248,8 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
+  [Obsolete(
+      "WARNING: The Vectorized input for RunningStatisticsAdvanced is not properly optimized yet, prefer scalar Pushing.")]
   public override void Push(ReadOnlySpan<double> values, ReadOnlySpan<ulong> freqs = default) {
     if (!freqs.IsEmpty && freqs.Length != values.Length)
       throw new ArgumentException(
