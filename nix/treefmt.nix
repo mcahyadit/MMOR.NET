@@ -18,6 +18,7 @@ _: {
         };
       };
       settings = {
+        excludes = ["third_party/**"];
         # https://github.com/numtide/treefmt-nix/pull/466
         toml = {
           command = "${pkgs.lib.getExe pkgs.tombi}";
