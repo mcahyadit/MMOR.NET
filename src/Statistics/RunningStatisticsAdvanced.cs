@@ -89,7 +89,7 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
     moment_3_ += t * s * (old_count - count) / count - 3 * s * moment_2_;
     moment_2_ += t;
 
-    mean_harmonics_ += 1.0 / value * count;
+    mean_harmonics_ += value == 0 ? value : 1.0 / value * count;
     mean_geometric_ += Math.Log(value) * count;
     mean_rms_ += (value * value - mean_rms_) * count / count_;
 
