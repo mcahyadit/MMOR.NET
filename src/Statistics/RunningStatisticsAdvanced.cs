@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using MMOR.NET.Collections;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
@@ -74,6 +75,8 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
       return;
 
     double old_count = count_;
+    if (value == 0)
+      count_0_ += count;
     count_ += count;
     double d  = value - mean_;
     double s  = d / count_ * count;
@@ -81,9 +84,9 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
     double t  = d * s * old_count;
 
     mean_ += s;
-    moment_4_ +=
-        t * s2 * (count_ * count_ - 3 * count_ + 3) + 6 * s2 * moment_2_ - 4 * s * moment_3_;
-    moment_3_ += t * s * (count_ - 2) - 3 * s * moment_2_;
+    moment_4_ += t * s2 * (old_count * old_count - old_count * count + count * count) / count +
+                 6 * s2 * count * moment_2_ - 4 * s * moment_3_;
+    moment_3_ += t * s * (old_count - count) / count - 3 * s * moment_2_;
     moment_2_ += t;
 
     mean_harmonics_ += 1.0 / value * count;
@@ -94,12 +97,7 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
     // Update MinMax
     //================
     min_val_ = Math.Min(min_val_, value);
-    if (value > max_val_) {
-      max_val_   = value;
-      count_max_ = count;
-    } else if (value == max_val_) {
-      count_max_ += count;
-    }
+    EvaluateMax(value, count);
   }
 
   public void Push(RunningStatisticsAdvanced stats) {
@@ -156,21 +154,92 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
       count_max_ += stats.count_max_;
     }
 
-    count_    = total_count;
+    mean_geometric_ += stats.mean_geometric_;
+    mean_harmonics_ += stats.mean_harmonics_;
+    mean_rms_ = (count_ * mean_rms_ + stats.count_ * stats.mean_rms_) / total_count;
+
+    count_ = total_count;
+    count_0_ += stats.count_0_;
     mean_     = mean;
     moment_2_ = moment_2;
     moment_3_ = moment_3;
     moment_4_ = moment_4;
   }
 
-  public override void Push(Vector<double> values, Vector<ulong> counts) {
-    // TODO:
-    throw new NotImplementedException();
-  }
+  public override void Push(Vector<double> values, Vector<ulong> counts,
+      bool evaluate_minmax = true) {
+    ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
+    if (b_cnt == 0)
+      return;
 
-  public override void PushVector(Vector<double> values, Vector<ulong> counts) {
-    // TODO:
-    throw new NotImplementedException();
+    count_0_ += Vector.Dot(counts, Vector.AsVectorUInt64(Vector.BitwiseAnd(Vector<long>.One,
+                                       Vector.Equals(values, Vector<double>.Zero))));
+
+    Vector<double> b_cnt_d = Vector.ConvertToDouble(counts);
+    double b_sum           = Vector.Dot(values, b_cnt_d);
+    double b_mean          = b_sum / b_cnt;
+    Vector<double> b_dif   = values - new Vector<double>(b_mean);
+    Vector<double> b_dif2  = b_dif * b_dif;
+    double b_moment_2      = Vector.Dot(b_dif * b_dif * b_cnt_d, Vector<double>.One);
+    double b_moment_3      = Vector.Dot(b_dif2 * b_dif * b_cnt_d, Vector<double>.One);
+    double b_moment_4      = Vector.Dot(b_dif2 * b_dif2 * b_cnt_d, Vector<double>.One);
+
+    double old_count = count_;
+    count_ += b_cnt;
+    double d1 = b_mean - mean_;
+    double d2 = d1 * d1;
+    double d3 = d2 * d1;
+    double d4 = d2 * d2;
+    double s  = d1 / count_ * b_cnt;
+    double t1 = b_moment_2 + d1 * s * old_count;
+
+    double moment_2 = moment_2_ + t1;
+    double moment_3 = moment_3_ + b_moment_3 +
+                      d3 * old_count * b_cnt * (old_count - b_cnt) / (count_ * count_) +
+                      3 * d1 * (old_count * b_moment_2 - b_cnt * moment_2_) / count_;
+    double moment_4 = moment_4_ + b_moment_4 +
+                      d4 * old_count * b_cnt *
+                          (old_count * old_count - old_count * b_cnt + b_cnt * b_cnt) /
+                          (count_ * count_ * count_) +
+                      6 * d2 * (old_count * old_count * b_moment_2 + b_cnt * b_cnt * moment_2_) /
+                          (count_ * count_) +
+                      4 * d1 * (old_count * b_moment_3 - b_cnt * moment_3_) / count_;
+
+    mean_ += s;
+    moment_2_ = moment_2;
+    moment_3_ = moment_3;
+    moment_4_ = moment_4;
+
+    Vector<double> inv_val = Vector<double>.One / values;
+    inv_val                = Vector.ConditionalSelect(Vector.Equals(values, Vector<double>.Zero),
+                       Vector<double>.Zero, inv_val);
+    mean_harmonics_ += Vector.Dot(b_cnt_d, inv_val);
+#if NET9_0_OR_GREATER
+    mean_geometric_ += Vector.Dot(b_cnt_d, Vector.Log(values));
+#else
+    Span<double> logtmp = stackalloc double[Vector<double>.Count];
+    values.CopyTo(logtmp);
+    for (int i = 0; i < Vector<double>.Count; ++i) {
+      logtmp[i] = Math.Log(logtmp[i]);
+    }
+    mean_geometric_ += Vector.Dot(b_cnt_d, logtmp.ToVector());
+#endif
+    Vector<double> rms       = new(mean_rms_);
+    Vector<double> new_count = Vector.ConvertToDouble(new Vector<ulong>(count_));
+    mean_rms_ += Vector.Dot(Vector<double>.One, (values * values - rms) * b_cnt_d / new_count);
+
+    if (!evaluate_minmax)
+      return;
+
+    for (int i = 0; i < Vector<double>.Count; ++i) {
+      ulong count = counts[i];
+      if (count == 0)
+        continue;
+
+      double value = values[i];
+      min_val_     = Math.Min(min_val_, value);
+      EvaluateMax(value, count);
+    }
   }
 
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
@@ -178,8 +247,44 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   public override void Push(ReadOnlySpan<double> values, ReadOnlySpan<ulong> freqs = default) {
-    // TODO:
-    throw new NotImplementedException();
+    if (!freqs.IsEmpty && freqs.Length != values.Length)
+      throw new ArgumentException(
+          string.Format("[ERROR]: freqs is not empty, but values.Length: {0} != freqs.Length: {1}",
+              values.Length, freqs.Length));
+
+    int vlen = Vector<double>.Count;
+    int alen = values.Length;
+    int rem  = alen - vlen;
+
+    Vector<double> min    = new(min_val_);
+    Vector<double> max    = new(max_val_);
+    Vector<ulong> max_acc = Vector<ulong>.Zero;
+
+    int i = 0;
+    for (; i <= rem; i += vlen) {
+      Vector<double> value = values.Slice(i, vlen).ToVector();
+      Vector<ulong> count  = freqs.IsEmpty ? Vector<ulong>.One : freqs.Slice(i, vlen).ToVector();
+      Push(value, count, false);
+
+      min     = Vector.Min(min, value);
+      max_acc = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.GreaterThan(value, max)),
+          Vector<ulong>.Zero, max_acc);
+      max     = Vector.Max(max, value);
+      max_acc += count * Vector.BitwiseAnd(Vector<ulong>.One,  //
+                             Vector.AsVectorUInt64(Vector.Equals(max, value)));
+    }
+
+    for (int j = 0; j < vlen; ++j) {
+      min_val_ = Math.Min(min_val_, min[j]);
+      EvaluateMax(max[j], max_acc[j]);
+    }
+
+    for (; i < alen; ++i) {
+      if (freqs.IsEmpty)
+        Push(values[i], 1);
+      else
+        Push(values[i], freqs[i]);
+    }
   }
 }
 }

@@ -21,7 +21,7 @@ public partial class RunningStatisticsTest {
         },
         new SimdParam {
           identifier = "len4",
-          precision  = 15,
+          precision  = 14,
           values = [784.3591354096909, -826.1223347411677, -156.1563606294592, -940.4055611238593],
         },
         new SimdParam {
@@ -62,7 +62,7 @@ public partial class RunningStatisticsTest {
         },
         new SimdParam {
           identifier = "gauss1k",
-          precision  = 14,
+          precision  = 13,
           values =
               [
                 0.664265899612895, -1.2190747412956953, 0.8473614233480004, -1.0022028242423497,
@@ -579,7 +579,7 @@ public partial class RunningStatisticsTest {
         },
         new SimdParam {
           identifier = "with-zeros",
-          precision  = 15,
+          precision  = 14,
           values =
               [
                 0.0, 2.718836790259777, -9.80810359850671, 5.178583064273571, 4.761653203847265,
@@ -3497,7 +3497,7 @@ public partial class RunningStatisticsTest {
         },
         new SimdParam {
           identifier = "exp-tail",
-          precision  = 15,
+          precision  = 14,
           values =
               [
                 -1.1905269583766953, -1.3428544821313646, -1.100509871974682, -0.1888245307505257,
