@@ -6,51 +6,48 @@ public partial class RunningStatisticsTest {
       [
         new SimdParam {
           identifier = "len1",
-          precision  = 15,
           values     = [278.8535969157674],
         },
 
         new SimdParam {
           identifier = "len2",
-          precision  = 15,
           values     = [-949.9784895546661, -449.94136326176147],
         },
 
         new SimdParam {
           identifier = "len3",
-          precision  = 15,
           values     = [-553.5785237023545, 472.9424283280248, 353.3989748458225],
         },
 
         new SimdParam {
           identifier = "len4",
-          precision  = 14,
           values = [784.3591354096909, -826.1223347411677, -156.1563606294592, -940.4055611238593],
+          skewness_precision = 14,
+          kurtosis_precision = 14,
         },
 
         new SimdParam {
           identifier = "len5",
-          precision  = 15,
           values =
               [
                 -562.7240503927933, 10.710576206724795, -946.9280606322727, -602.324698626703,
                 299.76887555904636
               ],
+          harmonic_mean_precision = 13,
         },
 
         new SimdParam {
           identifier = "len6",
-          precision  = 15,
           values =
               [
                 89.88296120643327, -559.1187559186067, 178.53136775181747, 618.8609133556533,
                 -987.002480643878, 611.6385036656159
               ],
+          harmonic_mean_precision = 12,
         },
 
         new SimdParam {
           identifier = "len7",
-          precision  = 15,
           values =
               [
                 396.2787899764537, -319.4989669640163, -689.0410003764368, 914.4261444135625,
@@ -60,17 +57,17 @@ public partial class RunningStatisticsTest {
 
         new SimdParam {
           identifier = "len8",
-          precision  = 13,
           values =
               [
                 694.9887326949195, 207.4520627337822, 614.2565465487603, 459.46357338763573,
                 72.45618290940138, 946.2315279587413, -242.93124558329305, 104.0812625464539
               ],
+          mean_precision          = 13,
+          harmonic_mean_precision = 12,
         },
 
         new SimdParam {
           identifier = "gauss1k",
-          precision  = 13,
           values =
               [
                 0.664265899612895, -1.2190747412956953, 0.8473614233480004, -1.0022028242423497,
@@ -327,11 +324,13 @@ public partial class RunningStatisticsTest {
                 0.41635889052149266, -0.002545563200592299, 0.6192887662137895,
                 -0.12117985080724364, -0.19378340374814312, 1.7589821689866296, 0.1647154399018857
               ],
+          standard_deviation_precision = 14,
+          root_mean_square_precision   = 14,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
           identifier = "wide-range",
-          tolerance  = 1E283,
           values =
               [
                 -2.049997022482651e+53, -3.5295622326463826e-196, -1.1353407544517734e-224,
@@ -506,11 +505,11 @@ public partial class RunningStatisticsTest {
                 -1.7641425243068728e+277, -1.341332581018697e+148, 4.62144794236968e+248,
                 -9.533137690584126e-63, -1.7683797320924628e+31
               ],
+          mean_precision = -1,
         },
 
         new SimdParam {
           identifier = "mixed-mag",
-          tolerance  = 1E-4,
           values =
               [
                 0.8806617443729226, 0.7615616273853526, 598.6082315654801, 1.4143304988974892,
@@ -586,11 +585,14 @@ public partial class RunningStatisticsTest {
                 1.2735274795058853, 0.5863855224333062, 8.689193591525492e-11, -1284507.2172873416,
                 868.2736276961188, -1.2324633367392666e-05, 5.063778827518041e-06
               ],
+          mean_precision               = 7,
+          standard_deviation_precision = 5,
+          root_mean_square_precision   = 12,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
           identifier = "with-zeros",
-          precision  = 14,
           values =
               [
                 0.0, 2.718836790259777, -9.80810359850671, 5.178583064273571, 4.761653203847265,
@@ -660,11 +662,13 @@ public partial class RunningStatisticsTest {
                 7.41698292706009, 0.0, -3.146602301419998, 7.856902466210862, -7.1355169540072305,
                 -6.392864617863124, 0.0, 9.732807453993598, -8.839728235496061
               ],
+          root_mean_square_precision = 14,
+          harmonic_mean_precision    = 14,
+          kurtosis_precision         = 14,
         },
 
         new SimdParam {
           identifier = "denormals",
-          tolerance  = 1E-13,
           values =
               [
                 4.5205322856849386e-306, 2.0938236833507853e-306, 7.735422713205649e-306,
@@ -694,7 +698,6 @@ public partial class RunningStatisticsTest {
 
         new SimdParam {
           identifier = "huge",
-          tolerance  = 1E293,
           values =
               [
                 3.2746446376261635e+306, 7.316813933686493e+306, 2.849454240923585e+306,
@@ -732,11 +735,11 @@ public partial class RunningStatisticsTest {
                 5.723361208347666e+306, 7.692614310904153e+306, 7.513961889483854e+306,
                 3.015864273913651e+306
               ],
+          mean_precision = -1,
         },
 
         new SimdParam {
           identifier = "cancel",
-          tolerance  = 1E-2,
           values =
               [
                 911522860375.7075, 746287127409.8848, 38199358032.69092, 376483286925.855,
@@ -990,11 +993,15 @@ public partial class RunningStatisticsTest {
                 -366520881925.8854, 116700884529.3794, 289291959355.7346, -305364522255.5792,
                 783591902832.9683, 466377663507.5405, -957294334631.4136, -244462127116.807
               ],
+          mean_precision               = 4,
+          standard_deviation_precision = 3,
+          harmonic_mean_precision      = 3,
+          skewness_precision           = 14,
+          kurtosis_precision           = 14,
         },
 
         new SimdParam {
           identifier = "const",
-          precision  = 15,
           values =
               [
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25,
@@ -1002,11 +1009,12 @@ public partial class RunningStatisticsTest {
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25,
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25
               ],
+          geometric_mean_precision = 13,
+          harmonic_mean_precision  = 14,
         },
 
         new SimdParam {
           identifier = "long10k",
-          precision  = 13,
           values =
               [
                 44.87983157445814, -49.860751779879564, -92.10229145690482, 41.32519578561187,
@@ -3510,11 +3518,15 @@ public partial class RunningStatisticsTest {
                 -82.25796296641164, 16.575841947390458, 84.96221240710435, -44.466008245806535,
                 -14.578856980235756, -30.20823756656823, -28.620064626146274, -9.528838759233267
               ],
+          mean_precision               = 14,
+          standard_deviation_precision = 13,
+          root_mean_square_precision   = 12,
+          harmonic_mean_precision      = 13,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
           identifier = "exp-tail",
-          precision  = 14,
           values =
               [
                 -1.1905269583766953, -1.3428544821313646, -1.100509871974682, -0.1888245307505257,
@@ -3551,6 +3563,8 @@ public partial class RunningStatisticsTest {
                 1.2769884889555296, -0.4154104755708711, -0.34790366820020496, 1.1046234417655039,
                 0.4736440603394573, 1.5706681220871839, -0.7194503867819724
               ],
+          harmonic_mean_precision = 14,
+          kurtosis_precision      = 14,
         },
 
       ];
