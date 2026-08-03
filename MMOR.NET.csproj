@@ -34,6 +34,9 @@
     <Compile Remove="third_party/**"/>
     <Content Remove="third_party/**"/>
     <None Remove="third_party/**"/>
+    <Compile Remove="benchmarks/**"/>
+    <Content Remove="benchmarks/**"/>
+    <None Remove="benchmarks/**"/>
     <Compile Remove="tests/**"/>
     <Content Remove="tests/**"/>
     <None Remove="tests/**"/>
