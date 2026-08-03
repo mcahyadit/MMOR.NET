@@ -26,7 +26,7 @@
     <Compile Remove="analyzers/**"/>
     <Content Remove="analyzers/**"/>
     <None Remove="analyzers/**"/>
-    <ProjectReference Include="./analyzers/Roslyn/MMOR.Roslyn.csproj"/>
+    <ProjectReference Include="./analyzers/Roslyn/MMOR.Roslyn.csproj" PrivateAssets="all"/>
     <ProjectReference Include="./analyzers/SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <PackageReference Include="MMOR.Roslyn" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="true"/>
   </ItemGroup>
@@ -46,7 +46,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="T4.Build" Version="0.2.5"/>
+    <PackageReference Include="T4.Build" Version="0.2.5" PrivateAssets="all"/>
     <TextTemplateTransformFiles Include="src/**/*.tt"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
