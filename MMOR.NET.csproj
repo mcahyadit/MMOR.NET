@@ -22,21 +22,10 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <TextTemplateTransformAll>false</TextTemplateTransformAll>
   </PropertyGroup>
-  <ItemGroup Label="Roslyn">
-    <Compile Remove="analyzers/**"/>
-    <Content Remove="analyzers/**"/>
-    <None Remove="analyzers/**"/>
-    <ProjectReference Include="./analyzers/Roslyn/MMOR.Roslyn.csproj" PrivateAssets="all"/>
-    <ProjectReference Include="./analyzers/SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    <PackageReference Include="MMOR.Roslyn" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="true"/>
-  </ItemGroup>
   <ItemGroup>
     <Compile Remove="third_party/**"/>
     <Content Remove="third_party/**"/>
     <None Remove="third_party/**"/>
-    <Compile Remove="benchmarks/**"/>
-    <Content Remove="benchmarks/**"/>
-    <None Remove="benchmarks/**"/>
     <Compile Remove="tests/**"/>
     <Content Remove="tests/**"/>
     <None Remove="tests/**"/>
@@ -52,9 +41,26 @@
     <PackageReference Include="T4.Build" Version="0.2.5" PrivateAssets="all"/>
     <TextTemplateTransformFiles Include="src/**/*.tt"/>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+  <ItemGroup Label="NetStandard-Polyfill" Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="Shim.System.Numerics" Version="6.0.0"/>
     <ProjectReference Include="./third_party/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal/Bcl.CollectionsMarshal.csproj" PrivateAssets="all"/>
     <PackageReference Include="Bcl.CollectionsMarshal" Version="2.1.0.0" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="all"/>
+  </ItemGroup>
+  <ItemGroup Label="Roslyn">
+    <Compile Remove="analyzers/**"/>
+    <Content Remove="analyzers/**"/>
+    <None Remove="analyzers/**"/>
+    <ProjectReference Include="./analyzers/Roslyn/MMOR.Roslyn.csproj" PrivateAssets="all"/>
+    <ProjectReference Include="./analyzers/SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <PackageReference Include="MMOR.Roslyn" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="true"/>
+  </ItemGroup>
+  <ItemGroup Label="Benchmark">
+    <!-- Seems like BenchmarkDotNet breaks Artifacts Output -->
+    <Compile Remove="benchmarks/**"/>
+    <Content Remove="benchmarks/**"/>
+    <None Remove="benchmarks/**"/>
+    <Compile Remove="artifacts/**"/>
+    <Content Remove="artifacts/**"/>
+    <None Remove="artifacts/**"/>
   </ItemGroup>
 </Project>
