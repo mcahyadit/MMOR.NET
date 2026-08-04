@@ -25,3 +25,6 @@ BenchmarkDotNet.Artifacts/
 
 
 *.g.cs
+
+# nix
+result
