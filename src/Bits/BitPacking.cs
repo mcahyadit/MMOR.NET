@@ -6,6 +6,8 @@ using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using MMOR.NET.Collections;
 using MMOR.Roslyn;
+using System.Runtime.CompilerServices;
+using System.Numerics;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics.X86;
@@ -101,6 +103,19 @@ public static partial class BitOps {
     for (; i < alen; ++i) {
       buffer[i] = ((bitmask >> i) & 1) == 1;
     }
+  }
+
+  [Pure]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector<ulong> ToVectorU64(ulong bitmask, int idx) {
+    return MmMovmEpi64Emu(Bzhi64(bitmask >> idx, (ulong)Vector<ulong>.Count));
+  }
+
+  [Pure]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector<int> ToVectorI32(ulong bitmask, int idx) {
+    uint slice = (uint)Bzhi64(bitmask >> idx, (ulong)Vector<uint>.Count);
+    return Vector.AsVectorInt32(MmMovmEpi32Emu(slice));
   }
 }
 }
