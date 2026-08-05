@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using MMOR.NET.Mathematics;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Collections {
@@ -23,7 +24,7 @@ public static partial class CollectionUtils {
       Vector<ulong> self_v = self.Slice(i, vlen).ToVector();
       acc_v += self_v;
     }
-    ulong result = Vector.Dot(acc_v, Vector<ulong>.One);
+    ulong result = MathExt.SumElements(acc_v);
     for (; i < alen; ++i) {
       result += self[i];
     }

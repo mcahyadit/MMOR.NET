@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using MMOR.NET.Collections;
+using MMOR.NET.Mathematics;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
@@ -188,7 +189,7 @@ public partial class RunningStatistics {
    */
   public virtual void Push(Vector<double> values, Vector<ulong> counts,
       bool evaluate_minmax = true) {
-    ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
+    ulong b_cnt = MathExt.SumElements(counts);
     if (b_cnt == 0)
       return;
 
@@ -199,7 +200,7 @@ public partial class RunningStatistics {
     double b_sum            = Vector.Dot(values, counts_d);
     double b_mean           = b_sum / b_cnt;
     Vector<double> b_dif    = values - new Vector<double>(b_mean);
-    double b_moment_2       = Vector.Dot(b_dif * b_dif * counts_d, Vector<double>.One);
+    double b_moment_2       = Vector.Dot(b_dif * b_dif, counts_d);
 
     double old_count = count_;
     count_ += b_cnt;

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using MMOR.NET.Collections;
+using MMOR.NET.Mathematics;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
@@ -170,7 +171,7 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
       "WARNING: The Vectorized input for RunningStatisticsAdvanced is not properly optimized yet, prefer scalar Pushing.")]
   public override void Push(Vector<double> values, Vector<ulong> counts,
       bool evaluate_minmax = true) {
-    ulong b_cnt = Vector.Dot(counts, Vector<ulong>.One);
+    ulong b_cnt = MathExt.SumElements(counts);
     if (b_cnt == 0)
       return;
 
@@ -182,9 +183,9 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
     double b_mean          = b_sum / b_cnt;
     Vector<double> b_dif   = values - new Vector<double>(b_mean);
     Vector<double> b_dif2  = b_dif * b_dif;
-    double b_moment_2      = Vector.Dot(b_dif * b_dif * b_cnt_d, Vector<double>.One);
-    double b_moment_3      = Vector.Dot(b_dif2 * b_dif * b_cnt_d, Vector<double>.One);
-    double b_moment_4      = Vector.Dot(b_dif2 * b_dif2 * b_cnt_d, Vector<double>.One);
+    double b_moment_2      = Vector.Dot(b_dif * b_dif, b_cnt_d);
+    double b_moment_3      = Vector.Dot(b_dif2 * b_dif, b_cnt_d);
+    double b_moment_4      = Vector.Dot(b_dif2 * b_dif2, b_cnt_d);
 
     double old_count = count_;
     count_ += b_cnt;
@@ -228,7 +229,7 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
 #endif
     Vector<double> rms       = new(mean_rms_);
     Vector<double> new_count = Vector.ConvertToDouble(new Vector<ulong>(count_));
-    mean_rms_ += Vector.Dot(Vector<double>.One, (values * values - rms) * b_cnt_d / new_count);
+    mean_rms_ += Vector.Dot(values * values - rms, b_cnt_d / new_count);
 
     if (!evaluate_minmax)
       return;

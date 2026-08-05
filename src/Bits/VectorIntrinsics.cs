@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Collections;
+using MMOR.NET.Mathematics;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics;
@@ -74,7 +75,7 @@ public static partial class BitOps {
       Vector<long> signed    = Vector.AsVectorInt64(vector);
       Vector<long> mask      = Vector.LessThan(signed, Vector<long>.Zero);
       Vector<ulong> weighted = Vector.BitwiseAnd(Vector.AsVectorUInt64(mask), kBitPosVec64);
-      return Vector.Dot(weighted, Vector<ulong>.One);
+      return MathExt.SumElements(weighted);
     }
 
     ulong result = 0;
@@ -131,7 +132,7 @@ public static partial class BitOps {
       Vector<int> signed    = Vector.AsVectorInt32(vector);
       Vector<int> mask      = Vector.LessThan(signed, Vector<int>.Zero);
       Vector<uint> weighted = Vector.BitwiseAnd(Vector.AsVectorUInt32(mask), kBitPosVec32);
-      return Vector.Dot(weighted, Vector<uint>.One);
+      return MathExt.SumElements(weighted);
     }
 
     ulong result = 0;
