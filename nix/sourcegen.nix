@@ -1,8 +1,4 @@
-{
-  inputs,
-  lib,
-  ...
-}: {
+{inputs, ...}: {
   perSystem = {
     pkgs,
     system,
@@ -10,7 +6,7 @@
   }: {
     packages.sourcegen = let
       pname = "MMOR.Roslyn";
-      version = lib.strings.trim (builtins.readFile ../analyzers/Roslyn/VERSION.txt);
+      version = pkgs.lib.strings.trim (builtins.readFile ../analyzers/Roslyn/VERSION.txt);
       nugetDeps = inputs.nuget-packageslock2nix.lib {
         name = "${pname}-${version}-nugetDeps";
         inherit system;
