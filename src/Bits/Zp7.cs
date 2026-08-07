@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 #if !NETSTANDARD
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using Aes = System.Runtime.Intrinsics.Arm.Aes;
 #endif
 
 namespace MMOR.NET.Bits {
@@ -57,14 +58,17 @@ public static partial class Zp7 {
     ulong m         = ~mask;
 
 #if !NETSTANDARD
-    if (Pclmulqdq.IsSupported) {
+    if (Pclmulqdq.IsSupported || Aes.IsSupported) {
       // 0xFFFFFFFFFFFFFFFE = -2 casted to ulong
-      Vector128<ulong> n2 = Vector128.Create(0ul, 0xFFFFFFFFFFFFFFFE);
+      Vector128<ulong> n2 = Vector128.Create(0xFFFFFFFFFFFFFFFE, 0);
       for (int i = 0; i < kBitLen - 1; ++i) {
-        Vector128<ulong> mv  = Vector128.Create(m, 0UL);
-        Vector128<ulong> bit = Pclmulqdq.CarrylessMultiply(mv, n2, 0);
-        ulong bit_low        = bit.ToScalar();
-        ppp[i]               = bit_low;
+        Vector128<ulong> mv  = Vector128.Create(m, 0);
+        Vector128<ulong> bit = Pclmulqdq.IsSupported ? Pclmulqdq.CarrylessMultiply(mv, n2, 0)
+                                                     : Aes.PolynomialMultiplyWideningLower(
+                                                           mv.GetLower(), n2.GetLower());
+
+        ulong bit_low = bit.ToScalar();
+        ppp[i]        = bit_low;
         m &= bit_low;
       }
       ppp[kBitLen - 1] = unchecked((ulong) - (long)m << 1);
@@ -89,8 +93,13 @@ public static partial class Zp7 {
   }
 
   [Pure]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Pext64(ulong value, ulong mask) {
-    Zp7Masks ppp = pppm_.GetOrAdd(mask, PppPre);
+    return Pext64Pre(value, mask, GetPpp(mask));
+  }
+
+  [Pure]
+  public static ulong Pext64Pre(ulong value, ulong mask, Zp7Masks ppp) {
     value &= mask;
     for (int i = 0; i < kBitLen; ++i) {
       int shift = 1 << i;
@@ -101,10 +110,14 @@ public static partial class Zp7 {
   }
 
   [Pure]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Pdep64(ulong value, ulong mask) {
-    Zp7Masks ppp = pppm_.GetOrAdd(mask, PppPre);
-    value        = BitOps.Bzhi64(value, (ulong)BitOperations.PopCount(mask));
+    return Pdep64Pre(value, mask, GetPpp(mask));
+  }
 
+  [Pure]
+  public static ulong Pdep64Pre(ulong value, ulong mask, Zp7Masks ppp) {
+    value = BitOps.Bzhi64(value, (ulong)BitOperations.PopCount(mask));
     for (int i = kBitLen - 1; i >= 0; --i) {
       int shift = 1 << i;
       ulong bit = ppp[i] >> shift;
