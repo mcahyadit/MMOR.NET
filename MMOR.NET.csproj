@@ -33,7 +33,7 @@
     <Content Remove="**/*.meta"/>
     <None Remove="**/*.meta"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.*"/>
-    <PackageReference Include="System.Collections.Immutable" Version="10.0.*"/>
+    <PackageReference Include="System.Collections.Immutable" Version="[8.0.0,)"/>
     <PackageReference Include="PolySharp" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
