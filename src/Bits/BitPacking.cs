@@ -78,23 +78,24 @@ public static partial class BitOps {
   public static void WriteToBoolArray(this ulong bitmask, Span<bool> buffer) {
     if (buffer.IsEmpty)
       throw new ArgumentException(nameof(buffer), "[ERROR]: passed buffer is empty.");
-    int alen   = Math.Min(buffer.Length, 64);
-    int i      = 0;
-    int rem    = alen - 8;
-    ulong mask = 0x0101010101010101ul;
+    int alen = Math.Min(buffer.Length, 64);
+    int i    = 0;
+    int rem  = alen - 8;
     for (; i <= rem; i += 8) {
       Span<ulong> cast = MemoryMarshal.Cast<bool, ulong>(buffer.Slice(i, 8));
       ulong chunk;
 #if !NETSTANDARD
       if (Bmi2.X64.IsSupported) {
-        ulong bitslice = Bmi2.X64.ZeroHighBits(bitmask >> i, 8);
-        chunk          = Bmi2.X64.ParallelBitDeposit(bitslice, mask);
+        const ulong mask_pdep = 0x0101010101010101ul;
+        ulong bitslice        = Bmi2.X64.ZeroHighBits(bitmask >> i, 8);
+        chunk                 = Bmi2.X64.ParallelBitDeposit(bitslice, mask_pdep);
         goto assign;
       }
 #endif
       ulong slice       = (bitmask >> i) & 0xFF;
-      const ulong magic = 0x0102040810204080ul;
-      chunk             = ((magic * slice) & mask) >> 7;
+      const ulong magic = 0x8040201008040201ul;
+      const ulong mask  = 0x8080808080808080ul;
+      chunk             = BinaryPrimitives.ReverseEndianness(((slice * magic) & mask) >> 7);
 #if !NETSTANDARD
     assign:
 #endif
