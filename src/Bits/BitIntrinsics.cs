@@ -20,10 +20,10 @@ public static partial class BitOps {
    */
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static ulong Bzhi64(ulong value, ulong index) {
+  public static ulong Bzhi64(ulong value, int index) {
 #if !NETSTANDARD
     if (Bmi2.X64.IsSupported) {
-      return Bmi2.X64.ZeroHighBits(value, index);
+      return Bmi2.X64.ZeroHighBits(value, (ulong)index);
     }
 #endif
     return Bzhi64Sw(value, index);
@@ -41,8 +41,8 @@ public static partial class BitOps {
    */
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static ulong Bzhi64Sw(ulong value, ulong index) {
-    ulong mask = index >= 64 ? ~0ul : (1ul << (int)index) - 1;
+  public static ulong Bzhi64Sw(ulong value, int index) {
+    ulong mask = index >= 64 ? ~0ul : (1ul << index) - 1;
     return value & mask;
   }
 
@@ -60,10 +60,10 @@ public static partial class BitOps {
    */
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static uint Bzhi32(uint value, uint index) {
+  public static uint Bzhi32(uint value, int index) {
 #if !NETSTANDARD
     if (Bmi2.IsSupported) {
-      return Bmi2.ZeroHighBits(value, index);
+      return Bmi2.ZeroHighBits(value, (uint)index);
     }
 #endif
     return Bzhi32Sw(value, index);
@@ -81,8 +81,8 @@ public static partial class BitOps {
    */
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static uint Bzhi32Sw(uint value, uint index) {
-    uint mask = index >= 32 ? ~0u : (1u << (int)index) - 1;
+  public static uint Bzhi32Sw(uint value, int index) {
+    uint mask = index >= 32 ? ~0u : (1u << index) - 1;
     return value & mask;
   }
 

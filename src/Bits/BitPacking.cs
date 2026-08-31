@@ -109,13 +109,13 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector<ulong> ToVectorU64(ulong bitmask, int idx) {
-    return MmMovmEpi64Emu(Bzhi64(bitmask >> idx, (ulong)Vector<ulong>.Count));
+    return MmMovmEpi64Emu(Bzhi64(bitmask >> idx, Vector<ulong>.Count));
   }
 
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector<int> ToVectorI32(ulong bitmask, int idx) {
-    uint slice = (uint)Bzhi64(bitmask >> idx, (ulong)Vector<uint>.Count);
+    uint slice = (uint)Bzhi64(bitmask >> idx, Vector<uint>.Count);
     return Vector.AsVectorInt32(MmMovmEpi32Emu(slice));
   }
 }

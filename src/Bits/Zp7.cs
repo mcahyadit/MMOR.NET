@@ -117,7 +117,7 @@ public static partial class Zp7 {
 
   [Pure]
   public static ulong Pdep64Pre(ulong value, ulong mask, Zp7Masks ppp) {
-    value = BitOps.Bzhi64(value, (ulong)BitOperations.PopCount(mask));
+    value = BitOps.Bzhi64(value, BitOperations.PopCount(mask));
     for (int i = kBitLen - 1; i >= 0; --i) {
       int shift = 1 << i;
       ulong bit = ppp[i] >> shift;
