@@ -8,6 +8,10 @@ using MMOR.NET.Collections;
 using MMOR.Roslyn;
 using System.Collections.Immutable;
 
+#if !NETSTANDARD
+using System.Runtime.Intrinsics.X86;
+#endif
+
 #if UNITY_5_3_OR_NEWER || UNITY_2017_1_OR_NEWER
 using Unity.Mathematics;
 #else
@@ -130,6 +134,12 @@ public static partial class Utilities {
 
     int count  = PopCount(bitmask);
     int target = rng.NextInt(0, count);
+#if !NETSTANDARD
+    if (Bmi2.X64.IsSupported) {
+      ulong mask = Bmi2.X64.ParallelBitDeposit(1ul << target, bitmask);
+      return BitOperations.TrailingZeroCount(mask);
+    }
+#endif
     for (int i = 0; i < target; ++i) {
       bitmask &= bitmask - 1;
     }
