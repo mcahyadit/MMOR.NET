@@ -66,6 +66,17 @@ public partial class RunningStatisticsAdvanced : RunningStatistics {
   protected double mean_harmonics_ = 0;
   protected double mean_rms_       = 0;
 
+  public override void Clear() {
+    base.Clear();
+
+    moment_3_ = 0;
+    moment_4_ = 0;
+
+    mean_geometric_ = 0;
+    mean_harmonics_ = 0;
+    mean_rms_       = 0;
+  }
+
   //=======================
   // █ █▄░█ █▀█ █░█ ▀█▀ █▀
   // █ █░▀█ █▀▀ █▄█ ░█░ ▄█
