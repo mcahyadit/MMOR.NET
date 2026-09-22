@@ -640,7 +640,7 @@ public partial class RunningStatisticsTest {
           kurtosis_precision      = 13,
           geometric_mean          = double.NaN,
           harmonic_mean           = 0.924603010761751,
-          harmonic_mean_precision = 14,
+          harmonic_mean_precision = 13,
           root_mean_square        = 0.9686101672681311,
         },
 
