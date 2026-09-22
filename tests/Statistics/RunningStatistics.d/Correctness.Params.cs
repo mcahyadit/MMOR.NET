@@ -2,6 +2,34 @@ using Xunit;
 
 namespace MMOR.NET.Statistics {
 public partial class RunningStatisticsTest {
+  static readonly double[] kHeavyTailValues = BuildHeavyTailValues();
+  static readonly ulong[] kHeavyTailCounts  = BuildHeavyTailCounts();
+
+  static double[] BuildHeavyTailValues() {
+    double[] v = new double[155];
+    for (int i = 0; i < 150; ++i) {
+      v[i] = 0.5 + 0.005 * i;
+    }
+    v[150] = 20.0;
+    v[151] = 40.0;
+    v[152] = 80.0;
+    v[153] = 160.0;
+    v[154] = 320.0;
+    return v;
+  }
+
+  static ulong[] BuildHeavyTailCounts() {
+    ulong[] c = new ulong[155];
+    for (int i = 0; i < 150; ++i) {
+      c[i] = 10_000;
+    }
+    c[150] = 1;
+    c[151] = 2;
+    c[152] = 4;
+    c[153] = 8;
+    c[154] = 16;
+    return c;
+  }
   public static readonly TheoryData<CorrectnessParam> kCorrectnessParams =
       [
         new CorrectnessParam {
@@ -614,6 +642,28 @@ public partial class RunningStatisticsTest {
           harmonic_mean           = 0.924603010761751,
           harmonic_mean_precision = 14,
           root_mean_square        = 0.9686101672681311,
+        },
+
+        new CorrectnessParam {
+          identifier                 = "heavy-tail-155",
+          values                     = kHeavyTailValues,
+          count                      = 155.0,
+          mean                       = 4.844354838709677,
+          variance                   = 862.881262568077,
+          variance_precision         = 14,
+          path_variance_precision    = 11,
+          path_skewness_precision    = 12,
+          path_kurtosis_precision    = 12,
+          skewness                   = 9.213245519948039,
+          skewness_precision         = 13,
+          kurtosis                   = 91.95339472177086,
+          kurtosis_precision         = 13,
+          geometric_mean             = 0.9780010289916555,
+          geometric_mean_precision   = 14,
+          harmonic_mean              = 0.8425908639408342,
+          harmonic_mean_precision    = 14,
+          root_mean_square           = 29.677972647805156,
+          root_mean_square_precision = 14,
         },
 
       ];

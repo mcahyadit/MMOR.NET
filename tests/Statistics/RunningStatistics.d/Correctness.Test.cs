@@ -11,7 +11,10 @@ public partial class RunningStatisticsTest {
     public required double mean { get; init; }
     public int mean_precision { get; init; } = 15;
     public required double variance { get; init; }
-    public int variance_precision { get; init; } = 15;
+    public int variance_precision { get; init; }       = 15;
+    public int path_variance_precision { get; init; }  = 13;
+    public int? path_skewness_precision { get; init; } = null;
+    public int? path_kurtosis_precision { get; init; } = null;
     public required double skewness { get; init; }
     public int skewness_precision { get; init; } = 15;
     public required double kurtosis { get; init; }

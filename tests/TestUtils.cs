@@ -1,3 +1,4 @@
+using System;
 using MMOR.NET.Mathematics;
 using Xunit;
 using Xunit.Sdk;
@@ -12,6 +13,11 @@ public static class TestUtils {
 
     if (!MathExt.Approximately(expected, actual))
       throw EqualException.ForMismatchedValues(expected, actual);
+  }
+
+  public static void AssertApproximately(double expected, double actual, double tolerance) {
+    double scale = Math.Max(1.0, Math.Max(Math.Abs(expected), Math.Abs(actual)));
+    Assert.Equal(expected, actual, tolerance * scale);
   }
 }
 }
