@@ -1,39 +1,39 @@
 namespace MMOR.NET.Statistics {
 public static partial class RunningStatisticsV2Extensions {
   public static void Clear(this RunningStatisticsV2 self) {
-    self.Count = 0;
-    self.Mean  = 0;
+    self.Count       = 0;
+    self.moment_1st_ = 0;
 
     self.moment_2nd_ = 0;
     self.moment_3rd_ = 0;
     self.moment_4th_ = 0;
 
-    self.MinValue = double.MaxValue;
-    self.MinCount = 0;
-    self.MaxValue = double.MinValue;
-    self.MaxCount = 0;
+    self.min_value_ = double.MaxValue;
+    self.min_count_ = 0;
+    self.max_value_ = double.MinValue;
+    self.max_count_ = 0;
   }
 
   public static void Push(this RunningStatisticsV2 self, RunningStatisticsV2 other) {
     if (other.Count == 0) {
       return;
     } else if (self.Count == 0) {
-      self.Count = other.Count;
-      self.Mean  = other.Mean;
+      self.Count       = other.Count;
+      self.moment_1st_ = other.moment_1st_;
 
       self.moment_2nd_ = other.moment_2nd_;
       self.moment_3rd_ = other.moment_3rd_;
       self.moment_4th_ = other.moment_4th_;
 
-      self.MinValue = other.MinValue;
-      self.MinCount = other.MinCount;
-      self.MaxValue = other.MaxValue;
-      self.MaxCount = other.MaxCount;
+      self.min_value_ = other.min_value_;
+      self.min_count_ = other.min_count_;
+      self.max_value_ = other.max_value_;
+      self.max_count_ = other.max_count_;
       return;
     }
 
     ulong total_count = self.Count + other.Count;
-    double delta      = other.Mean - self.Mean;
+    double delta      = other.moment_1st_ - self.moment_1st_;
     double delta2     = delta * delta;
     double delta3     = delta2 * delta;
     double delta4     = delta2 * delta2;
@@ -45,7 +45,7 @@ public static partial class RunningStatisticsV2Extensions {
     double total_count_3 = total_count_2 * total_count;
 
     // Overflow safety over (self.Mean * self.Count + other.Mean * other.Count) / total_count)
-    double moment_1st = self.Mean + delta * other.Count / total_count;
+    double moment_1st = self.moment_1st_ + delta * other.Count / total_count;
     double moment_2nd = self.moment_2nd_ + other.moment_2nd_  //
                         + delta2 * self.Count * other.Count / total_count;
     double moment_3rd = self.moment_3rd_ + other.moment_3rd_                               //
@@ -66,23 +66,23 @@ public static partial class RunningStatisticsV2Extensions {
               total_count;
 
     self.Count       = total_count;
-    self.Mean        = moment_1st;
+    self.moment_1st_ = moment_1st;
     self.moment_2nd_ = moment_2nd;
     self.moment_3rd_ = moment_3rd;
     self.moment_4th_ = moment_4th;
 
-    if (other.MinValue < self.MinValue) {
-      self.MinValue = other.MinValue;
-      self.MinCount = other.MinCount;
-    } else if (other.MinValue == self.MinValue) {
-      self.MinCount += other.MinCount;
+    if (other.min_value_ < self.min_value_) {
+      self.min_value_ = other.min_value_;
+      self.min_count_ = other.min_count_;
+    } else if (other.min_value_ == self.min_value_) {
+      self.min_count_ += other.min_count_;
     }
 
-    if (other.MaxValue > self.MaxValue) {
-      self.MaxValue = other.MaxValue;
-      self.MaxCount = other.MaxCount;
-    } else if (other.MaxValue == self.MaxValue) {
-      self.MaxCount += other.MaxCount;
+    if (other.max_value_ > self.max_value_) {
+      self.max_value_ = other.max_value_;
+      self.max_count_ = other.max_count_;
+    } else if (other.max_value_ == self.max_value_) {
+      self.max_count_ += other.max_count_;
     }
   }
 }
