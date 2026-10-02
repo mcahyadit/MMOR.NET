@@ -1,5 +1,6 @@
 using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Numerics;
 using BenchmarkDotNet.Attributes;
 using MMOR.NET.Statistics;
 
@@ -9,8 +10,9 @@ public class RunningStatisticsBench {
   [Params(1024, 65536, 1048576)]
   public int N;
 
-  private double[] values_ = null!;
-  private ulong[] counts_  = null!;
+  private double[] values_  = null!;
+  private ulong[] counts_   = null!;
+  private List<int> strides = null!;
 
   [GlobalSetup]
   public void Setup() {
@@ -20,6 +22,15 @@ public class RunningStatisticsBench {
     for (int i = 0; i < N; ++i) {
       values_[i] = rng.NextDouble() * 1000.0;
       counts_[i] = (ulong)rng.Next(1, 1000);
+    }
+
+    int n = N;
+
+    strides = new();
+    while (n > 0) {
+      int stride = rng.Next(3, Vector<double>.Count * 3);
+      strides.Add(Math.Min(stride, n));
+      n -= stride;
     }
   }
 
@@ -32,6 +43,16 @@ public class RunningStatisticsBench {
     return stats;
   }
 
+  [Benchmark]
+  public RunningStatistics Push_Span_Strides() {
+    var stats = new RunningStatistics();
+    int i     = 0;
+    foreach (int stride in strides) {
+      stats.Push(values_.AsSpan().Slice(i, stride));
+      i += stride;
+    }
+    return stats;
+  }
   [Benchmark]
   public RunningStatistics Push_Span() {
     var stats = new RunningStatistics();
@@ -52,6 +73,17 @@ public class RunningStatisticsBench {
   public RunningStatistics Push_Span_WithCount() {
     var stats = new RunningStatistics();
     stats.Push(values_.AsSpan(), counts_.AsSpan());
+    return stats;
+  }
+
+  [Benchmark]
+  public RunningStatistics Push_Span_WithCount_Strides() {
+    var stats = new RunningStatistics();
+    int i     = 0;
+    foreach (int stride in strides) {
+      stats.Push(values_.AsSpan().Slice(i, stride));
+      i += stride;
+    }
     return stats;
   }
 }

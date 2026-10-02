@@ -1,5 +1,6 @@
 using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Numerics;
 using BenchmarkDotNet.Attributes;
 using MMOR.NET.Statistics;
 
@@ -9,8 +10,9 @@ public class RunningStatisticsAdvancedBench {
   [Params(1024, 65536, 1048576)]
   public int N;
 
-  private double[] values_ = null!;
-  private ulong[] counts_  = null!;
+  private double[] values_  = null!;
+  private ulong[] counts_   = null!;
+  private List<int> strides = null!;
 
   [GlobalSetup]
   public void Setup() {
@@ -18,9 +20,17 @@ public class RunningStatisticsAdvancedBench {
     counts_ = new ulong[N];
     var rng = new System.Random(42);
     for (int i = 0; i < N; ++i) {
-      // 1.0 offset: GeometricMean / HarmonicMean require value > 0
-      values_[i] = rng.NextDouble() * 1000.0 + 1.0;
+      values_[i] = rng.NextDouble() * 1000.0;
       counts_[i] = (ulong)rng.Next(1, 1000);
+    }
+
+    int n = N;
+
+    strides = new();
+    while (n > 0) {
+      int stride = rng.Next(3, Vector<double>.Count * 3);
+      strides.Add(Math.Min(stride, n));
+      n -= stride;
     }
   }
 
@@ -29,6 +39,17 @@ public class RunningStatisticsAdvancedBench {
     var stats = new RunningStatisticsAdvanced();
     for (int i = 0; i < values_.Length; ++i) {
       stats.Push(values_[i]);
+    }
+    return stats;
+  }
+
+  [Benchmark]
+  public RunningStatisticsAdvanced Push_Span_Strides() {
+    var stats = new RunningStatisticsAdvanced();
+    int i     = 0;
+    foreach (int stride in strides) {
+      stats.Push(values_.AsSpan().Slice(i, stride));
+      i += stride;
     }
     return stats;
   }
@@ -52,9 +73,18 @@ public class RunningStatisticsAdvancedBench {
   [Benchmark]
   public RunningStatisticsAdvanced Push_Span_WithCount() {
     var stats = new RunningStatisticsAdvanced();
-#pragma warning disable CS0618
     stats.Push(values_.AsSpan(), counts_.AsSpan());
-#pragma warning restore CS0618
+    return stats;
+  }
+
+  [Benchmark]
+  public RunningStatisticsAdvanced Push_Span_WithCount_Strides() {
+    var stats = new RunningStatisticsAdvanced();
+    int i     = 0;
+    foreach (int stride in strides) {
+      stats.Push(values_.AsSpan().Slice(i, stride));
+      i += stride;
+    }
     return stats;
   }
 }
