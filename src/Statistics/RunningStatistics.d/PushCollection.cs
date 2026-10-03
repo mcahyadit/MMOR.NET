@@ -2,28 +2,28 @@ using System;
 using System.Collections.Generic;
 
 namespace MMOR.NET.Statistics {
-public static partial class RunningStatisticsV2Extensions {
-  public static void Push(this RunningStatisticsV2 self, IEnumerable<double> values) {
+public static partial class RunningStatisticsExtensions {
+  public static void Push(this RunningStatistics self, IEnumerable<double> values) {
     foreach (double value in values) {
       Push(self, value);
     }
   }
 
-  public static void Push<T>(this RunningStatisticsV2 self, IEnumerable<T> values)
+  public static void Push<T>(this RunningStatistics self, IEnumerable<T> values)
       where T : struct, IConvertible {
     foreach (T value in values) {
       Push(self, value.ToDouble(null));
     }
   }
 
-  public static void Push(this RunningStatisticsV2 self,
+  public static void Push(this RunningStatistics self,
       IEnumerable<KeyValuePair<double, ulong>> values) {
     foreach ((double value, ulong count) in values) {
       Push(self, value, count);
     }
   }
 
-  public static void Push<TValue, TCount>(this RunningStatisticsV2 self,
+  public static void Push<TValue, TCount>(this RunningStatistics self,
       IEnumerable<KeyValuePair<TValue, TCount>> values)
       where TValue : struct, IConvertible
       where TCount : struct, IConvertible {
@@ -32,13 +32,13 @@ public static partial class RunningStatisticsV2Extensions {
     }
   }
 
-  public static void Push(this RunningStatisticsV2 self, IEnumerable<(double, ulong)> values) {
+  public static void Push(this RunningStatistics self, IEnumerable<(double, ulong)> values) {
     foreach ((double value, ulong count) in values) {
       Push(self, value, count);
     }
   }
 
-  public static void Push<TValue, TCount>(this RunningStatisticsV2 self,
+  public static void Push<TValue, TCount>(this RunningStatistics self,
       IEnumerable<(TValue, TCount)> values)
       where TValue : struct, IConvertible
       where TCount : struct, IConvertible {

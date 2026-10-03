@@ -40,20 +40,20 @@ public partial class RunningStatisticsTest {
       throw new ArgumentException(string.Format("[ERROR]: values.Length: {0} != counts.Length: {1}",
           p.values.Length, p.counts.Length));
 
-    RunningStatisticsAdvanced seq = new();
+    RunningStatistics seq = new();
     for (int i = 0; i < p.values.Length; ++i) {
       PushAt(seq, p.values, p.counts, i);
     }
 
-    RunningStatisticsAdvanced rev = new();
+    RunningStatistics rev = new();
     for (int i = p.values.Length - 1; i >= 0; --i) {
       PushAt(rev, p.values, p.counts, i);
     }
 
-    RunningStatisticsAdvanced shuf_a = new();
-    RunningStatisticsAdvanced shuf_b = new();
-    int[] perm_a                     = p.Permutation(p.seed_a);
-    int[] perm_b                     = p.Permutation(p.seed_b);
+    RunningStatistics shuf_a = new();
+    RunningStatistics shuf_b = new();
+    int[] perm_a             = p.Permutation(p.seed_a);
+    int[] perm_b             = p.Permutation(p.seed_b);
     for (int i = 0; i < p.values.Length; ++i) {
       PushAt(shuf_a, p.values, p.counts, perm_a[i]);
       PushAt(shuf_b, p.values, p.counts, perm_b[i]);
@@ -69,7 +69,7 @@ public partial class RunningStatisticsTest {
     }
   }
 
-  static void PushAt(RunningStatisticsAdvanced s, double[] values, ulong[] counts, int i) {
+  static void PushAt(RunningStatistics s, double[] values, ulong[] counts, int i) {
     if (counts.Length > 0) {
       s.Push(values[i], counts[i]);
       return;
@@ -77,17 +77,16 @@ public partial class RunningStatisticsTest {
     s.Push(values[i]);
   }
 
-  void AssertEquivalent(RunningStatisticsAdvanced a, RunningStatisticsAdvanced b, OrderParam p) {
+  void AssertEquivalent(RunningStatistics a, RunningStatistics b, OrderParam p) {
     AssertStat(a.Count, b.Count, p, p.precision);
     AssertStat(a.Mean, b.Mean, p, p.precision);
     AssertStat(a.Variance, b.Variance, p, p.variance_precision);
     AssertStat(a.Skewness, b.Skewness, p, p.skewness_precision);
     AssertStat(a.Kurtosis, b.Kurtosis, p, p.kurtosis_precision);
-    AssertStat(a.GeometricMean, b.GeometricMean, p, p.precision);
-    AssertStat(a.HarmonicMean, b.HarmonicMean, p, p.precision);
-    AssertStat(a.RootMeanSquare, b.RootMeanSquare, p, p.precision);
-    AssertStat(a.Minimum, b.Minimum, p, p.precision);
-    AssertStat(a.Maximum, b.Maximum, p, p.precision);
+    AssertStat(a.MinValue, b.MinValue, p, p.precision);
+    AssertStat(a.MaxValue, b.MaxValue, p, p.precision);
+    Assert.Equal(a.MinCount, b.MinCount);
+    Assert.Equal(a.MaxCount, b.MaxCount);
   }
 
   static void AssertStat(double expected, double actual, OrderParam p, int precision) {

@@ -18,13 +18,13 @@ public partial class RunningStatisticsTest {
   [Theory]
   [MemberData(nameof(kSegmentTestParams))]
   public void SegmentTest(SegmentParam p) {
-    RunningStatisticsAdvanced a = new();
+    RunningStatistics a = new();
     for (int i = 0; i < p.values.Length; ++i) {
       a.Push(p.values[i]);
     }
 
-    RunningStatisticsAdvanced f = new();
-    RunningStatisticsAdvanced g = new();
+    RunningStatistics f = new();
+    RunningStatistics g = new();
 
     int n      = p.values.Length;
     int chunk  = n / p.segments;
@@ -39,8 +39,6 @@ public partial class RunningStatisticsTest {
 
       f.Push(g);
       g.Clear();
-
-      Assert.Equal(0UL, g.Count_uint64);
     }
 
     try {
@@ -49,9 +47,10 @@ public partial class RunningStatisticsTest {
       TestUtils.AssertApproximately(a.Variance, f.Variance, p.variance_precision);
       TestUtils.AssertApproximately(a.Skewness, f.Skewness, p.skewness_precision);
       TestUtils.AssertApproximately(a.Kurtosis, f.Kurtosis, p.kurtosis_precision);
-      TestUtils.AssertApproximately(a.GeometricMean, f.GeometricMean, p.precision);
-      TestUtils.AssertApproximately(a.HarmonicMean, f.HarmonicMean, p.precision);
-      TestUtils.AssertApproximately(a.RootMeanSquare, f.RootMeanSquare, p.precision);
+      TestUtils.AssertApproximately(a.MinValue, f.MinValue, p.precision);
+      TestUtils.AssertApproximately(a.MaxValue, f.MaxValue, p.precision);
+      Assert.Equal(a.MinCount, f.MinCount);
+      Assert.Equal(a.MaxCount, f.MaxCount);
     } catch {
       Console.Error.WriteLine(p.identifier);
       throw;

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace MMOR.NET.Statistics {
@@ -33,7 +35,10 @@ public partial class RunningStatisticsTest {
                 -562.7240503927933, 10.710576206724795, -946.9280606322727, -602.324698626703,
                 299.76887555904636
               ],
-          harmonic_mean_precision = 13,
+          mean_precision               = 12,
+          standard_deviation_precision = 12,
+          skewness_precision           = 12,
+          kurtosis_precision           = 12,
         },
 
         new SimdParam {
@@ -43,7 +48,10 @@ public partial class RunningStatisticsTest {
                 89.88296120643327, -559.1187559186067, 178.53136775181747, 618.8609133556533,
                 -987.002480643878, 611.6385036656159
               ],
-          harmonic_mean_precision = 12,
+          mean_precision               = 13,
+          standard_deviation_precision = 13,
+          skewness_precision           = 13,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
@@ -53,6 +61,10 @@ public partial class RunningStatisticsTest {
                 396.2787899764537, -319.4989669640163, -689.0410003764368, 914.4261444135625,
                 -326.8109097747465, -814.5083132397042, -806.567246333072
               ],
+          mean_precision               = 13,
+          standard_deviation_precision = 13,
+          skewness_precision           = 13,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
@@ -62,12 +74,18 @@ public partial class RunningStatisticsTest {
                 694.9887326949195, 207.4520627337822, 614.2565465487603, 459.46357338763573,
                 72.45618290940138, 946.2315279587413, -242.93124558329305, 104.0812625464539
               ],
-          mean_precision          = 13,
-          harmonic_mean_precision = 12,
+          mean_precision               = 13,
+          standard_deviation_precision = 13,
+          skewness_precision           = 13,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
-          identifier = "gauss1k",
+          identifier                   = "gauss1k",
+          mean_precision               = 12,
+          standard_deviation_precision = 12,
+          skewness_precision           = 12,
+          kurtosis_precision           = 12,
           values =
               [
                 0.664265899612895, -1.2190747412956953, 0.8473614233480004, -1.0022028242423497,
@@ -324,9 +342,6 @@ public partial class RunningStatisticsTest {
                 0.41635889052149266, -0.002545563200592299, 0.6192887662137895,
                 -0.12117985080724364, -0.19378340374814312, 1.7589821689866296, 0.1647154399018857
               ],
-          standard_deviation_precision = 14,
-          root_mean_square_precision   = 14,
-          kurtosis_precision           = 13,
         },
 
         new SimdParam {
@@ -505,7 +520,6 @@ public partial class RunningStatisticsTest {
                 -1.7641425243068728e+277, -1.341332581018697e+148, 4.62144794236968e+248,
                 -9.533137690584126e-63, -1.7683797320924628e+31
               ],
-          mean_precision = -1,
         },
 
         new SimdParam {
@@ -585,9 +599,10 @@ public partial class RunningStatisticsTest {
                 1.2735274795058853, 0.5863855224333062, 8.689193591525492e-11, -1284507.2172873416,
                 868.2736276961188, -1.2324633367392666e-05, 5.063778827518041e-06
               ],
-          mean_precision               = 7,
+          mean_precision = -1,
+
           standard_deviation_precision = 5,
-          root_mean_square_precision   = 12,
+          skewness_precision           = 14,
           kurtosis_precision           = 13,
         },
 
@@ -662,9 +677,7 @@ public partial class RunningStatisticsTest {
                 7.41698292706009, 0.0, -3.146602301419998, 7.856902466210862, -7.1355169540072305,
                 -6.392864617863124, 0.0, 9.732807453993598, -8.839728235496061
               ],
-          root_mean_square_precision = 14,
-          harmonic_mean_precision    = 14,
-          kurtosis_precision         = 14,
+          kurtosis_precision = 14,
         },
 
         new SimdParam {
@@ -993,11 +1006,10 @@ public partial class RunningStatisticsTest {
                 -366520881925.8854, 116700884529.3794, 289291959355.7346, -305364522255.5792,
                 783591902832.9683, 466377663507.5405, -957294334631.4136, -244462127116.807
               ],
-          mean_precision               = 4,
+          mean_precision               = 3,
           standard_deviation_precision = 3,
-          harmonic_mean_precision      = 3,
-          skewness_precision           = 14,
-          kurtosis_precision           = 14,
+          skewness_precision           = 13,
+          kurtosis_precision           = 13,
         },
 
         new SimdParam {
@@ -1009,8 +1021,6 @@ public partial class RunningStatisticsTest {
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25,
                 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25, 7.25
               ],
-          geometric_mean_precision = 13,
-          harmonic_mean_precision  = 14,
         },
 
         new SimdParam {
@@ -3518,15 +3528,18 @@ public partial class RunningStatisticsTest {
                 -82.25796296641164, 16.575841947390458, 84.96221240710435, -44.466008245806535,
                 -14.578856980235756, -30.20823756656823, -28.620064626146274, -9.528838759233267
               ],
-          mean_precision               = 14,
+          mean_precision               = 13,
           standard_deviation_precision = 13,
-          root_mean_square_precision   = 12,
-          harmonic_mean_precision      = 13,
+          skewness_precision           = 13,
           kurtosis_precision           = 13,
         },
 
         new SimdParam {
-          identifier = "exp-tail",
+          identifier                   = "exp-tail",
+          mean_precision               = 13,
+          standard_deviation_precision = 13,
+          skewness_precision           = 13,
+          kurtosis_precision           = 13,
           values =
               [
                 -1.1905269583766953, -1.3428544821313646, -1.100509871974682, -0.1888245307505257,
@@ -3563,10 +3576,114 @@ public partial class RunningStatisticsTest {
                 1.2769884889555296, -0.4154104755708711, -0.34790366820020496, 1.1046234417655039,
                 0.4736440603394573, 1.5706681220871839, -0.7194503867819724
               ],
-          harmonic_mean_precision = 14,
-          kurtosis_precision      = 14,
         },
 
       ];
+
+  /// <summary>2^-53, the scale that maps the top 53 bits of a ulong into [0, 1).</summary>
+  const double kUniformScaleD = 1.0 / 9007199254740992.0;
+
+  /**
+   * <summary>
+   *  Displaced fixtures. Every sample carries the same offset, so the mean dominates each one and
+   *  the raw power sums the vector reduction accumulates are recovered by subtraction, which is
+   *  where the significand used to run out.
+   * </summary>
+   */
+  public static readonly TheoryData<SimdParam> kSimdOffsetParams = [
+        ..BuildOffsetParams(),
+  ];
+
+  /**
+   * <summary>
+   *  The same sweep with only the leading sample displaced. On a fresh span push that sample is
+   *  pushed scalar first and so becomes the running mean, which is exactly the value the vector
+   *  reduction shifts by, so this is the case where the choice of origin is visible.
+   * </summary>
+   */
+  public static readonly TheoryData<SimdParam> kSimdOutlierParams = [
+        ..BuildOutlierParams(),
+  ];
+
+  static IEnumerable<SimdParam> BuildOffsetParams() {
+    //  sigma stays at ~1 across the sweep, so it is the offset alone that decides how much of the
+    //  significand the mean consumes. The sweep stops at 2^32, past which a double no longer
+    //  resolves the spread at all and the comparison would be measuring the input.
+    foreach (int exponent in new[] { 0, 8, 16, 20, 24, 28, 32 }) {
+      yield return new SimdParam {
+        identifier = string.Format("offset-2^{0}", exponent),
+        offset     = Math.Pow(2, exponent),
+        length     = 1024,
+      };
+    }
+  }
+
+  static IEnumerable<SimdParam> BuildOutlierParams() {
+    foreach (int exponent in new[] { 8, 16, 20, 24, 28, 32 }) {
+      yield return new SimdParam {
+        identifier   = string.Format("outlier-first-2^{0}", exponent),
+        offset       = 0,
+        first_sample = Math.Pow(2, exponent),
+        length       = 1024,
+      };
+    }
+  }
+
+  /// <summary>
+  ///  Deterministic standard normal samples rounded to whole units and shifted by
+  ///  <paramref name="offset"/>; the rounding keeps sigma ~ 1 while making the fixture exact. <br/>
+  ///  Uses SplitMix64 instead of <see cref="System.Random" /> so the bit pattern of the fixture
+  ///  cannot drift with the runtime, which matters because these assertions are about rounding.
+  /// </summary>
+  static double[] BuildNormalSamples(int length, ulong seed, double offset) {
+    double[] values = new double[length];
+    ulong state     = seed;
+    double spare    = 0;
+    bool has_spare  = false;
+
+    for (int i = 0; i < length; ++i) {
+      double sample;
+
+      if (has_spare) {
+        has_spare = false;
+        sample    = spare;
+      } else {
+        double u1        = Math.Max(NextUniform(ref state), double.Epsilon);
+        double u2        = NextUniform(ref state);
+        double magnitude = Math.Sqrt(-2.0 * Math.Log(u1));
+        double angle     = 2.0 * Math.PI * u2;
+
+        sample    = magnitude * Math.Sin(angle);
+        spare     = magnitude * Math.Cos(angle);
+        has_spare = true;
+      }
+
+      values[i] = offset + Math.Round(sample);
+    }
+
+    return values;
+  }
+
+  /// <summary>
+  ///  Builds the fixture for <paramref name="p" />, then applies
+  ///  <see cref="SimdParam.first_sample" /> where the case displaces the leading sample.
+  /// </summary>
+  static double[] BuildSamples(SimdParam p) {
+    double[] values = BuildNormalSamples(p.length, p.seed, p.offset);
+
+    if (p.first_sample is {} first)
+      values[0] = first;
+
+    return values;
+  }
+
+  static double NextUniform(ref ulong state) {
+    state += 0x9E3779B97F4A7C15;
+    ulong z = state;
+    z       = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
+    z       = (z ^ (z >> 27)) * 0x94D049BB133111EB;
+    z ^= z >> 31;
+    return (z >> 11) * kUniformScaleD;
+  }
 }
 }

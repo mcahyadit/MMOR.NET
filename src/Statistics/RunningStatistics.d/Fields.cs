@@ -2,70 +2,56 @@ using System;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
-public partial class RunningStatisticsV2 {
+public partial class RunningStatistics {
   public ulong Count      = 0;
   public double CountF64 => Count;
+  public MomentsRecord moments_;
+  public MinMaxRecord min_max_;
 
   public double Mean {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
       if (Count == 0)
         return double.NaN;
-      return moment_1st_;
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    set {
-      moment_1st_ = value;
+      return moments_.Raw1st;
     }
   }
   public double Sum {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => moment_1st_ * Count;
+    get => moments_.Raw1st * Count;
   }
 
-  public double moment_1st_ = 0;
-  /// <summary> WARNING: Modify at your own risk </summary>
-  public double moment_2nd_ = 0;
-  /// <summary> WARNING: Modify at your own risk </summary>
-  public double moment_3rd_ = 0;
-  /// <summary> WARNING: Modify at your own risk </summary>
-  public double moment_4th_ = 0;
-
-  public double min_value_ = double.MaxValue;
   public double MinValue {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
       if (Count == 0)
         return double.NaN;
-      return min_value_;
+      return min_max_.MinValue;
     }
   }
-  public ulong min_count_ = 0;
-  public double MinCount {
+  public ulong MinCount {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
       if (Count == 0)
-        return double.NaN;
-      return min_count_;
+        return 0;
+      return min_max_.MinCount;
     }
   }
 
-  public double max_value_ = double.MinValue;
   public double MaxValue {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
       if (Count == 0)
         return double.NaN;
-      return max_value_;
+      return min_max_.MaxValue;
     }
   }
-  public ulong max_count_ = 0;
-  public double MaxCount {
+  public ulong MaxCount {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
       if (Count == 0)
-        return double.NaN;
-      return max_count_;
+        return 0;
+      return min_max_.MaxCount;
     }
   }
 
@@ -74,7 +60,7 @@ public partial class RunningStatisticsV2 {
     get {
       if (Count < 2)
         return double.NaN;
-      return moment_2nd_ / (Count - 1);
+      return moments_.Central2nd / (Count - 1);
     }
   }
 
@@ -83,7 +69,7 @@ public partial class RunningStatisticsV2 {
     get {
       if (Count < 2)
         return double.NaN;
-      return Math.Sqrt(moment_2nd_ / (Count - 1));
+      return Math.Sqrt(moments_.Central2nd / (Count - 1));
     }
   }
   public double StandardError {
@@ -91,12 +77,16 @@ public partial class RunningStatisticsV2 {
     get {
       if (Count < 2)
         return double.NaN;
-      return Math.Sqrt(moment_2nd_ / (CountF64 * (Count - 1)));
+      return Math.Sqrt(moments_.Central2nd / (CountF64 * (Count - 1)));
     }
   }
   public double CoefficientOfVariation {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => StandardDeviation / moment_1st_;
+    get {
+      if (Count < 2)
+        return double.NaN;
+      return Math.Sqrt(moments_.Central2nd / (Count - 1)) / moments_.Raw1st;
+    }
   }
 
   public double Skewness {
@@ -104,10 +94,10 @@ public partial class RunningStatisticsV2 {
     get {
       if (Count < 3)
         return double.NaN;
-      if (moment_2nd_ == 0)
+      if (moments_.Central2nd == 0)
         return 0;
-      return Count * moment_3rd_ * Math.Sqrt(moment_2nd_ / (Count - 1)) /
-             (moment_2nd_ * moment_2nd_ * (Count - 2)) * (Count - 1);
+      return Count * moments_.Central3rd * Math.Sqrt(moments_.Central2nd / (Count - 1)) /
+             (moments_.Central2nd * moments_.Central2nd * (Count - 2)) * (Count - 1);
     }
   }
 
@@ -121,10 +111,11 @@ public partial class RunningStatisticsV2 {
     get {
       if (Count < 4)
         return double.NaN;
-      if (moment_2nd_ == 0)
+      if (moments_.Central2nd == 0)
         return 0;
-      return (CountF64 * Count - 1) / ((Count - 2) * (Count - 3)) *
-             (Count * moment_4th_ / (moment_2nd_ * moment_2nd_) - 3 + 6.0 / (Count + 1));
+      return (CountF64 * Count - 1) / ((CountF64 - 2) * (Count - 3)) *
+             (Count * moments_.Central4th / (moments_.Central2nd * moments_.Central2nd) - 3 +
+                 6.0 / (Count + 1));
     }
   }
 }

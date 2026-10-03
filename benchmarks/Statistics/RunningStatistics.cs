@@ -53,6 +53,7 @@ public class RunningStatisticsBench {
     }
     return stats;
   }
+
   [Benchmark]
   public RunningStatistics Push_Span() {
     var stats = new RunningStatistics();
@@ -61,7 +62,7 @@ public class RunningStatisticsBench {
   }
 
   [Benchmark]
-  public RunningStatistics Push_Scalar_WithCount() {
+  public RunningStatistics Push_WithCount_Scalar() {
     var stats = new RunningStatistics();
     for (int i = 0; i < values_.Length; ++i) {
       stats.Push(values_[i], counts_[i]);
@@ -70,20 +71,20 @@ public class RunningStatisticsBench {
   }
 
   [Benchmark]
-  public RunningStatistics Push_Span_WithCount() {
+  public RunningStatistics Push_WithCount_Span_Strides() {
     var stats = new RunningStatistics();
-    stats.Push(values_.AsSpan(), counts_.AsSpan());
+    int i     = 0;
+    foreach (int stride in strides) {
+      stats.Push(values_.AsSpan().Slice(i, stride), counts_.AsSpan().Slice(i, stride));
+      i += stride;
+    }
     return stats;
   }
 
   [Benchmark]
-  public RunningStatistics Push_Span_WithCount_Strides() {
+  public RunningStatistics Push_WithCount_Span() {
     var stats = new RunningStatistics();
-    int i     = 0;
-    foreach (int stride in strides) {
-      stats.Push(values_.AsSpan().Slice(i, stride));
-      i += stride;
-    }
+    stats.Push(values_.AsSpan(), counts_.AsSpan());
     return stats;
   }
 }

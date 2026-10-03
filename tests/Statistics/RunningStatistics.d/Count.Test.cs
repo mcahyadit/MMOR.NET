@@ -21,8 +21,8 @@ public partial class RunningStatisticsTest {
       throw new ArgumentException(string.Format("[ERROR]: values.Length: {0} != counts.Length: {1}",
           p.values.Length, p.counts.Length));
 
-    RunningStatisticsAdvanced freq = new();
-    RunningStatisticsAdvanced indv = new();
+    RunningStatistics freq = new();
+    RunningStatistics indv = new();
 
     double expected_count = 0;
     for (int i = 0; i < p.values.Length; ++i) {
@@ -35,15 +35,15 @@ public partial class RunningStatisticsTest {
 
     try {
       AssertStat(expected_count, freq.Count, p);
-      AssertStat(indv.Count, freq.Count, p);
-      AssertStat(indv.Count0, freq.Count0, p);
+      Assert.Equal(indv.Count, freq.Count);
       AssertStat(indv.Mean, freq.Mean, p);
       AssertStat(indv.Variance, freq.Variance, p);
       AssertStat(indv.Skewness, freq.Skewness, p);
       AssertStat(indv.Kurtosis, freq.Kurtosis, p);
-      AssertStat(indv.GeometricMean, freq.GeometricMean, p);
-      AssertStat(indv.HarmonicMean, freq.HarmonicMean, p);
-      AssertStat(indv.RootMeanSquare, freq.RootMeanSquare, p);
+      AssertStat(indv.MinValue, freq.MinValue, p);
+      AssertStat(indv.MaxValue, freq.MaxValue, p);
+      Assert.Equal(indv.MinCount, freq.MinCount);
+      Assert.Equal(indv.MaxCount, freq.MaxCount);
     } catch {
       Console.Error.WriteLine(p.identifier);
       throw;

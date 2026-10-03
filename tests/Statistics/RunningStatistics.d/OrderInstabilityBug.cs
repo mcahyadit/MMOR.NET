@@ -6,14 +6,14 @@ public partial class RunningStatisticsTest {
   public void MergeSmallIntoLargeCountImbalance() {
     double[] values = { 1.0, 2.0, 10.0, 20.0, 30.0, 40.0, 50.0 };
 
-    RunningStatisticsAdvanced reference = new();
+    RunningStatistics reference = new();
     foreach (double v in values) {
       reference.Push(v);
     }
 
-    RunningStatisticsAdvanced a = new();
-    RunningStatisticsAdvanced b = new();
-    RunningStatisticsAdvanced c = new();
+    RunningStatistics a = new();
+    RunningStatistics b = new();
+    RunningStatistics c = new();
     for (int i = 0; i < 2; ++i) {
       a.Push(values[i]);
     }
@@ -24,11 +24,11 @@ public partial class RunningStatisticsTest {
       c.Push(values[i]);
     }
 
-    RunningStatisticsAdvanced mid = new();
+    RunningStatistics mid = new();
     mid.Push(a);
     mid.Push(b);
 
-    RunningStatisticsAdvanced merged = new();
+    RunningStatistics merged = new();
     merged.Push(mid);
     merged.Push(c);
 
@@ -37,6 +37,10 @@ public partial class RunningStatisticsTest {
     TestUtils.AssertApproximately(reference.Variance, merged.Variance, 13);
     TestUtils.AssertApproximately(reference.Skewness, merged.Skewness, 12);
     TestUtils.AssertApproximately(reference.Kurtosis, merged.Kurtosis, 12);
+    Assert.Equal(reference.MinValue, merged.MinValue);
+    Assert.Equal(reference.MaxValue, merged.MaxValue);
+    Assert.Equal(reference.MinCount, merged.MinCount);
+    Assert.Equal(reference.MaxCount, merged.MaxCount);
   }
 }
 }

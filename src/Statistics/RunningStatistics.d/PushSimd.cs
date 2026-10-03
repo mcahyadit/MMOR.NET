@@ -4,18 +4,19 @@ using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MMOR.NET.Bits;
 using MMOR.NET.Collections;
 using MMOR.NET.Mathematics;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
-public static partial class RunningStatisticsV2Extensions {
+public static partial class RunningStatisticsExtensions {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void Push(this RunningStatisticsV2 self, ReadOnlySpan<double> values) {
+  public static void Push(this RunningStatistics self, ReadOnlySpan<double> values) {
     Push(self, values, (ReadOnlySpan<ulong>)default);
   }
 
@@ -23,105 +24,147 @@ public static partial class RunningStatisticsV2Extensions {
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
-  public static void Push(this RunningStatisticsV2 self, ReadOnlySpan<double> values,
+  public static void Push(this RunningStatistics self, ReadOnlySpan<double> values,
       ReadOnlySpan<ulong> counts) {
     if (!counts.IsEmpty && values.Length != counts.Length)
       throw new ArgumentException(
           "[ERROR]: Length mismatch.\n" +
           $"values.Length: {values.Length} != counts.Count: {counts.Length}");
 
-    int vlen = Vector<double>.Count;
+    if (values.IsEmpty)
+      return;
+
     int alen = values.Length;
-    int rem  = alen - vlen;
+    int vlen = Vector<double>.Count;
 
-    Vector<double> min_val = new(self.min_value_);
-    Vector<ulong> min_cnt  = Vector<ulong>.Zero;
-    Vector<double> max_val = new(self.max_value_);
-    Vector<ulong> max_cnt  = Vector<ulong>.Zero;
+    int rem = alen - vlen;
 
-    int i                   = 0;
-    RunningStatisticsV2 tmp = new();
-    for (; i <= rem; i += vlen) {
-      Vector<double> value = values.Slice(i, vlen).ToVector();
+    int i = 0;
+    if (self.Count == 0) {
       if (counts.IsEmpty) {
-        double mean           = value.SumElements() / vlen;
-        Vector<double> delta  = value - new Vector<double>(mean);
-        Vector<double> delta2 = delta * delta;
-        Vector<double> delta3 = delta2 * delta;
-        Vector<double> delta4 = delta2 * delta2;
-        double moment_2nd     = delta2.SumElements();
-        double moment_3rd     = delta3.SumElements();
-        double moment_4th     = delta4.SumElements();
-
-        tmp.Count       = (ulong)vlen;
-        tmp.moment_1st_ = mean;
-        tmp.moment_2nd_ = moment_2nd;
-        tmp.moment_3rd_ = moment_3rd;
-        tmp.moment_4th_ = moment_4th;
-
-        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.LessThan(value, min_val)),
-            Vector<ulong>.One, min_cnt);
-        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.Equals(value, min_val)),
-            min_cnt + Vector<ulong>.One, min_cnt);
-        max_cnt = Vector.ConditionalSelect(
-            Vector.AsVectorUInt64(Vector.GreaterThan(value, max_val)), Vector<ulong>.One, max_cnt);
-        max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.Equals(value, max_val)),
-            max_cnt + Vector<ulong>.One, max_cnt);
+        Push(self, values[i]);
       } else {
-        Vector<ulong> count = counts.Slice(i, vlen).ToVector();
-        ulong count_u64     = count.SumElements();
+        int j   = 0;
+        ulong m = 0;
+        for (; j <= rem; j += vlen) {
+          Vector<ulong> v_epi  = counts.Slice(j, vlen).ToVector();
+          Vector<ulong> cmp_gt = Vector.GreaterThan(v_epi, Vector<ulong>.Zero);
 
-        if (count_u64 == 0)
-          continue;
-        Vector<double> count_f64 = Vector.ConvertToDouble(count);
+          m = BitOps.MmMovemaskEpi64(cmp_gt);
+          if (m != 0)
+            break;
+        }
+        if (m != 0) {
+          i = j + BitOperations.TrailingZeroCount(m);
+        } else {
+          i = j;
+          while (counts[i] == 0) {
+            if (++i == alen)
+              return;
+          }
+        }
 
-        double mean           = Vector.Dot(value, count_f64) / count_u64;
-        Vector<double> delta  = value - new Vector<double>(mean);
-        Vector<double> delta2 = delta * delta;
-        Vector<double> delta3 = delta2 * delta;
-        Vector<double> delta4 = delta2 * delta2;
-        double moment_2nd     = Vector.Dot(delta2, count_f64);
-        double moment_3rd     = Vector.Dot(delta3, count_f64);
-        double moment_4th     = Vector.Dot(delta4, count_f64);
-
-        tmp.Count       = count_u64;
-        tmp.moment_1st_ = mean;
-        tmp.moment_2nd_ = moment_2nd;
-        tmp.moment_3rd_ = moment_3rd;
-        tmp.moment_4th_ = moment_4th;
-
-        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.LessThan(value, min_val)),
-            count, min_cnt);
-        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.Equals(value, min_val)),
-            min_cnt + count, min_cnt);
-        max_cnt = Vector.ConditionalSelect(
-            Vector.AsVectorUInt64(Vector.GreaterThan(value, max_val)), count, max_cnt);
-        max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.Equals(value, max_val)),
-            max_cnt + count, max_cnt);
+        Push(self, values[i], counts[i]);
       }
-      Push(self, tmp);
-      min_val = Vector.Min(min_val, value);
-      max_val = Vector.Max(max_val, value);
+      ++i;
     }
 
-    for (int k = 0; k < vlen; ++k) {
-      if (min_val[k] < self.min_value_) {
-        self.min_value_ = min_val[k];
-        self.min_count_ = min_cnt[k];
-      } else if (min_val[k] == self.min_value_) {
-        self.min_count_ += min_cnt[k];
-      }
+    if (alen >= vlen + i) {
+      double shift             = self.moments_.Raw1st;
+      Vector<double> shift_epi = new(shift);
 
-      if (max_val[k] > self.max_value_) {
-        self.max_value_ = max_val[k];
-        self.max_count_ = max_cnt[k];
-      } else if (max_val[k] == self.max_value_) {
-        self.max_count_ += max_cnt[k];
+      Vector<double> sum1_epi = Vector<double>.Zero;
+      Vector<double> sum2_epi = Vector<double>.Zero;
+      Vector<double> sum3_epi = Vector<double>.Zero;
+      Vector<double> sum4_epi = Vector<double>.Zero;
+      Vector<ulong> cnt       = Vector<ulong>.Zero;
+
+      Vector<double> min_val = new(double.MaxValue);
+      Vector<ulong> min_cnt  = Vector<ulong>.Zero;
+      Vector<double> max_val = new(double.MinValue);
+      Vector<ulong> max_cnt  = Vector<ulong>.Zero;
+
+      for (; i <= rem; i += vlen) {
+        Vector<double> value_epi = values.Slice(i, vlen).ToVector();
+
+        // Shift for numerical stability
+        Vector<double> delta  = value_epi - shift_epi;
+        Vector<double> delta2 = delta * delta;
+
+        Vector<ulong> count_epi;
+        if (!counts.IsEmpty) {
+          count_epi = counts.Slice(i, vlen).ToVector();
+
+          Vector<double> count_f64_epi = Vector.ConvertToDouble(count_epi);
+
+          sum1_epi += delta * count_f64_epi;
+          sum2_epi += delta2 * count_f64_epi;
+          sum3_epi += delta2 * delta * count_f64_epi;
+          sum4_epi += delta2 * delta2 * count_f64_epi;
+          cnt += count_epi;
+        } else {
+          count_epi = Vector<ulong>.One;
+          sum1_epi += delta;
+          sum2_epi += delta2;
+          sum3_epi += delta2 * delta;
+          sum4_epi += delta2 * delta2;
+          cnt += Vector<ulong>.One;
+        }
+
+        Vector<long> cnt_nz =
+            Vector.AsVectorInt64(Vector.GreaterThan(count_epi, Vector<ulong>.Zero));
+
+        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
+                                               Vector.LessThan(value_epi, min_val))),
+            count_epi, min_cnt);
+        min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
+                                               Vector.Equals(value_epi, min_val))),
+            min_cnt + count_epi, min_cnt);
+        max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
+                                               Vector.GreaterThan(value_epi, max_val))),
+            count_epi, max_cnt);
+        max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
+                                               Vector.Equals(value_epi, max_val))),
+            max_cnt + count_epi, max_cnt);
+        min_val = Vector.ConditionalSelect(cnt_nz, Vector.Min(min_val, value_epi), min_val);
+        max_val = Vector.ConditionalSelect(cnt_nz, Vector.Max(max_val, value_epi), max_val);
+      }  // End of SIMD Loop
+
+      // Reduce Moments
+      ulong count = cnt.SumElements();
+      double sum1 = sum1_epi.SumElements();
+      double sum2 = sum2_epi.SumElements();
+      double sum3 = sum3_epi.SumElements();
+      double sum4 = sum4_epi.SumElements();
+
+      double pivot = sum1 / count;
+      double mean  = shift + pivot;
+
+      self.PushMoments(
+          new MomentsRecord {
+            Raw1st     = mean,
+            Central2nd = sum2 - sum1 * pivot,
+            Central3rd = sum3 - 3 * pivot * sum2 + 2 * pivot * pivot * sum1,
+            Central4th = sum4 - 4 * pivot * sum3 + 6 * pivot * pivot * sum2 -
+                         3 * pivot * pivot * pivot * sum1,
+          },
+          count);
+
+      for (int k = 0; k < vlen; ++k) {
+        self.PushMinMax(new MinMaxRecord {
+          MinValue = min_val[k],
+          MinCount = min_cnt[k],
+          MaxValue = max_val[k],
+          MaxCount = max_cnt[k],
+        });
       }
     }
 
     for (; i < alen; ++i) {
-      Push(self, values[i]);
+      if (counts.IsEmpty)
+        Push(self, values[i]);
+      else
+        Push(self, values[i], counts[i]);
     }
   }
 }

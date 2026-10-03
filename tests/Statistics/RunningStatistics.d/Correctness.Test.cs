@@ -19,12 +19,14 @@ public partial class RunningStatisticsTest {
     public int skewness_precision { get; init; } = 15;
     public required double kurtosis { get; init; }
     public int kurtosis_precision { get; init; } = 15;
-    public required double geometric_mean { get; init; }
-    public int geometric_mean_precision { get; init; } = 15;
-    public required double harmonic_mean { get; init; }
-    public int harmonic_mean_precision { get; init; } = 15;
-    public required double root_mean_square { get; init; }
-    public int root_mean_square_precision { get; init; } = 15;
+    public required double min_value { get; init; }
+    public int min_value_precision { get; init; } = 15;
+    public required double max_value { get; init; }
+    public int max_value_precision { get; init; } = 15;
+    public required double min_count { get; init; }
+    public int min_count_precision { get; init; } = 15;
+    public required double max_count { get; init; }
+    public int max_count_precision { get; init; } = 15;
     public CorrectnessParam() {}
     public override string ToString() => identifier;
   }
@@ -32,7 +34,7 @@ public partial class RunningStatisticsTest {
   [Theory]
   [MemberData(nameof(kCorrectnessParams))]
   public void CorrectnessTest(CorrectnessParam p) {
-    RunningStatisticsAdvanced s = new();
+    RunningStatistics s = new();
     for (int i = 0; i < p.values.Length; ++i) {
       s.Push(p.values[i]);
     }
@@ -43,10 +45,10 @@ public partial class RunningStatisticsTest {
       TestUtils.AssertApproximately(p.variance, s.Variance, p.variance_precision);
       TestUtils.AssertApproximately(p.skewness, s.Skewness, p.skewness_precision);
       TestUtils.AssertApproximately(p.kurtosis, s.Kurtosis, p.kurtosis_precision);
-      TestUtils.AssertApproximately(p.geometric_mean, s.GeometricMean, p.geometric_mean_precision);
-      TestUtils.AssertApproximately(p.harmonic_mean, s.HarmonicMean, p.harmonic_mean_precision);
-      TestUtils.AssertApproximately(p.root_mean_square, s.RootMeanSquare,
-          p.root_mean_square_precision);
+      TestUtils.AssertApproximately(p.min_value, s.MinValue, p.min_value_precision);
+      TestUtils.AssertApproximately(p.max_value, s.MaxValue, p.max_value_precision);
+      Assert.Equal(p.min_count, s.MinCount);
+      Assert.Equal(p.max_count, s.MaxCount);
     } catch {
       Console.Error.WriteLine(p.identifier);
       throw;
