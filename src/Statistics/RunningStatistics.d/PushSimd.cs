@@ -56,6 +56,8 @@ public static partial class RunningStatisticsExtensions {
         }
         if (m != 0) {
           i = j + BitOperations.TrailingZeroCount(m);
+        } else if (j >= alen) {
+          return;
         } else {
           i = j;
           while (counts[i] == 0) {
