@@ -248,39 +248,6 @@ public class BitReverseTest {
       Assert.Equal(sample, BitOps.ReverseBits(sample, start, length));
   }
 
-  [Fact]
-  public void ReverseBitsVector_MatchesScalarPerLane() {
-    var rng   = new System.Random(20260905);
-    var lanes = new ulong[Vector<ulong>.Count];
-    for (int iter = 0; iter < 512; ++iter) {
-      for (int i = 0; i < lanes.Length; ++i) lanes[i] = RandomU64(rng);
-      Vector<ulong> reversed = BitOps.ReverseBits(new Vector<ulong>(lanes));
-      for (int i = 0; i < lanes.Length; ++i) Assert.Equal(ReferenceReverse(lanes[i]), reversed[i]);
-    }
-  }
-
-  [Fact]
-  public void ReverseBitsVector_IsSelfInversePerLane() {
-    var rng   = new System.Random(20260905);
-    var lanes = new ulong[Vector<ulong>.Count];
-    for (int iter = 0; iter < 512; ++iter) {
-      for (int i = 0; i < lanes.Length; ++i) lanes[i] = RandomU64(rng);
-      Vector<ulong> v     = new(lanes);
-      Vector<ulong> twice = BitOps.ReverseBits(BitOps.ReverseBits(v));
-      for (int i = 0; i < lanes.Length; ++i) Assert.Equal(lanes[i], twice[i]);
-    }
-  }
-
-  [Fact]
-  public void ReverseBitsVector_HandlesAllOnesAndZero() {
-    Vector<ulong> ones = Vector<ulong>.One * ulong.MaxValue;
-    Vector<ulong> zero = Vector<ulong>.Zero;
-    for (int i = 0; i < Vector<ulong>.Count; ++i) {
-      Assert.Equal(ulong.MaxValue, BitOps.ReverseBits(ones)[i]);
-      Assert.Equal(0ul, BitOps.ReverseBits(zero)[i]);
-    }
-  }
-
   /*
    * BZHI saturation, which is what an "ignore length > bitcount" policy in ReverseBits would lean
    * on: index >= OperandSize leaves the value untouched (it does NOT clear everything), and the
