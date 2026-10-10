@@ -50,7 +50,7 @@ public static partial class RunningStatisticsExtensions {
           Vector<ulong> v_epi  = counts.Slice(j, vlen).ToVector();
           Vector<ulong> cmp_gt = Vector.GreaterThan(v_epi, Vector<ulong>.Zero);
 
-          m = BitOps.MmMovemaskEpi64(cmp_gt);
+          m = BitOps.MmMovEpi64Mask(cmp_gt);
           if (m != 0)
             break;
         }

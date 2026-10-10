@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using BenchmarkDotNet.Attributes;
 using MMOR.NET.Bits;
@@ -36,7 +35,7 @@ public class MovemaskBench {
   public ulong MmMovemaskEpi64() {
     ulong acc = 0;
     for (int i = 0; i < vectors64_.Length; ++i) {
-      acc |= BitOps.MmMovemaskEpi64(vectors64_[i]);
+      acc |= BitOps.MmMovEpi64Mask(vectors64_[i]);
     }
     return acc;
   }
@@ -45,7 +44,7 @@ public class MovemaskBench {
   public ulong MmMovemaskEpi64Sw() {
     ulong acc = 0;
     for (int i = 0; i < vectors64_.Length; ++i) {
-      acc |= BitOps.MmMovemaskEpi64Sw(vectors64_[i]);
+      acc |= BitOps.MmMovEpi64MaskSw(vectors64_[i]);
     }
     return acc;
   }
@@ -54,7 +53,7 @@ public class MovemaskBench {
   public ulong MmMovemaskEpi32() {
     ulong acc = 0;
     for (int i = 0; i < vectors32_.Length; ++i) {
-      acc |= BitOps.MmMovemaskEpi32(vectors32_[i]);
+      acc |= BitOps.MmMovEpi32Mask(vectors32_[i]);
     }
     return acc;
   }
@@ -63,7 +62,7 @@ public class MovemaskBench {
   public ulong MmMovemaskEpi32Sw() {
     ulong acc = 0;
     for (int i = 0; i < vectors32_.Length; ++i) {
-      acc |= BitOps.MmMovemaskEpi32Sw(vectors32_[i]);
+      acc |= BitOps.MmMovEpi32MaskSw(vectors32_[i]);
     }
     return acc;
   }

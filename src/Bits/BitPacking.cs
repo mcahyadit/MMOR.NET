@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
-using MMOR.NET.Collections;
 using MMOR.Roslyn;
 using System.Runtime.CompilerServices;
 using System.Numerics;
@@ -109,14 +108,14 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector<ulong> ToVectorU64(ulong bitmask, int idx) {
-    return MmMovmEpi64Emu(Bzhi64(bitmask >> idx, Vector<ulong>.Count));
+    return MmMovMaskEpi64Emu(Bzhi64(bitmask >> idx, Vector<ulong>.Count));
   }
 
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector<int> ToVectorI32(ulong bitmask, int idx) {
     uint slice = (uint)Bzhi64(bitmask >> idx, Vector<uint>.Count);
-    return Vector.AsVectorInt32(MmMovmEpi32Emu(slice));
+    return Vector.AsVectorInt32(MmMovMaskEpi32Emu(slice));
   }
 }
 }
