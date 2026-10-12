@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using MMOR.NET.Collections;
 using MMOR.Roslyn;
 
 namespace MMOR.NET.Mathematics {

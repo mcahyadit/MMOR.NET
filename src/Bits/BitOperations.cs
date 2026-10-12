@@ -1,15 +1,15 @@
 // TODO: Move namespace
-using System.Runtime.InteropServices;
 using System;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Random;
-using MMOR.NET.Collections;
 using MMOR.Roslyn;
 using System.Collections.Immutable;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics.X86;
+using System.Runtime.Intrinsics.Arm;
 #endif
 
 #if UNITY_5_3_OR_NEWER || UNITY_2017_1_OR_NEWER

@@ -1,5 +1,4 @@
 using System;
-using MMOR.NET.RichString;
 
 namespace MMOR.NET.MultiThreadSimulation {
 /**
