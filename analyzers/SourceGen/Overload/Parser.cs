@@ -80,10 +80,11 @@ public partial class OverloadGenerator {
       if (param.Type is INamedTypeSymbol named && param.RefKind is RefKind.None &&
           !param.HasExplicitDefaultValue) {
         INamedTypeSymbol def = named.OriginalDefinition;
-        string x             = def.ToDisplayString();
+        string open          = def.ToDisplayString();  // Turns to generic i.e. Span<int> => Span<T>
+        string full          = named.ToDisplayString();  // Keeps original full
 
         foreach (Typemap typemap in typemaps) {
-          if (x.StartsWith(typemap.from_type)) {
+          if (full == typemap.from_type || open.StartsWith(typemap.from_type)) {
             param_typemaps.Add(typemap);
           }
         }
