@@ -30,8 +30,21 @@ public static partial class BitOps {
     return buffer.ToVector();
   })).Invoke();
 
-  public static ulong MovEpiMask<T>(Vector<T> vector)
+  public static ulong MmMovEpiMask<T>(Vector<T> vector)
       where T : unmanaged {
+#if !NETSTANDARD
+    if (Vector512<T>.IsSupported && Vector<T>.Count == Vector512<T>.Count) {
+      Vector512<T> v512 = vector.AsVector512();
+      return Vector512.ExtractMostSignificantBits(v512);
+    } else if (Vector256<T>.IsSupported && Vector<T>.Count == Vector256<T>.Count) {
+      Vector256<T> v256 = vector.AsVector256();
+      return Vector256.ExtractMostSignificantBits(v256);
+    } else if (Vector256<T>.IsSupported && Vector<T>.Count == Vector128<T>.Count) {
+      Vector128<T> v128 = vector.AsVector128();
+      return Vector128.ExtractMostSignificantBits(v128);
+    }
+#endif
+
     if (typeof(T) == typeof(ulong) || typeof(T) == typeof(long))
       return MmMovEpi64Mask(Vector.AsVectorUInt64(vector));
     if (typeof(T) == typeof(uint) || typeof(T) == typeof(int))
@@ -51,7 +64,6 @@ public static partial class BitOps {
    *  Reference <see href="https://www.felixcloutier.com/x86/vpmovb2m:vpmovw2m:vpmovd2m:vpmovq2m"/>
    *  <br/>
    *  Returns the most significant bit of each lane in <paramref name="vector"/>. <br/>
-   *  For <see cref="uint"/>, use <see cref="MmMovEpi32Mask"/>
    * </summary>
    */
   [Pure]
@@ -60,13 +72,13 @@ public static partial class BitOps {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong MmMovEpi64Mask(Vector<ulong> vector) {
 #if !NETSTANDARD
-    if (Vector<ulong>.Count == Vector512<ulong>.Count) {
+    if (Vector512<ulong>.IsSupported && Vector<ulong>.Count == Vector512<ulong>.Count) {
       Vector512<ulong> v512 = vector.AsVector512();
       return Vector512.ExtractMostSignificantBits(v512);
-    } else if (Vector<ulong>.Count == Vector256<ulong>.Count) {
+    } else if (Vector256<ulong>.IsSupported && Vector<ulong>.Count == Vector256<ulong>.Count) {
       Vector256<ulong> v256 = vector.AsVector256();
       return Vector256.ExtractMostSignificantBits(v256);
-    } else if (Vector<ulong>.Count == Vector128<ulong>.Count) {
+    } else if (Vector128<ulong>.IsSupported && Vector<ulong>.Count == Vector128<ulong>.Count) {
       Vector128<ulong> v128 = vector.AsVector128();
       return Vector128.ExtractMostSignificantBits(v128);
     }
@@ -82,7 +94,6 @@ public static partial class BitOps {
    *  Reference <see href="https://www.felixcloutier.com/x86/vpmovb2m:vpmovw2m:vpmovd2m:vpmovq2m"/>
    *  <br/>
    *  Returns the most significant bit of each lane in <paramref name="vector"/>. <br/>
-   *  For <see cref="uint"/>, use <see cref="MmMovEpi32MaskSw"/>
    * </summary>
    */
   [Pure]
@@ -112,7 +123,6 @@ public static partial class BitOps {
    *  Reference <see href="https://www.felixcloutier.com/x86/vpmovb2m:vpmovw2m:vpmovd2m:vpmovq2m"/>
    *  <br/>
    *  Returns the most significant bit of each lane in <paramref name="vector"/>. <br/>
-   *  For <see cref="ulong"/>, use <see cref="MmMovEpi64Mask"/>
    * </summary>
    */
   [Pure]
@@ -121,13 +131,13 @@ public static partial class BitOps {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong MmMovEpi32Mask(Vector<uint> vector) {
 #if !NETSTANDARD
-    if (Vector<uint>.Count == Vector512<uint>.Count) {
+    if (Vector512<uint>.IsSupported && Vector<uint>.Count == Vector512<uint>.Count) {
       Vector512<uint> v512 = vector.AsVector512();
       return Vector512.ExtractMostSignificantBits(v512);
-    } else if (Vector<uint>.Count == Vector256<uint>.Count) {
+    } else if (Vector256<uint>.IsSupported && Vector<uint>.Count == Vector256<uint>.Count) {
       Vector256<uint> v256 = vector.AsVector256();
       return Vector256.ExtractMostSignificantBits(v256);
-    } else if (Vector<uint>.Count == Vector128<uint>.Count) {
+    } else if (Vector128<uint>.IsSupported && Vector<uint>.Count == Vector128<uint>.Count) {
       Vector128<uint> v128 = vector.AsVector128();
       return Vector128.ExtractMostSignificantBits(v128);
     }
@@ -143,7 +153,6 @@ public static partial class BitOps {
    *  Reference <see href="https://www.felixcloutier.com/x86/vpmovb2m:vpmovw2m:vpmovd2m:vpmovq2m"/>
    *  <br/>
    *  Returns the most significant bit of each lane in <paramref name="vector"/>. <br/>
-   *  For <see cref="ulong"/>, use <see cref="MmMovEpi64MaskSw"/>
    * </summary>
    */
   [Pure]
@@ -181,13 +190,13 @@ public static partial class BitOps {
       nameof(Vector.AsVectorUInt16))]
   public static ulong MmMovEpi16Mask(Vector<ushort> vector) {
 #if !NETSTANDARD
-    if (Vector<ushort>.Count == Vector512<ushort>.Count) {
+    if (Vector512<ushort>.IsSupported && Vector<ushort>.Count == Vector512<ushort>.Count) {
       Vector512<ushort> v512 = vector.AsVector512();
       return Vector512.ExtractMostSignificantBits(v512);
-    } else if (Vector<ushort>.Count == Vector256<ushort>.Count) {
+    } else if (Vector256<ushort>.IsSupported && Vector<ushort>.Count == Vector256<ushort>.Count) {
       Vector256<ushort> v256 = vector.AsVector256();
       return Vector256.ExtractMostSignificantBits(v256);
-    } else if (Vector<ushort>.Count == Vector128<ushort>.Count) {
+    } else if (Vector128<ushort>.IsSupported && Vector<ushort>.Count == Vector128<ushort>.Count) {
       Vector128<ushort> v128 = vector.AsVector128();
       return Vector128.ExtractMostSignificantBits(v128);
     }
@@ -240,13 +249,13 @@ public static partial class BitOps {
       nameof(Vector.AsVectorByte))]
   public static ulong MmMovEpi8Mask(Vector<byte> vector) {
 #if !NETSTANDARD
-    if (Vector<byte>.Count == Vector512<byte>.Count) {
+    if (Vector512<byte>.IsSupported && Vector<byte>.Count == Vector512<byte>.Count) {
       Vector512<byte> v512 = vector.AsVector512();
       return Vector512.ExtractMostSignificantBits(v512);
-    } else if (Vector<byte>.Count == Vector256<byte>.Count) {
+    } else if (Vector256<byte>.IsSupported && Vector<byte>.Count == Vector256<byte>.Count) {
       Vector256<byte> v256 = vector.AsVector256();
       return Vector256.ExtractMostSignificantBits(v256);
-    } else if (Vector<byte>.Count == Vector128<byte>.Count) {
+    } else if (Vector128<byte>.IsSupported && Vector<byte>.Count == Vector128<byte>.Count) {
       Vector128<byte> v128 = vector.AsVector128();
       return Vector128.ExtractMostSignificantBits(v128);
     }
