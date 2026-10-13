@@ -9,6 +9,10 @@
     "long",
     "uint",
     "int",
+    "ushort",
+    "short",
+    "sbyte",
+    "byte",
     "float",
     "double",
   };

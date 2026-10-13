@@ -25,6 +25,11 @@ public class MaxElementBench {
   }
 
   [Benchmark]
+  public double MaxElementGeneric_Span() {
+    return CollectionUtils.MaxElement<double>(values_double_.AsSpan());
+  }
+
+  [Benchmark]
   public double MaxElement_Linq() {
     return Enumerable.Max(values_double_);
   }

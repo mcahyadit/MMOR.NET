@@ -25,6 +25,11 @@ public class MinElementBench {
   }
 
   [Benchmark]
+  public double MinElementGeneric_Span() {
+    return CollectionUtils.MinElement<double>(values_double_.AsSpan());
+  }
+
+  [Benchmark]
   public double MinElement_Linq() {
     return Enumerable.Min(values_double_);
   }
