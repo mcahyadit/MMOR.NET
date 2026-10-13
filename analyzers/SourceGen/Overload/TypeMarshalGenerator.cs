@@ -97,7 +97,17 @@ public partial class OverloadGenerator {
     if (method.return_type != "void")
       sb.Append("return ");
 
-    sb.Append(method.name).Append("(");
+    sb.Append(method.name);
+    if (method.type_args.Length > 0) {
+      sb.Append('<');
+      for (int i = 0; i < method.type_args.Length; ++i) {
+        if (i != 0)
+          sb.Append(", ");
+        sb.Append(method.type_args[i].Item1);
+      }
+      sb.Append('>');
+    }
+    sb.Append("(");
     for (int i = 0; i < len; ++i) {
       int idx = perm[i];
       if (i != 0)
