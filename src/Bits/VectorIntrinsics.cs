@@ -30,6 +30,20 @@ public static partial class BitOps {
     return buffer.ToVector();
   })).Invoke();
 
+  public static ulong MovEpiMask<T>(Vector<T> vector)
+      where T : unmanaged {
+    if (typeof(T) == typeof(ulong) || typeof(T) == typeof(long))
+      return MmMovEpi64Mask(Vector.AsVectorUInt64(vector));
+    if (typeof(T) == typeof(uint) || typeof(T) == typeof(int))
+      return MmMovEpi32Mask(Vector.AsVectorUInt32(vector));
+    if (typeof(T) == typeof(ushort) || typeof(T) == typeof(short))
+      return MmMovEpi16Mask(Vector.AsVectorUInt16(vector));
+    if (typeof(T) == typeof(byte) || typeof(T) == typeof(sbyte))
+      return MmMovEpi8Mask(Vector.AsVectorByte(vector));
+
+    throw new NotSupportedException($"[ERROR]: Unsupported T: {typeof(T).FullName}");
+  }
+
   /**
    * <summary>
    *  Calls SSE or AVX's <c>PMOVMSKB</c> or AVX-512's <c>VPMOVQ2M</c> if supported. <br/>
