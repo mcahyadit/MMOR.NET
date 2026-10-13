@@ -1,8 +1,9 @@
 using System;
-using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  public const int kPdqSortDepthLimit = 16;
+
   public readonly struct PdqSortConfig {
     public readonly int insertion_sort_threshold { get; init; }
     public readonly int ninther_threshold { get; init; }
@@ -17,7 +18,7 @@ public static partial class CollectionUtils {
 
   /**
    * <summary>
-   *  Internal function for <see cref="PdqSort{T}(Span{T}, PdqSortConfig?, int?)"/>. <br/>
+   *  Internal function for <see cref="PdqSort{T}(Span{T}, PdqSortConfig?, int)"/>. <br/>
    *  Use at your own risk.
    * </summary>
    */
@@ -72,7 +73,7 @@ public static partial class CollectionUtils {
   }
 
   public static void PdqSort<T>(this Span<T> slice, PdqSortConfig? config = null,
-      int? heap_depth = null)
+      int depth_limit = kPdqSortDepthLimit)
       where T : unmanaged, IComparable<T> {
     PdqSortConfig cfg = config ?? kDefaultPdqSortConfig;
     int length        = slice.Length;
@@ -90,18 +91,17 @@ public static partial class CollectionUtils {
     } else {
       Sort3Unsafe(slice, pivot_idx);
     }
-    bool partitioned = QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    bool partitioned = QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
 
     int l8                 = length / 8;
     Span<T> lt_span        = slice[..lt_idx];
     Span<T> gt_span        = slice[gt_idx..];
     bool highly_unbalanced = lt_span.Length < l8 || gt_span.Length < l8;
 
-    bool lt_sort   = false;
-    bool gt_sort   = false;
-    heap_depth   ??= BitOperations.Log2((uint)length);
+    bool lt_sort = false;
+    bool gt_sort = false;
     if (highly_unbalanced) {
-      if (--heap_depth == 0) {
+      if (--depth_limit == 0) {
         HeapSort(slice);
         return;
       }
@@ -114,9 +114,9 @@ public static partial class CollectionUtils {
     }
 
     if (!lt_sort)
-      PdqSort(slice[..lt_idx], cfg, heap_depth);
+      PdqSort(slice[..lt_idx], cfg, depth_limit);
     if (!gt_sort)
-      PdqSort(slice[gt_idx..], cfg, heap_depth);
+      PdqSort(slice[gt_idx..], cfg, depth_limit);
   }
 
   /// <inheritdoc cref="OrlpNintherSortUnsafe{T}(Span{T})"/>
@@ -187,7 +187,7 @@ public static partial class CollectionUtils {
   }
 
   public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
-      PdqSortConfig? config = null, int? heap_depth = null)
+      PdqSortConfig? config = null, int depth_limit = kPdqSortDepthLimit)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
     PdqSortConfig cfg = config ?? kDefaultPdqSortConfig;
@@ -211,11 +211,10 @@ public static partial class CollectionUtils {
     int l8                 = length / 8;
     bool highly_unbalanced = lt_idx < l8 || length - gt_idx < l8;
 
-    bool lt_sort   = false;
-    bool gt_sort   = false;
-    heap_depth   ??= BitOperations.Log2((uint)length);
+    bool lt_sort = false;
+    bool gt_sort = false;
     if (highly_unbalanced) {
-      if (--heap_depth == 0) {
+      if (--depth_limit == 0) {
         HeapSort(keys, values);
         return;
       }
@@ -232,9 +231,9 @@ public static partial class CollectionUtils {
     }
 
     if (!lt_sort)
-      PdqSort(keys[..lt_idx], values[..lt_idx], cfg, heap_depth);
+      PdqSort(keys[..lt_idx], values[..lt_idx], cfg, depth_limit);
     if (!gt_sort)
-      PdqSort(keys[gt_idx..], values[gt_idx..], cfg, heap_depth);
+      PdqSort(keys[gt_idx..], values[gt_idx..], cfg, depth_limit);
   }
 }
 }

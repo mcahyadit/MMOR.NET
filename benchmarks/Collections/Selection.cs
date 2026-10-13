@@ -11,6 +11,9 @@ public class SelectionBench {
   [ParamsSource(typeof(SortData), nameof(SortData.Distributions))]
   public Distribution Distribution;
 
+  [ParamsSource(typeof(SortData), nameof(SortData.KFractions))]
+  public KFraction K;
+
   private int[] template_ = null!;
   private int[] work_     = null!;
   private int k_;
@@ -19,38 +22,44 @@ public class SelectionBench {
   public void Setup() {
     template_ = SortData.Build(N, Distribution);
     work_     = new int[N];
-    k_        = N / 2;
-  }
-
-  [Benchmark(Baseline = true)]
-  public int SortThenPick() {
-    Array.Copy(template_, work_, N);
-    Array.Sort(work_);
-    return work_[k_ - 1];
+    k_        = SortData.ResolveK(N, K);
   }
 
   [Benchmark]
   public int QuickSelect() {
     Array.Copy(template_, work_, N);
-    return work_.AsSpan().QuickSelectMutable(k_);
+    return CollectionUtils.QuickSelectMutable(work_, k_);
   }
 
   [Benchmark]
   public int MedianOfMedians() {
     Array.Copy(template_, work_, N);
-    return work_.AsSpan().MedianOfMediansMutable(k_);
+    return CollectionUtils.MedianOfMediansMutable(work_, k_);
   }
 
   [Benchmark]
+  public int HeapSelect() {
+    Array.Copy(template_, work_, N);
+    return CollectionUtils.HeapSelectMutable(work_, k_);
+  }
+
+  [Benchmark(Baseline = true)]
   public int IntroSelect() {
     Array.Copy(template_, work_, N);
-    return work_.AsSpan().IntroSelectMutable(k_);
+    return CollectionUtils.IntroSelectMutable(work_, k_);
+  }
+
+  [Benchmark]
+  public int IntroSelectHeap() {
+    Array.Copy(template_, work_, N);
+    return CollectionUtils.IntroSelectMutable(work_, k_,
+        bad_path: CollectionUtils.IntroSelectBadPath.HeapSelect);
   }
 
   [Benchmark]
   public int PdqSelect() {
     Array.Copy(template_, work_, N);
-    return work_.AsSpan().PdqSelect(k_);
+    return CollectionUtils.PdqSelect(work_, k_);
   }
 }
 }

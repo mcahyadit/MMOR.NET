@@ -28,30 +28,37 @@ public class SortBench {
   }
 
   [Benchmark]
-  public int HeapSort_Span() {
+  public int HeapSort() {
     Array.Copy(template_, work_, N);
-    work_.AsSpan().HeapSort();
+    CollectionUtils.HeapSort(work_);
     return work_[0];
   }
 
   [Benchmark]
-  public int MergeSort_Span() {
+  public int MergeSort() {
     Array.Copy(template_, work_, N);
-    work_.AsSpan().MergeSort();
+    CollectionUtils.MergeSort(work_);
     return work_[0];
   }
 
   [Benchmark]
-  public int QuickSort_Span() {
+  public int QuickSort() {
     Array.Copy(template_, work_, N);
-    work_.AsSpan().QuickSort();
+    CollectionUtils.QuickSort(work_);
     return work_[0];
   }
 
   [Benchmark]
-  public int PdqSort_Span() {
+  public int IntroSort() {
     Array.Copy(template_, work_, N);
-    work_.AsSpan().PdqSort();
+    CollectionUtils.IntroSort(work_);
+    return work_[0];
+  }
+
+  [Benchmark]
+  public int PdqSort() {
+    Array.Copy(template_, work_, N);
+    CollectionUtils.PdqSort(work_);
     return work_[0];
   }
 }

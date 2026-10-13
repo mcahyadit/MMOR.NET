@@ -2,11 +2,11 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Numerics;
-using MMOR.NET.Random;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  public const int kPdqSelectDepthLimit = 16;
+
   public static readonly PdqSortConfig kDefaultPdqSelectConfig = new() {
     insertion_sort_threshold     = 11,
     ninther_threshold            = 49,
@@ -44,7 +44,7 @@ public static partial class CollectionUtils {
    */
   [Pure]
   public static T PdqSelect<T>(this ReadOnlySpan<T> slice, int k, PdqSortConfig? config = null,
-      int depth_limit = 16)
+      int depth_limit = kPdqSelectDepthLimit)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if ((uint)(k - 1) >= length)
@@ -69,7 +69,7 @@ public static partial class CollectionUtils {
    * </remarks>
    */
   public static T PdqSelectMutable<T>(this Span<T> slice, int k, PdqSortConfig? config = null,
-      int depth_limit = 16)
+      int depth_limit = kPdqSelectDepthLimit)
       where T : unmanaged, IComparable<T> {
     PdqSortConfig cfg = config ?? kDefaultPdqSelectConfig;
     int length        = slice.Length;
@@ -78,6 +78,10 @@ public static partial class CollectionUtils {
           $"[ERROR]: Trying to PdqSelect {k}th element in an array of Length: {length}");
     if (length == 1)
       return slice[0];
+    if (k == 1)
+      return MinElement<T>(slice);
+    if (length == k)
+      return MaxElement<T>(slice);
     if (length <= Math.Max(k, cfg.insertion_sort_threshold)) {
       if (length == 3)
         Sort3Unsafe(slice, 1);
@@ -93,7 +97,7 @@ public static partial class CollectionUtils {
     } else {
       Sort3Unsafe(slice, pivot_idx);
     }
-    QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k > lt_idx && k <= gt_idx)
       return slice[lt_idx];
@@ -123,7 +127,7 @@ public static partial class CollectionUtils {
   /// <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int)"/>
   [Pure]
   public static T PdqSelect<T>(this ICollection<T> collection, int k, PdqSortConfig? config = null,
-      int depth_limit = 16)
+      int depth_limit = kPdqSelectDepthLimit)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;
     if ((uint)(k - 1) >= length)

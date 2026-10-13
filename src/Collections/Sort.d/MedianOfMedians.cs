@@ -41,16 +41,15 @@ public static partial class CollectionUtils {
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to QuickSelect {k}th element in an array of Length: {length}");
-    if (length <= 5) {
-      InsertionSort(slice);
-      return slice[k - 1];
-    }
-
     if (k == 1) {
       return MinElement<T>(slice);
     }
     if (k == length) {
       return MaxElement<T>(slice);
+    }
+    if (length <= 5) {
+      InsertionSort(slice);
+      return slice[k - 1];
     }
 
     int grp_cnt  = (length + 4) / 5;
@@ -67,7 +66,7 @@ public static partial class CollectionUtils {
       T pivot  = MedianOfMediansMutable(med_buff, grp_cnt / 2 + 1);
       int pidx = 0;
       while (pidx < length && Comparer<T>.Default.Compare(slice[pidx], pivot) != 0) ++pidx;
-      QuickSelectMutate(slice, pidx, out int lt_idx, out int gt_idx);
+      QuickSortMutate(slice, pidx, out int lt_idx, out int gt_idx);
 
       if (k <= lt_idx)
         return MedianOfMediansMutable(slice[..lt_idx], k);

@@ -11,7 +11,13 @@ namespace MMOR.NET.Collections {
  * </summary>
  */
 public class SelectTest {
-  public enum SelectKind { QuickSelect, MedianOfMedians, IntroSelect, PdqSelect }
+  public enum SelectKind {
+    QuickSelect,
+    MedianOfMedians,
+    HeapSelect,
+    IntroSelect,
+    PdqSelect,
+  }
 
   public static readonly TheoryData<int> kInvalidKLengths = [1, 5, 10];
 
@@ -95,6 +101,8 @@ public class SelectTest {
         return data.QuickSelect(k);
       case SelectKind.MedianOfMedians:
         return data.MedianOfMedians(k);
+      case SelectKind.HeapSelect:
+        return data.IntroSelect(k);
       case SelectKind.IntroSelect:
         return data.IntroSelect(k);
       default:

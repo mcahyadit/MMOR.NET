@@ -3,6 +3,8 @@ using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  public const int kIntroSortDepthLimit = 16;
+
   /**
    * <summary>
    *  Internal function for <see cref="IntroSort{T}(Span{T}, int, int?)"/>. <br/>
@@ -27,23 +29,21 @@ public static partial class CollectionUtils {
   }
 
   public static void IntroSort<T>(this Span<T> slice, int insertion_sort_threshold = 16,
-      int? heap_depth = null)
+      int depth_limit = kIntroSortDepthLimit)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if (length <= 1)
       return;
 
-    heap_depth ??= 2 * BitOperations.Log2((uint)length);
     if (length <= insertion_sort_threshold) {
       InsertionSort(slice);
-    } else if (heap_depth <= 0) {
+    } else if (depth_limit <= 0) {
       HeapSort(slice);
     } else {
-      int pivot_idx = length / 2;
-      Sort3Unsafe(slice, pivot_idx);
-      QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
-      IntroSort(slice[..lt_idx], insertion_sort_threshold, heap_depth - 1);
-      IntroSort(slice[gt_idx..], insertion_sort_threshold, heap_depth - 1);
+      int pivot_idx = IndexMedian3<T>(slice);
+      QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+      IntroSort(slice[..lt_idx], insertion_sort_threshold, depth_limit - 1);
+      IntroSort(slice[gt_idx..], insertion_sort_threshold, depth_limit - 1);
     }
   }
 
@@ -70,24 +70,22 @@ public static partial class CollectionUtils {
   }
 
   public static void IntroSort<TKey, TValue>(this Span<TKey> keys, Span<TValue> values,
-      int insertion_sort_threshold = 16, int? heap_depth = null)
+      int insertion_sort_threshold = 16, int depth_limit = kIntroSortDepthLimit)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
     int length = keys.Length;
     if (length <= 1)
       return;
 
-    heap_depth ??= 2 * BitOperations.Log2((uint)length);
     if (length <= insertion_sort_threshold) {
       InsertionSort(keys, values);
-    } else if (heap_depth <= 0) {
+    } else if (depth_limit <= 0) {
       HeapSort(keys, values);
     } else {
-      int pivot_idx = length / 2;
-      Sort3Unsafe(keys, values, pivot_idx);
+      int pivot_idx = IndexMedian3<TKey>(keys);
       QuickSelectMutate(keys, values, pivot_idx, out int lt_idx, out int gt_idx);
-      IntroSort(keys[..lt_idx], values[..lt_idx], insertion_sort_threshold, heap_depth - 1);
-      IntroSort(keys[gt_idx..], values[gt_idx..], insertion_sort_threshold, heap_depth - 1);
+      IntroSort(keys[..lt_idx], values[..lt_idx], insertion_sort_threshold, depth_limit - 1);
+      IntroSort(keys[gt_idx..], values[gt_idx..], insertion_sort_threshold, depth_limit - 1);
     }
   }
 }

@@ -1,22 +1,38 @@
 using System;
-using MMOR.NET.Random;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  public static int IndexMedian3<T>(ReadOnlySpan<T> slice)
+      where T : unmanaged, IComparable<T> {
+    T a = slice[0];
+    T b = slice[slice.Length / 2];
+    T c = slice[^1];
+
+    bool ab = a.CompareTo(b) < 0;
+    bool ac = a.CompareTo(c) < 0;
+
+    if (ab == ac) {
+      bool bc = b.CompareTo(c) < 0;
+      return bc == ab ? (slice.Length / 2) : (slice.Length - 1);
+    }
+
+    return 0;
+  }
+
   public static void QuickSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if (length <= 1)
       return;
 
-    int pivot_idx = Xoroshiro.global.NextInt(0, length);
-    QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<T>(slice);
+    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
 
     QuickSort(slice[..lt_idx]);
     QuickSort(slice[gt_idx..]);
   }
 
-  public static bool QuickSelectMutate<T>(Span<T> slice, int pidx, out int lt_idx, out int gt_idx)
+  public static bool QuickSortMutate<T>(Span<T> slice, int pidx, out int lt_idx, out int gt_idx)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     T pivot    = slice[pidx];
@@ -57,7 +73,7 @@ public static partial class CollectionUtils {
     if (length <= 1)
       return;
 
-    int pivot_idx = Xoroshiro.global.NextInt(0, length);
+    int pivot_idx = IndexMedian3<TKey>(keys);
     QuickSelectMutate(keys, values, pivot_idx, out int lt_idx, out int gt_idx);
 
     QuickSort(keys[..lt_idx], values[..lt_idx]);

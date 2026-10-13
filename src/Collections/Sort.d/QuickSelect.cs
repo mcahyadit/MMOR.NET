@@ -2,7 +2,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using MMOR.NET.Random;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
@@ -48,9 +47,13 @@ public static partial class CollectionUtils {
           $"[ERROR]: Trying to QuickSelect {k}th element in an array of Length: {length}");
     if (length == 1)
       return slice[0];
+    if (k == 1)
+      return MinElement<T>(slice);
+    if (length == k)
+      return MaxElement<T>(slice);
 
-    int pivot_idx = Xoroshiro.global.NextInt(0, length);
-    QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<T>(slice);
+    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k <= lt_idx) {
       return QuickSelectMutable(slice[..lt_idx], k);

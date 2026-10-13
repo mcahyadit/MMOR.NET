@@ -2,11 +2,16 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Numerics;
-using MMOR.NET.Random;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  public const int kIntroSelectDepthLimit = 16;
+
+  public enum IntroSelectBadPath {
+    MedianOfMedians,
+    HeapSelect,
+  }
+
   /**
    * <summary>
    *  Return the <paramref name="k"/>th (1-Indexed) smallest value
@@ -15,7 +20,9 @@ public static partial class CollectionUtils {
    * </summary>
    */
   [Pure]
-  public static T IntroSelect<T>(this ReadOnlySpan<T> slice, int k, int? depth_limit = null)
+  public static T IntroSelect<T>(this ReadOnlySpan<T> slice, int k,
+      int depth_limit             = kIntroSelectDepthLimit,
+      IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if ((uint)(k - 1) >= length)
@@ -25,7 +32,7 @@ public static partial class CollectionUtils {
     try {
       Span<T> mut_buffer = mut_data is null ? stackalloc T[length] : mut_data.AsSpan(0, length);
       slice.CopyTo(mut_buffer);
-      return IntroSelectMutable(mut_buffer, k, depth_limit ?? 2 * BitOperations.Log2((uint)length));
+      return IntroSelectMutable(mut_buffer, k, depth_limit, bad_path);
     } finally {
       if (mut_data is not null) {
         ArrayPool<T>.Shared.Return(mut_data, true);
@@ -34,12 +41,14 @@ public static partial class CollectionUtils {
   }
 
   /**
-   * <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int?)"/>
+   * <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int, IntroSelectBadPath)"/>
    * <remarks>
    *  This method will non-deterministically re-order the elements in the collection.
    * </remarks>
    */
-  public static T IntroSelectMutable<T>(this Span<T> slice, int k, int? depth_limit = null)
+  public static T IntroSelectMutable<T>(this Span<T> slice, int k,
+      int depth_limit             = kIntroSelectDepthLimit,
+      IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if ((uint)(k - 1) >= length)
@@ -47,43 +56,48 @@ public static partial class CollectionUtils {
           $"[ERROR]: Trying to IntroSelect {k}th element in an array of Length: {length}");
     if (length == 1)
       return slice[0];
+    if (k == 1)
+      return MinElement<T>(slice);
+    if (length == k)
+      return MaxElement<T>(slice);
     if (length == 3) {
       Sort3Unsafe(slice, 1);
       return slice[k - 1];
     }
 
-    depth_limit ??= 2 * BitOperations.Log2((uint)slice.Length);
     if (depth_limit <= 0) {
-      return MedianOfMediansMutable(slice, k);
+      if (bad_path == IntroSelectBadPath.MedianOfMedians)
+        return MedianOfMediansMutable(slice, k);
+      else
+        return HeapSelectMutable(slice, k);
     }
 
-    int pivot_idx = length / 2;
-    Sort3Unsafe(slice, pivot_idx);
-    QuickSelectMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<T>(slice);
+    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k <= lt_idx) {
-      return IntroSelectMutable(slice[..lt_idx], k, depth_limit - 1);
+      return IntroSelectMutable(slice[..lt_idx], k, depth_limit - 1, bad_path);
     } else if (k > gt_idx) {
-      return IntroSelectMutable(slice[gt_idx..], k - gt_idx, depth_limit - 1);
+      return IntroSelectMutable(slice[gt_idx..], k - gt_idx, depth_limit - 1, bad_path);
     } else {
       return slice[lt_idx];
     }
   }
 
-  /// <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int?)"/>
+  /// <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int, IntroSelectBadPath)"/>
   [Pure]
-  public static T IntroSelect<T>(this ICollection<T> collection, int k, int? depth_limit = null)
+  public static T IntroSelect<T>(this ICollection<T> collection, int k,
+      int depth_limit             = kIntroSelectDepthLimit,
+      IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to IntroSelect {k}th element in an array of Length: {length}");
-    T[] mut_data   = ArrayPool<T>.Shared.Rent(length);
-    depth_limit  ??= 2 * BitOperations.Log2((uint)collection.Count);
+    T[] mut_data = ArrayPool<T>.Shared.Rent(length);
     try {
       collection.CopyTo(mut_data, 0);
-      return IntroSelectMutable(mut_data.AsSpan(0, length), k,
-          depth_limit ?? 2 * BitOperations.Log2((uint)length));
+      return IntroSelectMutable(mut_data.AsSpan(0, length), k, depth_limit, bad_path);
     } finally {
       ArrayPool<T>.Shared.Return(mut_data, true);
     }
