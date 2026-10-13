@@ -23,6 +23,7 @@ public static partial class CollectionUtils {
     int i = 0;
     if (typeof(T).IsEnum) {
       switch (Unsafe.SizeOf<T>()) {
+#if NETSTANDARD
         case 1:
           return IndexOf(MemoryMarshal.Cast<T, byte>(self), Unsafe.As<T, byte>(ref item));
         case 2:
@@ -31,6 +32,16 @@ public static partial class CollectionUtils {
           return IndexOf(MemoryMarshal.Cast<T, uint>(self), Unsafe.As<T, uint>(ref item));
         case 8:
           return IndexOf(MemoryMarshal.Cast<T, ulong>(self), Unsafe.As<T, ulong>(ref item));
+#else
+        case 1:
+          return IndexOf(MemoryMarshal.Cast<T, byte>(self), Unsafe.BitCast<T, byte>(item));
+        case 2:
+          return IndexOf(MemoryMarshal.Cast<T, ushort>(self), Unsafe.BitCast<T, ushort>(item));
+        case 4:
+          return IndexOf(MemoryMarshal.Cast<T, uint>(self), Unsafe.BitCast<T, uint>(item));
+        case 8:
+          return IndexOf(MemoryMarshal.Cast<T, ulong>(self), Unsafe.BitCast<T, ulong>(item));
+#endif
         default:
           goto scalar_tail;
       }
