@@ -5,7 +5,7 @@ namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
   /**
    * <summary>
-   *  Internal function for <see cref="IntroSort"/>. <br/>
+   *  Internal function for <see cref="IntroSort{T}(Span{T}, int, int?)"/>. <br/>
    *  Use at your own risk.
    * </summary>
    */

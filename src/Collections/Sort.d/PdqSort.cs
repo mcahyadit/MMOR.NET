@@ -17,7 +17,7 @@ public static partial class CollectionUtils {
 
   /**
    * <summary>
-   *  Internal function for <see cref="PdqSort"/>. <br/>
+   *  Internal function for <see cref="PdqSort{T}(Span{T}, PdqSortConfig?, int?)"/>. <br/>
    *  Use at your own risk.
    * </summary>
    */
