@@ -9,7 +9,15 @@ namespace MMOR.NET.Collections {
  * </summary>
  */
 public class SortTest {
-  public enum SortKind { Insertion, Merge, Quick, Heap, Pdq, Intro }
+  public enum SortKind {
+    Insertion,
+    Merge,
+    Quick,
+    Heap,
+    Intro,
+    Pdq,
+    Tim,
+  }
 
   [Theory]
   [MemberData(nameof(SortSelectionData.Params), MemberType = typeof(SortSelectionData))]
@@ -69,11 +77,14 @@ public class SortTest {
       case SortKind.Heap:
         span.HeapSort();
         break;
+      case SortKind.Intro:
+        span.IntroSort();
+        break;
       case SortKind.Pdq:
         span.PdqSort();
         break;
-      case SortKind.Intro:
-        span.IntroSort();
+      case SortKind.Tim:
+        span.TimSort();
         break;
       default:
         span.QuickSort();
