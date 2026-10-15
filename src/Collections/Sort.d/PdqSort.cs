@@ -71,6 +71,12 @@ public static partial class CollectionUtils {
     }
   }
 
+  /**
+   * <summary>
+   *  Unstable Sort <paramref name="slice"/> in ascending order using pdqsort. <br/>
+   *  <i>O(n)</i> best case. <i>O(n log n)</i> worst case. <br/>
+   * </summary>
+   */
   public static void PdqSort<T>(this Span<T> slice, PdqSortConfig? config = null,
       int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
@@ -186,6 +192,7 @@ public static partial class CollectionUtils {
     }
   }
 
+  /// <inheritdoc cref="PdqSort{T}(Span{T}, PdqSortConfig?, int?)"/>
   public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
       PdqSortConfig? config = null, int? depth_limit = null)
       where TKey : unmanaged, IComparable<TKey>

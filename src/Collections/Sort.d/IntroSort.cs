@@ -26,6 +26,12 @@ public static partial class CollectionUtils {
     }
   }
 
+  /**
+   * <summary>
+   *  Unstable Sort <paramref name="slice"/> in ascending order using introsort. <br/>
+   *  <i>O(n log n)</i> all cases. <br/>
+   * </summary>
+   */
   public static void IntroSort<T>(this Span<T> slice, int insertion_sort_threshold = 16,
       int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
@@ -69,6 +75,7 @@ public static partial class CollectionUtils {
     }
   }
 
+  /// <inheritdoc cref="IntroSort{T}(Span{T}, int, int?)"/>
   public static void IntroSort<TKey, TValue>(this Span<TKey> keys, Span<TValue> values,
       int insertion_sort_threshold = 16, int? depth_limit = null)
       where TKey : unmanaged, IComparable<TKey>

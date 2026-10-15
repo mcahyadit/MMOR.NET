@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  /**
+   * <summary>
+   *  Unstable Sort <paramref name="slice"/> in ascending order using heap sort. <br/>
+   *  <i>O(n log n)</i> all cases. <br/>
+   * </summary>
+   */
   public static void HeapSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -42,6 +48,7 @@ public static partial class CollectionUtils {
     }
   }
 
+  /// <inheritdoc cref="HeapSort{T}(Span{T})"/>
   public static void HeapSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {

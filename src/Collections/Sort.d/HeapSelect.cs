@@ -30,7 +30,7 @@ public static partial class CollectionUtils {
    * <summary>
    *  Return the <paramref name="k"/>th (1-Indexed) smallest value
    *  in unordered <paramref name="slice"/>. <br/>
-   *  <i>O(n)</i> average case. <i>O(n^2)</i> worst case. <br/>
+   *  <i>O(n + k log n)</i> all cases. <br/>
    * </summary>
    */
   [Pure]

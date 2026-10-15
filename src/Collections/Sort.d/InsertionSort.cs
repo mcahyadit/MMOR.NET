@@ -2,6 +2,12 @@ using System;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  /**
+   * <summary>
+   *  Stable Sort <paramref name="slice"/> in ascending order using insertion sort. <br/>
+   *  <i>O(n)</i> best case. <i>O(n^2)</i> average &amp; worst case. <br/>
+   * </summary>
+   */
   public static void InsertionSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -17,6 +23,7 @@ public static partial class CollectionUtils {
     }
   }
 
+  /// <inheritdoc cref="InsertionSort{T}(Span{T})"/>
   public static void InsertionSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
@@ -36,6 +43,12 @@ public static partial class CollectionUtils {
     }
   }
 
+  /**
+   * <summary>
+   *  Unstable Sort <paramref name="slice"/> in ascending order using binary insertion sort. <br/>
+   *  <i>O(n log n)</i> comparisons. <i>O(n^2)</i> moves worst case. <br/>
+   * </summary>
+   */
   public static void BinaryInsertionSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -49,6 +62,7 @@ public static partial class CollectionUtils {
     }
   }
 
+  /// <inheritdoc cref="BinaryInsertionSort{T}(Span{T})"/>
   public static void BinaryInsertionSort<TKey, TValue>(this Span<TKey> keys, Span<TValue> values)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {

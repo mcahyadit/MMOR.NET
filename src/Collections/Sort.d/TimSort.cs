@@ -152,6 +152,12 @@ public static partial class CollectionUtils {
     }
   }
 
+  /**
+   * <summary>
+   *  Stable Sort <paramref name="slice"/> in ascending order using timsort. <br/>
+   *  <i>O(n)</i> best case. <i>O(n log n)</i> worst case. <br/>
+   * </summary>
+   */
   public static void TimSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;

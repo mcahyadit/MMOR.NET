@@ -19,6 +19,12 @@ public static partial class CollectionUtils {
     return 0;
   }
 
+  /**
+   * <summary>
+   *  Unstable Sort <paramref name="slice"/> in ascending order using quicksort. <br/>
+   *  <i>O(n log n)</i> average case. <i>O(n^2)</i> worst case. <br/>
+   * </summary>
+   */
   public static void QuickSort<T>(this Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -66,6 +72,7 @@ public static partial class CollectionUtils {
     return partitioned;
   }
 
+  /// <inheritdoc cref="QuickSort{T}(Span{T})"/>
   public static void QuickSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
