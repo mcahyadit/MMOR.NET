@@ -61,5 +61,12 @@ public class SortBench {
     CollectionUtils.PdqSort(work_);
     return work_[0];
   }
+
+  [Benchmark]
+  public int TimSort() {
+    Array.Copy(template_, work_, N);
+    CollectionUtils.TimSort(work_);
+    return work_[0];
+  }
 }
 }
