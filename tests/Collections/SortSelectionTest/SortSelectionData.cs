@@ -26,6 +26,14 @@ public static class SortSelectionData {
 
   /**
    * <summary>
+   *  Duplicate-heavy samples (equal keys everywhere) used by the stability tests; the
+   *  payload of each element is its original index, so any swap of equal keys is visible.
+   * </summary>
+   */
+  public static readonly TheoryData<SortSelectionParam> StabilityParams = BuildStabilityParams();
+
+  /**
+   * <summary>
    *  Ascending copy of <paramref name="data" /> built with <see cref="Array.Sort" /> as the oracle.
    * </summary>
    */
@@ -90,6 +98,66 @@ public static class SortSelectionData {
     int[] ks = new int[n];
     for (int i = 0; i < n; ++i) ks[i] = i + 1;
     return ks;
+  }
+
+  static TheoryData<SortSelectionParam> BuildStabilityParams() {
+    TheoryData<SortSelectionParam> data = [];
+
+    System.Random rng = new(7);
+
+    for (int n = 1; n <= 40; ++n) {
+      int[] values = new int[n];
+      for (int i = 0; i < n; ++i) values[i] = rng.Next(0, 3);
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-dup3-len{0}", n),
+        values     = values,
+        ks         = [],
+      });
+    }
+
+    foreach (int n in new[] { 2, 31, 32, 33, 64, 65, 127, 128, 129, 200, 1000 }) {
+      int[] alleq = new int[n];
+      Array.Fill(alleq, 7);
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-alleq-len{0}", n),
+        values     = alleq,
+        ks         = [],
+      });
+
+      int[] asc = new int[n];
+      for (int i = 0; i < n; ++i) asc[i] = i / 4;
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-asc-plateau-len{0}", n),
+        values     = asc,
+        ks         = [],
+      });
+
+      int[] desc = new int[n];
+      for (int i = 0; i < n; ++i) desc[i] = (n - 1 - i) / 4;
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-desc-plateau-len{0}", n),
+        values     = desc,
+        ks         = [],
+      });
+
+      int[] sawtooth = new int[n];
+      for (int i = 0; i < n; ++i) sawtooth[i] = i % 16;
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-sawtooth-len{0}", n),
+        values     = sawtooth,
+        ks         = [],
+      });
+
+      int[] dup = new int[n];
+      for (int i = 0; i < n; ++i) dup[i] = rng.Next(0, n / 8 + 1);
+      data.Add(new SortSelectionParam {
+        identifier = string.Format("stability-dupn-len{0}", n),
+        values     = dup,
+        ks         = [],
+      });
+    }
+
+    return data;
   }
 }
 }
