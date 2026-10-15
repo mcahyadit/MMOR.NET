@@ -1,80 +1,10 @@
 using System;
 using System.Buffers;
 using System.Numerics;
-using MMOR.NET.Bits;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public static int ComputeMinRun(int length) {
-    // Bit Manip for getting Power Of 2 until [32, 64)
-    int log2    = BitOperations.Log2((uint)length);
-    int idx     = Math.Max(0, log2 - 5);
-    int min_run = (length >> idx) & 63;
-    int add     = BitOps.Bzhi32((uint)length, idx) != 0 ? 1 : 0;
-    return Math.Max(32, min_run + add);
-  }
-
-  public static int TailBinarySearch<T>(Span<T> slice, T value)
-      where T : IComparable<T> {
-    int hi = slice.Length;
-    int lo = 0;
-    while (lo < hi) {
-      int mid = lo + ((hi - lo) >> 1);
-      if (slice[mid].CompareTo(value) <= 0) {
-        lo = mid + 1;
-      } else {
-        hi = mid;
-      }
-    }
-    return lo;
-  }
-
-  public static int HeadBinarySearch<T>(Span<T> slice, T value)
-      where T : IComparable<T> {
-    int hi = slice.Length;
-    int lo = 0;
-    while (lo < hi) {
-      int mid = lo + ((hi - lo) >> 1);
-      if (slice[mid].CompareTo(value) < 0) {
-        lo = mid + 1;
-      } else {
-        hi = mid;
-      }
-    }
-    return lo;
-  }
-
-  public static void TimBinaryInsertion<T>(Span<T> slice)
-      where T : IComparable<T> {
-    int length = slice.Length;
-    for (int c_idx = 1; c_idx < length; ++c_idx) {
-      T value = slice[c_idx];
-      if (value.CompareTo(slice[c_idx - 1]) >= 0)
-        continue;
-
-      int i_idx = TailBinarySearch(slice[..c_idx], value);
-      slice[i_idx..c_idx].CopyTo(slice.Slice(i_idx + 1, c_idx - i_idx));
-      slice[i_idx] = value;
-    }
-  }
-
-  public static int CountRun<T>(Span<T> slice)
-      where T : IComparable<T> {
-    int length = slice.Length;
-    if (length <= 1)
-      return length;
-
-    int run = 2;
-    if (slice[1].CompareTo(slice[0]) >= 0) {
-      while (run < length && slice[run].CompareTo(slice[run - 1]) >= 0) ++run;
-    } else {
-      while (run < length && slice[run].CompareTo(slice[run - 1]) < 0) ++run;
-      slice[..run].Reverse();
-    }
-    return run;
-  }
-
-  public static int TimMerge<T>(Span<T> slice, int l_len, int min_gallop)
+  public static int TimMerge<T>(in Span<T> slice, in int l_len, int min_gallop)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
 
@@ -93,7 +23,7 @@ public static partial class CollectionUtils {
       while (l_idx < l_len && r_idx < length) {
         int threshold = galloping ? 7 : min_gallop;
         if (Math.Abs(gallop) < threshold) {
-          // Step-by-Step
+          // Step-by-Step Comparison
           if (galloping) {
             ++min_gallop;
             galloping = false;
@@ -148,7 +78,7 @@ public static partial class CollectionUtils {
       return min_gallop;
     } finally {
       if (l_mem is not null)
-        ArrayPool<T>.Shared.Return(l_mem);
+        ArrayPool<T>.Shared.Return(l_mem, true);
     }
   }
 
@@ -164,7 +94,7 @@ public static partial class CollectionUtils {
 
     int min_run = ComputeMinRun(slice.Length);
     if (length <= min_run) {
-      TimBinaryInsertion(slice);
+      BinaryInsertionSort(slice);
       return;
     }
 
@@ -176,10 +106,15 @@ public static partial class CollectionUtils {
     int min_gallop       = 7;
 
     for (int i = 0; i < length;) {
-      int stride = CountRun(slice[i..]);
+      int stride = CountRun<T>(slice[i..]);
+      if (stride < 0) {
+        stride = -stride;
+        slice.Slice(i, stride).Reverse();
+      }
+
       if (stride < min_run) {
         stride = Math.Min(min_run, length - i);
-        TimBinaryInsertion(slice.Slice(i, stride));
+        BinaryInsertionSort(slice.Slice(i, stride));
       }
       run_start[runs_count]  = i;
       run_length[runs_count] = stride;

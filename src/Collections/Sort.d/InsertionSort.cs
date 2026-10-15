@@ -42,42 +42,5 @@ public static partial class CollectionUtils {
       values[j + 1] = p_val;
     }
   }
-
-  /**
-   * <summary>
-   *  Unstable Sort <paramref name="slice"/> in ascending order using binary insertion sort. <br/>
-   *  <i>O(n log n)</i> comparisons. <i>O(n^2)</i> moves worst case. <br/>
-   * </summary>
-   */
-  public static void BinaryInsertionSort<T>(this Span<T> slice)
-      where T : unmanaged, IComparable<T> {
-    int length = slice.Length;
-    for (int i = 1; i < length; ++i) {
-      T pivot = slice[i];
-
-      int j = slice[..i].BinarySearch(pivot);
-      j     = j < 0 ? ~j : j;
-      slice.Slice(j, i - j).CopyTo(slice.Slice(j + 1, i - j));
-      slice[j] = pivot;
-    }
-  }
-
-  /// <inheritdoc cref="BinaryInsertionSort{T}(Span{T})"/>
-  public static void BinaryInsertionSort<TKey, TValue>(this Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
-    int length = keys.Length;
-    for (int i = 1; i < length; ++i) {
-      TKey pivot   = keys[i];
-      TValue p_val = values[i];
-
-      int j = keys[..i].BinarySearch(pivot);
-      j     = j < 0 ? ~j : j;
-      keys.Slice(j, i - j).CopyTo(keys.Slice(j + 1, i - j));
-      values.Slice(j, i - j).CopyTo(values.Slice(j + 1, i - j));
-      keys[j]   = pivot;
-      values[j] = p_val;
-    }
-  }
 }
 }
