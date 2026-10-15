@@ -1,9 +1,8 @@
 using System;
+using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public const int kPdqSortDepthLimit = 16;
-
   public readonly struct PdqSortConfig {
     public readonly int insertion_sort_threshold { get; init; }
     public readonly int ninther_threshold { get; init; }
@@ -18,7 +17,7 @@ public static partial class CollectionUtils {
 
   /**
    * <summary>
-   *  Internal function for <see cref="PdqSort{T}(Span{T}, PdqSortConfig?, int)"/>. <br/>
+   *  Internal function for <see cref="PdqSort{T}(Span{T}, PdqSortConfig?, int?)"/>. <br/>
    *  Use at your own risk.
    * </summary>
    */
@@ -73,7 +72,7 @@ public static partial class CollectionUtils {
   }
 
   public static void PdqSort<T>(this Span<T> slice, PdqSortConfig? config = null,
-      int depth_limit = kPdqSortDepthLimit)
+      int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     PdqSortConfig cfg = config ?? kDefaultPdqSortConfig;
     int length        = slice.Length;
@@ -101,6 +100,7 @@ public static partial class CollectionUtils {
     bool lt_sort = false;
     bool gt_sort = false;
     if (highly_unbalanced) {
+      depth_limit ??= BitOperations.Log2((uint)length);
       if (--depth_limit == 0) {
         HeapSort(slice);
         return;
@@ -187,7 +187,7 @@ public static partial class CollectionUtils {
   }
 
   public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
-      PdqSortConfig? config = null, int depth_limit = kPdqSortDepthLimit)
+      PdqSortConfig? config = null, int? depth_limit = null)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
     PdqSortConfig cfg = config ?? kDefaultPdqSortConfig;
@@ -214,6 +214,7 @@ public static partial class CollectionUtils {
     bool lt_sort = false;
     bool gt_sort = false;
     if (highly_unbalanced) {
+      depth_limit ??= BitOperations.Log2((uint)length);
       if (--depth_limit == 0) {
         HeapSort(keys, values);
         return;

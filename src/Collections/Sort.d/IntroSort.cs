@@ -3,8 +3,6 @@ using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public const int kIntroSortDepthLimit = 16;
-
   /**
    * <summary>
    *  Internal function for <see cref="IntroSort{T}(Span{T}, int, int?)"/>. <br/>
@@ -29,11 +27,13 @@ public static partial class CollectionUtils {
   }
 
   public static void IntroSort<T>(this Span<T> slice, int insertion_sort_threshold = 16,
-      int depth_limit = kIntroSortDepthLimit)
+      int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if (length <= 1)
       return;
+
+    depth_limit ??= 2 * BitOperations.Log2((uint)length);
 
     if (length <= insertion_sort_threshold) {
       InsertionSort(slice);
@@ -70,12 +70,14 @@ public static partial class CollectionUtils {
   }
 
   public static void IntroSort<TKey, TValue>(this Span<TKey> keys, Span<TValue> values,
-      int insertion_sort_threshold = 16, int depth_limit = kIntroSortDepthLimit)
+      int insertion_sort_threshold = 16, int? depth_limit = null)
       where TKey : unmanaged, IComparable<TKey>
       where TValue : unmanaged {
     int length = keys.Length;
     if (length <= 1)
       return;
+
+    depth_limit ??= 2 * BitOperations.Log2((uint)length);
 
     if (length <= insertion_sort_threshold) {
       InsertionSort(keys, values);

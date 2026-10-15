@@ -2,11 +2,10 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public const int kIntroSelectDepthLimit = 16;
-
   public enum IntroSelectBadPath {
     MedianOfMedians,
     HeapSelect,
@@ -20,8 +19,7 @@ public static partial class CollectionUtils {
    * </summary>
    */
   [Pure]
-  public static T IntroSelect<T>(this ReadOnlySpan<T> slice, int k,
-      int depth_limit             = kIntroSelectDepthLimit,
+  public static T IntroSelect<T>(this ReadOnlySpan<T> slice, int k, int? depth_limit = null,
       IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -41,13 +39,12 @@ public static partial class CollectionUtils {
   }
 
   /**
-   * <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int, IntroSelectBadPath)"/>
+   * <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int?, IntroSelectBadPath)"/>
    * <remarks>
    *  This method will non-deterministically re-order the elements in the collection.
    * </remarks>
    */
-  public static T IntroSelectMutable<T>(this Span<T> slice, int k,
-      int depth_limit             = kIntroSelectDepthLimit,
+  public static T IntroSelectMutable<T>(this Span<T> slice, int k, int? depth_limit = null,
       IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -65,6 +62,7 @@ public static partial class CollectionUtils {
       return slice[k - 1];
     }
 
+    depth_limit ??= 2 * BitOperations.Log2((uint)length);
     if (depth_limit <= 0) {
       if (bad_path == IntroSelectBadPath.MedianOfMedians)
         return MedianOfMediansMutable(slice, k);
@@ -84,10 +82,9 @@ public static partial class CollectionUtils {
     }
   }
 
-  /// <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int, IntroSelectBadPath)"/>
+  /// <inheritdoc cref="IntroSelect{T}(ReadOnlySpan{T}, int, int?, IntroSelectBadPath)"/>
   [Pure]
-  public static T IntroSelect<T>(this ICollection<T> collection, int k,
-      int depth_limit             = kIntroSelectDepthLimit,
+  public static T IntroSelect<T>(this ICollection<T> collection, int k, int? depth_limit = null,
       IntroSelectBadPath bad_path = IntroSelectBadPath.MedianOfMedians)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;

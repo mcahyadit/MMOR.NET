@@ -2,24 +2,15 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public const int kPdqSelectDepthLimit = 16;
-
   public static readonly PdqSortConfig kDefaultPdqSelectConfig = new() {
     insertion_sort_threshold     = 11,
     ninther_threshold            = 49,
     partial_insertion_sort_limit = 8,
   };
-
-  // public static void MedianOfNintherUnsafe<T>(Span<T> slice)
-  //     where T : unmanaged, IComparable<T> {
-  //   Sort3Unsafe(slice[..3], 1);
-  //   Sort3Unsafe(slice[3..6], 1);
-  //   Sort3Unsafe(slice[6..], 1);
-  //   Sort3Unsafe(slice[1..8], 3);
-  // }
 
   public static void BreakDescendingUnsafe<T>(Span<T> slice)
       where T : unmanaged, IComparable<T> {
@@ -44,7 +35,7 @@ public static partial class CollectionUtils {
    */
   [Pure]
   public static T PdqSelect<T>(this ReadOnlySpan<T> slice, int k, PdqSortConfig? config = null,
-      int depth_limit = kPdqSelectDepthLimit)
+      int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if ((uint)(k - 1) >= length)
@@ -63,13 +54,13 @@ public static partial class CollectionUtils {
   }
 
   /**
-   * <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int)"/>
+   * <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int?)"/>
    * <remarks>
    *  This method will non-deterministically re-order the elements in the collection.
    * </remarks>
    */
   public static T PdqSelectMutable<T>(this Span<T> slice, int k, PdqSortConfig? config = null,
-      int depth_limit = kPdqSelectDepthLimit)
+      int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     PdqSortConfig cfg = config ?? kDefaultPdqSelectConfig;
     int length        = slice.Length;
@@ -108,6 +99,7 @@ public static partial class CollectionUtils {
     bool highly_unbalanced = lt_span.Length < l8 || gt_span.Length < l8;
 
     if (highly_unbalanced) {
+      depth_limit ??= BitOperations.Log2((uint)length);
       if (--depth_limit == 0)
         return MedianOfMediansMutable(slice, k);
     }
@@ -124,10 +116,10 @@ public static partial class CollectionUtils {
     }
   }
 
-  /// <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int)"/>
+  /// <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int?)"/>
   [Pure]
   public static T PdqSelect<T>(this ICollection<T> collection, int k, PdqSortConfig? config = null,
-      int depth_limit = kPdqSelectDepthLimit)
+      int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;
     if ((uint)(k - 1) >= length)
