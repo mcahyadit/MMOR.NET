@@ -6,12 +6,6 @@ using System.Numerics;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  public static readonly PdqSortConfig kDefaultPdqSelectConfig = new() {
-    insertion_sort_threshold     = 11,
-    ninther_threshold            = 49,
-    partial_insertion_sort_limit = 8,
-  };
-
   public static void BreakDescendingUnsafe<T>(Span<T> slice)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -34,8 +28,9 @@ public static partial class CollectionUtils {
    * </summary>
    */
   [Pure]
-  public static T PdqSelect<T>(this ReadOnlySpan<T> slice, int k, PdqSortConfig? config = null,
-      int? depth_limit = null)
+  public static T PdqSelect<T>(this in ReadOnlySpan<T> slice, in int k,
+      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
     if ((uint)(k - 1) >= length)
@@ -45,7 +40,8 @@ public static partial class CollectionUtils {
     try {
       Span<T> mut_buffer = mut_data is null ? stackalloc T[length] : mut_data.AsSpan(0, length);
       slice.CopyTo(mut_buffer);
-      return PdqSelectMutable(mut_buffer, k, config ?? kDefaultPdqSelectConfig, depth_limit);
+      return PdqSelectMutable(mut_buffer, k, insertion_sort_threshold, ninther_threshold,
+          partial_insertion_sort_limit, depth_limit);
     } finally {
       if (mut_data is not null) {
         ArrayPool<T>.Shared.Return(mut_data, true);
@@ -54,16 +50,16 @@ public static partial class CollectionUtils {
   }
 
   /**
-   * <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int?)"/>
+   * <inheritdoc cref="PdqSelect{T}(in ReadOnlySpan{T}, in int, in int, in int, in int, int?)"/>
    * <remarks>
    *  This method will non-deterministically re-order the elements in the collection.
    * </remarks>
    */
-  public static T PdqSelectMutable<T>(this Span<T> slice, int k, PdqSortConfig? config = null,
-      int? depth_limit = null)
+  public static T PdqSelectMutable<T>(this Span<T> slice, int k,
+      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
-    PdqSortConfig cfg = config ?? kDefaultPdqSelectConfig;
-    int length        = slice.Length;
+    int length = slice.Length;
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to PdqSelect {k}th element in an array of Length: {length}");
@@ -73,7 +69,7 @@ public static partial class CollectionUtils {
       return MinElement<T>(slice);
     if (length == k)
       return MaxElement<T>(slice);
-    if (length <= Math.Max(k, cfg.insertion_sort_threshold)) {
+    if (length <= Math.Max(k, insertion_sort_threshold)) {
       if (length == 3)
         Sort3Unsafe(slice, 1);
       else
@@ -82,7 +78,7 @@ public static partial class CollectionUtils {
     }
 
     int pivot_idx = length / 2;
-    if (length > cfg.ninther_threshold) {
+    if (length > ninther_threshold) {
       BreakDescendingUnsafe(slice);
       OrlpNintherSortUnsafe(slice);
     } else {
@@ -105,21 +101,24 @@ public static partial class CollectionUtils {
     }
     if (k <= lt_idx) {
       if (highly_unbalanced)
-        BreakPatterns(lt_span, cfg.insertion_sort_threshold, cfg.ninther_threshold);
-      return PdqSelectMutable(lt_span, k, cfg, depth_limit);
+        BreakPatterns(lt_span, insertion_sort_threshold, ninther_threshold);
+      return PdqSelectMutable(lt_span, k, insertion_sort_threshold, ninther_threshold,
+          partial_insertion_sort_limit, depth_limit);
     } else if (k > gt_idx) {
       if (highly_unbalanced)
-        BreakPatterns(gt_span, cfg.insertion_sort_threshold, cfg.ninther_threshold);
-      return PdqSelectMutable(gt_span, k - gt_idx, cfg, depth_limit);
+        BreakPatterns(gt_span, insertion_sort_threshold, ninther_threshold);
+      return PdqSelectMutable(gt_span, k - gt_idx, insertion_sort_threshold, ninther_threshold,
+          partial_insertion_sort_limit, depth_limit);
     } else {
       return slice[lt_idx];
     }
   }
 
-  /// <inheritdoc cref="PdqSelect{T}(ReadOnlySpan{T}, int, PdqSortConfig?, int?)"/>
+  /// <inheritdoc cref="PdqSelect{T}(in ReadOnlySpan{T}, in int, in int, in int, in int, int?)"/>
   [Pure]
-  public static T PdqSelect<T>(this ICollection<T> collection, int k, PdqSortConfig? config = null,
-      int? depth_limit = null)
+  public static T PdqSelect<T>(this ICollection<T> collection, int k,
+      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;
     if ((uint)(k - 1) >= length)
@@ -128,8 +127,8 @@ public static partial class CollectionUtils {
     T[] mut_data = ArrayPool<T>.Shared.Rent(length);
     try {
       collection.CopyTo(mut_data, 0);
-      return PdqSelectMutable(mut_data.AsSpan(0, length), k, config ?? kDefaultPdqSelectConfig,
-          depth_limit);
+      return PdqSelectMutable(mut_data.AsSpan(0, length), k, insertion_sort_threshold,
+          ninther_threshold, partial_insertion_sort_limit, depth_limit);
     } finally {
       ArrayPool<T>.Shared.Return(mut_data, true);
     }
