@@ -3,24 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
 public readonly partial struct TotalStatisticsV2 {
-  /**
-   * <summary>
-   *  <br/>
-   *  Ignores 0 and negative values. <br/>
-   *  Averaged by <see cref="CountPositive"/>.
-   * </summary>
-   */
-  public readonly double GeometricMean { get; init; }
-  /**
-   * <summary>
-   *  <br/>
-   *  Ignores 0. <br/>
-   *  Averaged by <see cref="CountA"/>.
-   * </summary>
-   */
-  public readonly double HarmonicMean { get; init; }
-  public readonly double InterQuartileMean { get; init; }
-
   public double RootMeanSquare {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get => Math.Sqrt((CentralMoment2nd + Count * Mean * Mean) / Count);

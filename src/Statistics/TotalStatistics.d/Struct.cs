@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -14,12 +15,65 @@ public readonly partial struct TotalStatisticsV2 {
     get => Count - Count0;
   }
 
+  public readonly double Mean { get; init; }
+  public readonly double CentralMoment2nd { get; init; }
+  public readonly double CentralMoment3rd { get; init; }
+  public readonly double CentralMoment4th { get; init; }
+
   public readonly double MinValue { get; init; }
   public readonly ulong MinCount { get; init; }
   public readonly double MaxValue { get; init; }
   public readonly ulong MaxCount { get; init; }
   public readonly double ModeValue { get; init; }
   public readonly ulong ModeCount { get; init; }
+
+  public readonly ImmutableDictionary<double, double> CommonQuantiles { get; init; }
+  public readonly ulong OutlierCount { get; init; }
+
+  /**
+   * <summary>
+   *  <br/>
+   *  Ignores 0 and negative values. <br/>
+   *  Averaged by <see cref="CountPositive"/>.
+   * </summary>
+   */
+  public readonly double GeometricMean { get; init; }
+  /**
+   * <summary>
+   *  <br/>
+   *  Ignores 0. <br/>
+   *  Averaged by <see cref="CountA"/>.
+   * </summary>
+   */
+  public readonly double HarmonicMean { get; init; }
+  public readonly double InterQuartileMean { get; init; }
+
+  /**
+   * <summary>
+   *  Average of Absolute of the Differences between each element to the <see cref="Mean"/>
+   * </summary>
+   */
+  public readonly double MeanAbsoluteDeviation { get; init; }
+  /**
+   * <summary>
+   *  Average of Absolute of the Differences between each element to the <see cref="Median"/>
+   * </summary>
+   */
+  public readonly double MedianAbsoluteDeviation { get; init; }
+
+  public readonly double Entropy { get; init; }
+  public readonly double GiniCoefficient { get; init; }
+  public readonly double HerfindahlHirschmanIndex { get; init; }
+  /**
+   * <summary>
+   *  Economic Redundancy Metric for measure of <i>equality</i>. <br/>
+   *  <br/>
+   *  Averaged by <see cref="CountPositive"/>. <br/>
+   *  Measurement ignores zeroes and negative values.
+   * </summary>
+   */
+  public readonly double TheilIndex { get; init; }
+  public readonly double SimpsonDiversityIndex { get; init; }
 
   public static readonly TotalStatisticsV2 kDefault = new TotalStatisticsV2 {
     Count           = 0,

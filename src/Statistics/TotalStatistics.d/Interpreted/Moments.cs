@@ -3,15 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
 public readonly partial struct TotalStatisticsV2 {
-  public readonly double Mean { get; init; }
   public double Sum {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get => Mean * Count;
   }
-
-  public readonly double CentralMoment2nd { get; init; }
-  public readonly double CentralMoment3rd { get; init; }
-  public readonly double CentralMoment4th { get; init; }
 
   public double Variance {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

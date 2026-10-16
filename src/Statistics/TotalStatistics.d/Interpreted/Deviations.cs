@@ -3,33 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
 public readonly partial struct TotalStatisticsV2 {
-  /**
-   * <summary>
-   *  Average of Absolute of the Differences between each element to the <see cref="Mean"/>
-   * </summary>
-   */
-  public readonly double MeanAbsoluteDeviation { get; init; }
-  /**
-   * <summary>
-   *  Average of Absolute of the Differences between each element to the <see cref="Median"/>
-   * </summary>
-   */
-  public readonly double MedianAbsoluteDeviation { get; init; }
-
-  public readonly double Entropy { get; init; }
-  public readonly double GiniCoefficient { get; init; }
-  public readonly double HerfindahlHirschmanIndex { get; init; }
-  /**
-   * <summary>
-   *  Economic Redundancy Metric for measure of <i>equality</i>. <br/>
-   *  <br/>
-   *  Averaged by <see cref="CountPositive"/>. <br/>
-   *  Measurement ignores zeroes and negative values.
-   * </summary>
-   */
-  public readonly double TheilIndex { get; init; }
-  public readonly double SimpsonDiversityIndex { get; init; }
-
   public double StandardDeviation {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {

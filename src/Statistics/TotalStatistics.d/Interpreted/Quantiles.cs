@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
 public readonly partial struct TotalStatisticsV2 {
-  public readonly ImmutableDictionary<double, double> CommonQuantiles { get; init; }
-  public readonly ulong OutlierCount { get; init; }
-
   public double Median {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get => CommonQuantiles is null || CommonQuantiles.IsEmpty ? double.NaN : CommonQuantiles[0.5];
