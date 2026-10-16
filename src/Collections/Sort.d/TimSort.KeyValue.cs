@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
@@ -97,6 +99,30 @@ public static partial class CollectionUtils {
     }
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void TimCollapse<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values,
+      bool finish, ref int min_gallop, ref int count, in Span<int> run_start,
+      in Span<int> run_length)
+      where TKey : unmanaged, IComparable<TKey>
+      where TValue : unmanaged {
+    while (count > 1) {
+      int len_1 = run_length[count - 2];
+      int len_2 = run_length[count - 1];
+      bool inv3 = count > 2 && run_length[count - 3] <= len_2 + len_1;
+      bool inv4 = count > 3 && run_length[count - 4]  //
+                                   <= len_1 + run_length[count - 3];
+      if (finish || len_1 <= len_2 || inv3 || inv4) {
+        int len_combined      = len_1 + len_2;
+        min_gallop            = TimMerge(keys.Slice(run_start[count - 2], len_combined),  //
+                       values.Slice(run_start[count - 2], len_combined), len_1, min_gallop);
+        run_length[count - 2] = len_combined;
+        --count;
+      } else {
+        break;
+      }
+    }
+  }
+
   /// <inheritdoc cref="TimSort{T}(Span{T})"/>
   public static void TimSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
       where TKey : unmanaged, IComparable<TKey>
@@ -133,35 +159,10 @@ public static partial class CollectionUtils {
       ++runs_count;
       i += stride;
 
-      while (runs_count > 1) {
-        int len_1 = run_length[runs_count - 2];
-        int len_2 = run_length[runs_count - 1];
-        bool inv3 = runs_count > 2 && run_length[runs_count - 3] <= len_2 + len_1;
-        bool inv4 = runs_count > 3 && run_length[runs_count - 4]  //
-                                          <= len_1 + run_length[runs_count - 3];
-        if (len_1 <= len_2 || inv3 || inv4) {
-          int len_combined           = len_1 + len_2;
-          int c_start                = run_start[runs_count - 2];
-          min_gallop                 = TimMerge(keys.Slice(c_start, len_combined),
-                              values.Slice(c_start, len_combined), len_1, min_gallop);
-          run_length[runs_count - 2] = len_combined;
-          --runs_count;
-        } else {
-          break;
-        }
-      }
+      TimCollapse(keys, values, false, ref min_gallop, ref runs_count, run_start, run_length);
     }
 
-    while (runs_count > 1) {
-      int len_1   = run_length[runs_count - 2];
-      int len_2   = run_length[runs_count - 1];
-      int len_t   = len_1 + len_2;
-      int c_start = run_start[runs_count - 2];
-      min_gallop =
-          TimMerge(keys.Slice(c_start, len_t), values.Slice(c_start, len_t), len_1, min_gallop);
-      run_length[runs_count - 2] = len_t;
-      --runs_count;
-    }
+    TimCollapse(keys, values, true, ref min_gallop, ref runs_count, run_start, run_length);
   }
 }
 }
