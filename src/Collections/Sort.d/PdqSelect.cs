@@ -29,7 +29,7 @@ public static partial class CollectionUtils {
    */
   [Pure]
   public static T PdqSelect<T>(this in ReadOnlySpan<T> slice, in int k,
-      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int insertion_sort_threshold = 10, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -56,7 +56,7 @@ public static partial class CollectionUtils {
    * </remarks>
    */
   public static T PdqSelectMutable<T>(this Span<T> slice, int k,
-      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int insertion_sort_threshold = 10, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = slice.Length;
@@ -95,9 +95,9 @@ public static partial class CollectionUtils {
     bool highly_unbalanced = lt_span.Length < l8 || gt_span.Length < l8;
 
     if (highly_unbalanced) {
-      depth_limit ??= BitOperations.Log2((uint)length);
+      depth_limit ??= BitOperations.Log2((uint)length) - (BitOperations.Log2((uint)length) >> 1);
       if (--depth_limit == 0)
-        return MedianOfMediansMutable(slice, k);
+        return MedianOfNintherMutable(slice, k);
     }
     if (k <= lt_idx) {
       if (highly_unbalanced)
@@ -117,7 +117,7 @@ public static partial class CollectionUtils {
   /// <inheritdoc cref="PdqSelect{T}(in ReadOnlySpan{T}, in int, in int, in int, in int, int?)"/>
   [Pure]
   public static T PdqSelect<T>(this ICollection<T> collection, int k,
-      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int insertion_sort_threshold = 10, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where T : unmanaged, IComparable<T> {
     int length = collection.Count;
