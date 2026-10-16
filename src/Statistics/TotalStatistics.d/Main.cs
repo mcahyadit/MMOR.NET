@@ -1,293 +1,144 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Numerics;
+using System.Runtime.InteropServices;
 using MMOR.NET.Collections;
-using MMOR.NET.Mathematics;
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
 public static partial class TotalStatisticsExtension {
-  public enum QuantileType {
-    R1,
-    R2,
-    R3,
-    R4,
-    R5,
-    R6,
-    R7,
-    R8,
-    R9,
-    // Names
-    InvertedCDF            = R1,
-    AveragedInvertedCDF    = R2,
-    ClosestObservation     = R3,
-    InterpolatedInverseCDF = R4,
-    Hazen                  = R5,
-    Weibull                = R6,
-    Linear                 = R7,
-    Gumbel                 = R7,
-    MedianUnbiased         = R8,
-    Blom                   = R9,
-    NormalUnbiased         = R9,
-  }
-
-  public static readonly ImmutableArray<double> kCommonQuantiles =
-      ImmutableArray.Create(stackalloc double[] {
-        0.0215,  // 7 Number Summary
-        0.0887,  // 7 Number Summary
-        0.10,    // Bowley Summary
-        0.125,   // Tunkey Summary
-        0.25,    // Q1
-        0.5,     // Median
-        0.75,    // Q3
-        0.875,   // Tunkey Summary
-        0.90,    // Bowley Summary
-        0.9113,  // 7 Number Summary
-        0.9785,  // 7 Number Summary
-      });
-
-  /**
-   * <summary>
-   *  WARNING: <br/>
-   *  Internal Calculation for generating <see cref="TotalStatisticsV2"/>. <br/>
-   *  Requires sorted, no-duplicates, finite numbers set, no 0 in <paramref name="counts"/>. <br/>
-   *  No Assertions will be performed. <br/>
-   *  Use <see cref="CalculateStatistics"/> instead, unless you know what you are doing.
-   * </summary>
-   */
-  public static TotalStatisticsV2 CalculateCoreUnsafe(Span<double> values, Span<ulong> counts) {
+  // <!-- A
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  public static TotalStatisticsV2 Calculate<TVal, TCnt>(ReadOnlySpan<TVal> values,
+      ReadOnlySpan<TCnt> counts)
+      where TVal : unmanaged, IConvertible
+      where TCnt : unmanaged, IConvertible {
     int length = values.Length;
+    // A -->
 
-    ulong count0    = 0;
-    ulong count_neg = 0;
-    ulong count_pos = 0;
+    double[]? v_mem = length > kHeapThreshold ? ArrayPool<double>.Shared.Rent(length) : null;
+    ulong[]? c_mem  = length > kHeapThreshold ? ArrayPool<ulong>.Shared.Rent(length) : null;
+    try {
+      Span<double> val_buffer = v_mem is null ? stackalloc double[length] : v_mem.AsSpan(0, length);
+      Span<ulong> cnt_buffer  = c_mem is null ? stackalloc ulong[length] : c_mem.AsSpan(0, length);
 
-    RunningStatistics stats = new();
-    for (int i = 0; i < length; ++i) {
-      ulong count = counts.IsEmpty ? 1 : counts[i];
-      if (count == 0)
-        continue;
+      int minrun           = CollectionUtils.ComputeMinRun(length);
+      int expect_runs      = length / minrun + 1;
+      Span<int> run_start  = stackalloc int[expect_runs];
+      Span<int> run_length = stackalloc int[expect_runs];
+      int runs_count       = 0;
 
-      double value = values[i];
-      stats.Push(value, count);
+      run_start[0]       = 0;
+      int cmp_dir        = 0;
+      TimState run_state = 0;
 
-      switch (value) {
-        case 0:
-          count0 += count;
-          break;
-        case < 0:
-          count_neg += count;
-          break;
-        default:
-          count_pos += count;
-          break;
-      }
-    }
+      RunningStatistics stats = new();
+      ulong count0            = 0;
+      ulong count_neg         = 0;
+      ulong count_pos         = 0;
 
-    if (stats.Count == 0)
-      return TotalStatisticsV2.kDefault;
-
-    return SecondPassUnsafe(values, counts, stats, count_pos, count_neg, count0);
-  }
-
-  public static TotalStatisticsV2 SecondPassUnsafe(Span<double> values, Span<ulong> counts,
-      RunningStatistics first_pass, ulong count_positive, ulong count_negative, ulong count_0) {
-    double sum      = first_pass.Sum;
-    double geom_sum = 0;
-    double iq_sum   = 0;
-
-    double mode_val = 0;
-    ulong mode_cnt  = 0;
-
-    ulong re_cnt       = 0;
-    double c_val       = 0;
-    double gini_index  = 0;
-    double entropy     = 0;
-    double hh_index    = 0;
-    double theil_index = 0;
-    double simp_index  = 0;
-
-    double q1_point = first_pass.Count * 0.25;
-    double q3_point = first_pass.Count * 0.75;
-
-    //=============
-    // Second Pass
-    //=============
-    int length = values.Length;
-
-    Dictionary<double, double> quantiles = new(kCommonQuantiles.Length);
-
-    double last_value = values[0];
-    int idx           = 0;
-    int unique        = 0;
-
-    for (; idx < length; ++unique) {
-      //=====================
-      // Collapse Duplicates
-      //=====================
-      double value = values[idx];
-
-      int run_idx = 1;
-      while (idx + run_idx < length) {
-        if (values[idx + run_idx] != value) {
-          break;
-        }
-        run_idx <<= 1;
-      }
-      int dupes   = CollectionUtils.TailBinarySearch(values.Slice(idx, run_idx), value);
-      ulong count = dupes > 1 ? CollectionUtils.Sum(counts.Slice(idx, dupes)) : counts[idx];
-
-      values[unique] = value;
-      counts[unique] = count;
-      idx += dupes;
-      //=====================
-
-      if (mode_cnt < count) {
-        mode_val = value;
-        mode_cnt = count;
-      }
-
-      re_cnt += count;
-      iq_sum += value * Math.Max(0, Math.Min(re_cnt, q3_point)  //
-                                        - Math.Max(re_cnt - count, q1_point));
-
-      foreach (double tau in kCommonQuantiles) {
-        // NOTE: Use type R-7 Quantile
-        double point = tau * (first_pass.Count - 1);
-        if (re_cnt < Math.Ceiling(point) + 1)
-          break;
-
-        if (quantiles.ContainsKey(tau))
+      int skip_cnt  = 0;
+      int valid_cnt = 0;
+      // <!-- B  WARNING: Do no remove this comment pair
+      for (int i = 0; i < length; ++i) {
+        ulong count = counts.IsEmpty ? 1 : counts[i].ToUInt64(null);
+        if (count == 0) {
+          ++skip_cnt;
           continue;
+        }
 
-        double lo_rank = Math.Floor(point);
-        double frac    = point - lo_rank;
-        double lo_val  = (lo_rank + 1.0) > (re_cnt - count) ? value : last_value;
-        quantiles.Add(tau, value * frac + lo_val * (1 - frac));
+        double value = values[i].ToDouble(null);
+        // B -->
+        if (!double.IsFinite(value)) {
+          throw new ArgumentException(
+              "[ERROR]: TotalStatistics cannot process non-finite number\n" +
+              $"Detected {value} at index: {i}");
+        }
+
+        stats.Push(value, count);
+        switch (value) {
+          case 0:
+            count0 += count;
+            break;
+          case < 0:
+            count_neg += count;
+            break;
+          default:
+            count_pos += count;
+            break;
+        }
+
+        val_buffer[valid_cnt] = value;
+        cnt_buffer[valid_cnt] = count;
+        ++valid_cnt;
+
+        if (valid_cnt == 1) {
+          continue;
+        }
+
+        // Check if Still Ascending or Descending
+        int cmp = value.CompareTo(val_buffer[valid_cnt - 2]);
+        if (cmp_dir == 0) {
+          // First Comparison
+          cmp_dir = Math.Sign(cmp);
+          if (cmp_dir < 0)
+            run_state |= TimState.NeedsReverse;
+        }
+
+        int curr_run = ++run_length[runs_count];
+        if (curr_run >= minrun) {
+          run_state |= TimState.HitMinrun;
+          // Mark Run ready to End
+        }
+
+        if (Math.Sign(cmp * cmp_dir) < 0) {
+          if ((run_state & TimState.HitMinrun) != 0)
+            run_state |= TimState.QueueMerge;
+          else
+            run_state |= TimState.NeedsSorting;
+        }
+
+        if ((run_state & TimState.QueueMerge) != 0) {
+          int start            = run_start[runs_count];
+          int r_len            = run_length[runs_count];
+          Span<double> run_val = val_buffer.Slice(start, r_len);
+          Span<ulong> run_cnt  = cnt_buffer.Slice(start, r_len);
+
+          if ((run_state & TimState.NeedsReverse) != 0) {
+            run_val.Reverse();
+            run_cnt.Reverse();
+          }
+          if ((run_state & TimState.NeedsSorting) != 0) {
+            CollectionUtils.BinaryInsertionSort(run_val, run_cnt);
+          }
+
+          ++runs_count;
+          run_start[runs_count]  = valid_cnt - 1;
+          run_length[runs_count] = 0;
+          run_state              = 0;
+          cmp_dir                = 0;
+        }
       }
-      last_value = value;
 
-      geom_sum += value > 0 ? Math.Log(value) * count : 0;
+      // Empty Dataset
+      if (stats.Count == 0)
+        return TotalStatisticsV2.kDefault;
 
-      double p_cnt = count / first_pass.CountF64;
-      if (sum != 0) {
-        double p_val = value / sum * count;
-        c_val += p_val;
-        gini_index += 2.0 * p_cnt * c_val - p_cnt * p_val;
-        entropy += p_cnt * MathExt.Log2(p_cnt);
-        hh_index += p_val * p_val;
+      val_buffer = val_buffer[..valid_cnt];
+      cnt_buffer = cnt_buffer[..valid_cnt];
+      CollectionUtils.TimSort(val_buffer, cnt_buffer);
+
+      return SecondPassUnsafe(val_buffer, cnt_buffer, stats, count_pos, count_neg, count0);
+    } finally {
+      if (v_mem is not null) {
+        ArrayPool<double>.Shared.Return(v_mem, true);
+        ArrayPool<ulong>.Shared.Return(c_mem!, true);
       }
-
-      double ratio = first_pass.Mean == 0 ? 0 : value / first_pass.Mean;
-      theil_index += ratio <= 0 ? 0 : count * ratio * Math.Log(ratio);
-      simp_index += p_cnt * (count - 1.0) / (first_pass.CountF64 - 1);
     }
-    entropy          = sum == 0 ? double.NaN : -entropy;
-    gini_index       = sum == 0 ? double.NaN : 1.0 - gini_index;
-    theil_index      = count_positive == 0 ? double.NaN : theil_index / count_positive;
-    hh_index         = sum == 0 ? double.NaN : hh_index;
-    simp_index       = first_pass.Count < 2 ? double.NaN : 1 - simp_index;
-    double iq_mean   = 2 * iq_sum / first_pass.Count;
-    double geom_mean = count_positive == 0 ? double.NaN : Math.Exp(geom_sum / count_positive);
-
-    //=============
-    // Third Pass
-    //=============
-    double iqr   = quantiles[0.75] - quantiles[0.25];
-    double lower = Math.Max(quantiles[0.25] - 1.5 * iqr, first_pass.MinValue);
-    double upper = Math.Min(quantiles[0.75] + 1.5 * iqr, first_pass.MaxValue);
-
-    ulong outliers   = 0;
-    double m_abs_dev = 0;
-    double u_abs_dev = 0;
-    double harm_sum  = 0;
-
-    int vlen = Vector<double>.Count;
-    int vend = 0;
-    if (Vector.IsHardwareAccelerated) {
-      vend                      = unique - (unique % vlen);
-      Vector<double> mean_epi   = new(first_pass.Mean);
-      Vector<double> median_epi = new(quantiles[0.5]);
-      Vector<double> lower_epi  = new(lower);
-      Vector<double> upper_epi  = new(upper);
-
-      Vector<ulong> outliers_epi   = Vector<ulong>.Zero;
-      Vector<double> m_abs_dev_epi = Vector<double>.Zero;
-      Vector<double> u_abs_dev_epi = Vector<double>.Zero;
-      Vector<double> harm_sum_epi  = Vector<double>.Zero;
-      for (int i = 0; i < vend; i += vlen) {
-        Vector<double> value = values.Slice(i, vlen).ToVector();
-        Vector<ulong> count  = counts.Slice(i, vlen).ToVector();
-
-        Vector<double> count_f64 = Vector.ConvertToDouble(count);
-
-        m_abs_dev_epi += Vector.Abs(value - median_epi) * count_f64;
-        u_abs_dev_epi += Vector.Abs(value - mean_epi) * count_f64;
-        harm_sum_epi += Vector.AndNot(count_f64 / value,  //
-            Vector.Equals<double>(value, Vector<double>.Zero));
-
-        Vector<long> cmp_lt      = Vector.LessThan(value, lower_epi);
-        Vector<long> cmp_gt      = Vector.GreaterThan(value, upper_epi);
-        Vector<ulong> is_outlier = Vector.AsVectorUInt64(Vector.BitwiseOr(cmp_lt, cmp_gt));
-        outliers_epi += Vector.BitwiseAnd(is_outlier, count);
-      }
-      outliers += outliers_epi.SumElements();
-      m_abs_dev += m_abs_dev_epi.SumElements();
-      u_abs_dev += u_abs_dev_epi.SumElements();
-      harm_sum += harm_sum_epi.SumElements();
-    }
-    for (int i = vend; i < unique; ++i) {
-      ulong count  = counts[i];
-      double value = values[i];
-
-      m_abs_dev += Math.Abs(value - quantiles[0.5]) * count;
-      u_abs_dev += Math.Abs(value - first_pass.Mean) * count;
-      harm_sum += value != 0 ? count / value : 0;
-
-      if (value < lower || value > upper)
-        outliers += count;
-    }
-    m_abs_dev /= first_pass.CountF64;
-    u_abs_dev /= first_pass.CountF64;
-    double harm_mean = (first_pass.Count == count_0 || harm_sum == 0)
-                           ? double.NaN
-                           : (first_pass.Count - count_0) / harm_sum;
-
-    return new TotalStatisticsV2 {
-      Count         = first_pass.Count,
-      Count0        = count_0,
-      CountNegative = count_negative,
-      CountPositive = count_positive,
-
-      Mean             = first_pass.Mean,
-      CentralMoment2nd = first_pass.moments_.Central2nd,
-      CentralMoment3rd = first_pass.moments_.Central3rd,
-      CentralMoment4th = first_pass.moments_.Central4th,
-
-      MinValue  = first_pass.MinValue,
-      MinCount  = first_pass.MinCount,
-      MaxValue  = first_pass.MaxValue,
-      MaxCount  = first_pass.MaxCount,
-      ModeValue = mode_val,
-      ModeCount = mode_cnt,
-
-      GeometricMean = geom_mean,
-      HarmonicMean  = harm_mean,
-
-      Entropy                  = entropy,
-      GiniCoefficient          = gini_index,
-      HerfindahlHirschmanIndex = hh_index,
-      TheilIndex               = theil_index,
-      SimpsonDiversityIndex    = simp_index,
-
-      MeanAbsoluteDeviation   = u_abs_dev,
-      MedianAbsoluteDeviation = m_abs_dev,
-
-      CommonQuantiles = quantiles.ToImmutableDictionary(),
-
-      InterQuartileMean = iq_mean,
-      OutlierCount      = outliers,
-    };
   }
 }
 }
