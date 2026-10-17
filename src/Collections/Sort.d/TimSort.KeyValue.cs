@@ -44,6 +44,8 @@ public static partial class CollectionUtils {
             ++l_idx;
             gallop = gallop > 0 ? gallop + 1 : 1;
           } else {
+            keys[idx]   = keys[r_idx];
+            values[idx] = values[r_idx];
             ++idx;
             ++r_idx;
             gallop = gallop < 0 ? gallop - 1 : -1;
