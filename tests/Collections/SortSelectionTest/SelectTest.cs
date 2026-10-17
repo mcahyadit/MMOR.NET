@@ -16,6 +16,7 @@ public class SelectTest {
     MedianOfMedians,
     HeapSelect,
     IntroSelect,
+    MedianOfNinter,
     PdqSelect,
   }
 
@@ -37,6 +38,12 @@ public class SelectTest {
   [MemberData(nameof(SortSelectionData.Params), MemberType = typeof(SortSelectionData))]
   public void IntroSelect_MatchesSortedOracle(SortSelectionParam p) {
     foreach (int k in p.ks) AssertOne(SelectKind.IntroSelect, p.values, k);
+  }
+
+  [Theory]
+  [MemberData(nameof(SortSelectionData.Params), MemberType = typeof(SortSelectionData))]
+  public void MedianOfNinther_MatchesSortedOracle(SortSelectionParam p) {
+    foreach (int k in p.ks) AssertOne(SelectKind.MedianOfNinter, p.values, k);
   }
 
   [Theory]
@@ -105,6 +112,8 @@ public class SelectTest {
         return data.IntroSelect(k);
       case SelectKind.IntroSelect:
         return data.IntroSelect(k);
+      case SelectKind.MedianOfNinter:
+        return data.MedianOfNinther(k);
       default:
         return data.PdqSelect(k);
     }
