@@ -1,4 +1,6 @@
-using System.Collections.Immutable;
+using System;
+using System.Collections.Frozen;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -27,7 +29,7 @@ public readonly partial struct TotalStatisticsV2 {
   public readonly double ModeValue { get; init; }
   public readonly ulong ModeCount { get; init; }
 
-  public readonly ImmutableDictionary<double, double> CommonQuantiles { get; init; }
+  public readonly FrozenDictionary<CommonQuantile, double> CommonQuantiles { get; init; }
   public readonly ulong OutlierCount { get; init; }
 
   /**
@@ -76,11 +78,10 @@ public readonly partial struct TotalStatisticsV2 {
   public readonly double SimpsonDiversityIndex { get; init; }
 
   public static readonly TotalStatisticsV2 kDefault = new TotalStatisticsV2 {
-    Count           = 0,
-    MinValue        = double.NaN,
-    MaxValue        = double.NaN,
-    ModeValue       = double.NaN,
-    CommonQuantiles = default!,
+    Count     = 0,
+    MinValue  = double.NaN,
+    MaxValue  = double.NaN,
+    ModeValue = double.NaN,
 
     Mean              = double.NaN,
     CentralMoment2nd  = double.NaN,
@@ -97,6 +98,15 @@ public readonly partial struct TotalStatisticsV2 {
     HerfindahlHirschmanIndex = double.NaN,
     TheilIndex               = double.NaN,
     SimpsonDiversityIndex    = double.NaN,
+
+    CommonQuantiles = ((Func<FrozenDictionary<CommonQuantile, double>>)(() => {
+      FrozenDictionary<CommonQuantile, double> cmn = TotalStatisticsExtension.kCommonQuantiles;
+      Dictionary<CommonQuantile, double> result    = new(cmn.Count);
+      foreach ((var name, _) in cmn) {
+        result.Add(name, double.NaN);
+      }
+      return FrozenDictionary.ToFrozenDictionary(result);
+    })).Invoke(),
   };
 }
 }

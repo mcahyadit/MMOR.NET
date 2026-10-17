@@ -6,10 +6,10 @@ public partial class RunningStatisticsTest {
 
   static TheoryData<OrderParam> BuildOrderParams() {
     TheoryData<OrderParam> data = [];
-    foreach (CorrectnessParam p in kCorrectnessParams) {
+    foreach (RunningStatsParam p in kCorrectnessParams) {
       data.Add(new OrderParam {
-        identifier         = string.Format("{0}-seed{1}x{2}", p.identifier, 12345, 54321),
-        values             = p.values,
+        identifier         = string.Format("{0}-seed{1}x{2}", p.data.identifier, 12345, 54321),
+        values             = p.data.values,
         seed_a             = 12345,
         seed_b             = 54321,
         variance_precision = p.path_variance_precision,
@@ -17,8 +17,8 @@ public partial class RunningStatisticsTest {
         kurtosis_precision = p.path_kurtosis_precision ?? 12,
       });
       data.Add(new OrderParam {
-        identifier         = string.Format("{0}-seed{1}x{2}", p.identifier, 101, 999),
-        values             = p.values,
+        identifier         = string.Format("{0}-seed{1}x{2}", p.data.identifier, 101, 999),
+        values             = p.data.values,
         seed_a             = 101,
         seed_b             = 999,
         variance_precision = p.path_variance_precision,

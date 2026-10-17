@@ -90,8 +90,8 @@ public partial class RunningStatisticsTest {
 
     data.Add(new CountParam {
       identifier = "heavy-tail-count-10k",
-      values     = kHeavyTailValues,
-      counts     = kHeavyTailCounts,
+      values     = StatFixtures.kHeavyTailValues,
+      counts     = StatFixtures.kHeavyTailCounts,
       relative   = true,
     });
 

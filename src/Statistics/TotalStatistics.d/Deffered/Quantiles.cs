@@ -5,33 +5,28 @@ namespace MMOR.NET.Statistics {
 public readonly partial struct TotalStatisticsV2 {
   public double Median {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty ? double.NaN : CommonQuantiles[0.5];
+    get => CommonQuantiles[CommonQuantile.Median];
   }
   public readonly double Quartile1st {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty ? double.NaN : CommonQuantiles[0.25];
+    get => CommonQuantiles[CommonQuantile.Quartile1st];
   }
   public readonly double Quartile3rd {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty ? double.NaN : CommonQuantiles[0.75];
+    get => CommonQuantiles[CommonQuantile.Quartile3rd];
   }
 
   public double InterQuartileRange {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get =>
-        CommonQuantiles is null || CommonQuantiles.IsEmpty ? double.NaN : Quartile3rd - Quartile1st;
+    get => Quartile3rd - Quartile1st;
   }
   public double LowerFence {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty
-               ? double.NaN
-               : Math.Max(MinValue, Quartile1st - 1.5 * InterQuartileRange);
+    get => Math.Max(MinValue, Quartile1st - 1.5 * InterQuartileRange);
   }
   public readonly double UpperFence {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty
-               ? double.NaN
-               : Math.Min(MaxValue, Quartile3rd + 1.5 * InterQuartileRange);
+    get => Math.Min(MaxValue, Quartile3rd + 1.5 * InterQuartileRange);
   }
 
   /**
@@ -41,9 +36,7 @@ public readonly partial struct TotalStatisticsV2 {
    */
   public double TriMean {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty
-               ? double.NaN
-               : (Quartile1st + 2 * Median + Quartile3rd) / 4;
+    get => (Quartile1st + 2 * Median + Quartile3rd) / 4;
   }
 
   /**
@@ -53,15 +46,13 @@ public readonly partial struct TotalStatisticsV2 {
    */
   public double MidHinge {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    get => CommonQuantiles is null || CommonQuantiles.IsEmpty  //
-               ? double.NaN
-               : (Quartile1st + Quartile3rd) / 2;
+    get => (Quartile1st + Quartile3rd) / 2;
   }
 
   public double QuartileCoefficientOfDispersion {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
-      if (CommonQuantiles is null || CommonQuantiles.IsEmpty || Quartile1st + Quartile3rd == 0)
+      if (Quartile1st + Quartile3rd == 0)
         return double.NaN;
       return InterQuartileRange / (Quartile1st + Quartile3rd);
     }
@@ -79,7 +70,7 @@ public readonly partial struct TotalStatisticsV2 {
   public double PearsonMedianSkewness {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
-      if (CommonQuantiles is null || CommonQuantiles.IsEmpty || Count < 2)
+      if (CommonQuantiles is null || Count < 2)
         return double.NaN;
       return 3 * (Mean - Median) / StandardDeviation;
     }
@@ -109,11 +100,8 @@ public readonly partial struct TotalStatisticsV2 {
   public double KellySkewness {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
-      if (CommonQuantiles is null || CommonQuantiles.IsEmpty)
-        return double.NaN;
-
-      double q90th = CommonQuantiles[0.9];
-      double q10th = CommonQuantiles[0.1];
+      double q90th = CommonQuantiles[CommonQuantile.Percentile90th];
+      double q10th = CommonQuantiles[CommonQuantile.Percentile10th];
       if (q90th - q10th == 0)
         return double.NaN;
       return (q90th + q10th - 2 * Median) / (q90th - q10th);
@@ -123,7 +111,7 @@ public readonly partial struct TotalStatisticsV2 {
   public double GroeneveldMeedenCoefficient {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
-      if (CommonQuantiles is null || CommonQuantiles.IsEmpty || MedianAbsoluteDeviation == 0)
+      if (MedianAbsoluteDeviation == 0)
         return double.NaN;
       return (Mean - Median) / MedianAbsoluteDeviation;
     }
@@ -137,7 +125,7 @@ public readonly partial struct TotalStatisticsV2 {
   public double IndexOfDispersion {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get {
-      if (CommonQuantiles is null || CommonQuantiles.IsEmpty || Median == 0)
+      if (Median == 0)
         return double.NaN;
       return MedianAbsoluteDeviation / Median;
     }

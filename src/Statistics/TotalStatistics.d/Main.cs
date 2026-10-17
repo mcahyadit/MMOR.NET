@@ -8,7 +8,7 @@ using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
 public static partial class TotalStatisticsExtension {
-  // <!-- A
+  // <!-- A  WARNING: Do no remove this comment pair
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
@@ -18,6 +18,10 @@ public static partial class TotalStatisticsExtension {
       where TVal : unmanaged, IConvertible
       where TCnt : unmanaged, IConvertible {
     int length = values.Length;
+    if (!counts.IsEmpty && counts.Length != length)
+      throw new ArgumentException(
+          "[ERROR]: Length mismatch." +
+          $"counts is passed as parameter, but counts.Length: {counts.Length} != values.Length: {length}");
     // A -->
 
     double[]? v_mem = length > kHeapThreshold ? ArrayPool<double>.Shared.Rent(length) : null;

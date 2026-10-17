@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
@@ -32,7 +33,7 @@ public static partial class TotalStatisticsExtension {
     //=============
     int length = values.Length;
 
-    Dictionary<double, double> quantiles = new(kCommonQuantiles.Length);
+    Dictionary<CommonQuantile, double> quantiles = new(kCommonQuantiles.Count);
 
     double last_value = values[0];
     int idx           = 0;
@@ -68,19 +69,19 @@ public static partial class TotalStatisticsExtension {
       iq_sum += value * Math.Max(0, Math.Min(re_cnt, q3_point)  //
                                         - Math.Max(re_cnt - count, q1_point));
 
-      foreach (double tau in kCommonQuantiles) {
+      foreach ((CommonQuantile quantile, double tau) in kCommonQuantiles) {
         // NOTE: Use type R-7 Quantile
         double point = tau * (first_pass.Count - 1);
         if (re_cnt < Math.Ceiling(point) + 1)
-          break;
+          continue;
 
-        if (quantiles.ContainsKey(tau))
+        if (quantiles.ContainsKey(quantile))
           continue;
 
         double lo_rank = Math.Floor(point);
         double frac    = point - lo_rank;
         double lo_val  = (lo_rank + 1.0) > (re_cnt - count) ? value : last_value;
-        quantiles.Add(tau, value * frac + lo_val * (1 - frac));
+        quantiles.Add(quantile, value * frac + lo_val * (1 - frac));
       }
       last_value = value;
 
@@ -110,9 +111,9 @@ public static partial class TotalStatisticsExtension {
     //=============
     // Third Pass
     //=============
-    double iqr   = quantiles[0.75] - quantiles[0.25];
-    double lower = Math.Max(quantiles[0.25] - 1.5 * iqr, first_pass.MinValue);
-    double upper = Math.Min(quantiles[0.75] + 1.5 * iqr, first_pass.MaxValue);
+    double iqr   = quantiles[CommonQuantile.Quartile3rd] - quantiles[CommonQuantile.Quartile1st];
+    double lower = Math.Max(quantiles[CommonQuantile.Quartile1st] - 1.5 * iqr, first_pass.MinValue);
+    double upper = Math.Min(quantiles[CommonQuantile.Quartile3rd] + 1.5 * iqr, first_pass.MaxValue);
 
     ulong outliers   = 0;
     double m_abs_dev = 0;
@@ -124,7 +125,7 @@ public static partial class TotalStatisticsExtension {
     if (Vector.IsHardwareAccelerated) {
       vend                      = unique - (unique % vlen);
       Vector<double> mean_epi   = new(first_pass.Mean);
-      Vector<double> median_epi = new(quantiles[0.5]);
+      Vector<double> median_epi = new(quantiles[CommonQuantile.Median]);
       Vector<double> lower_epi  = new(lower);
       Vector<double> upper_epi  = new(upper);
 
@@ -157,7 +158,7 @@ public static partial class TotalStatisticsExtension {
       ulong count  = counts[i];
       double value = values[i];
 
-      m_abs_dev += Math.Abs(value - quantiles[0.5]) * count;
+      m_abs_dev += Math.Abs(value - quantiles[CommonQuantile.Median]) * count;
       u_abs_dev += Math.Abs(value - first_pass.Mean) * count;
       harm_sum += value != 0 ? count / value : 0;
 
@@ -200,7 +201,7 @@ public static partial class TotalStatisticsExtension {
       MeanAbsoluteDeviation   = u_abs_dev,
       MedianAbsoluteDeviation = m_abs_dev,
 
-      CommonQuantiles = quantiles.ToImmutableDictionary(),
+      CommonQuantiles = FrozenDictionary.ToFrozenDictionary(quantiles),
 
       InterQuartileMean = iq_mean,
       OutlierCount      = outliers,
