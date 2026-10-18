@@ -35,7 +35,7 @@ public readonly partial struct TotalStatisticsV2 {
   /**
    * <summary>
    *  <br/>
-   *  Ignores 0 and negative values. <br/>
+   *  Only considers positive values. <br/>
    *  Averaged by <see cref="CountPositive"/>.
    * </summary>
    */
@@ -43,8 +43,8 @@ public readonly partial struct TotalStatisticsV2 {
   /**
    * <summary>
    *  <br/>
-   *  Ignores 0. <br/>
-   *  Averaged by <see cref="CountA"/>.
+   *  Only considers positive values. <br/>
+   *  Averaged by <see cref="CountPositive"/>.
    * </summary>
    */
   public readonly double HarmonicMean { get; init; }

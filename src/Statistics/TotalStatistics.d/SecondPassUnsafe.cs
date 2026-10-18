@@ -101,7 +101,9 @@ public static partial class TotalStatisticsExtension {
       simp_index += p_cnt * (count - 1.0) / (first_pass.CountF64 - 1);
     }
     entropy          = sum == 0 ? double.NaN : -entropy;
-    gini_index       = sum == 0 ? double.NaN : 1.0 - gini_index;
+    gini_index       = (sum == 0 || first_pass.Count < 2)  //
+                           ? double.NaN
+                           : first_pass.CountF64 / (first_pass.Count - 1) * (1.0 - gini_index);
     theil_index      = count_positive == 0 ? double.NaN : theil_index / count_positive;
     hh_index         = sum == 0 ? double.NaN : hh_index;
     simp_index       = first_pass.Count < 2 ? double.NaN : 1 - simp_index;
@@ -134,20 +136,21 @@ public static partial class TotalStatisticsExtension {
       Vector<double> u_abs_dev_epi = Vector<double>.Zero;
       Vector<double> harm_sum_epi  = Vector<double>.Zero;
       for (int i = 0; i < vend; i += vlen) {
-        Vector<double> value = values.Slice(i, vlen).ToVector();
-        Vector<ulong> count  = counts.Slice(i, vlen).ToVector();
+        Vector<double> value_epi = values.Slice(i, vlen).ToVector();
+        Vector<ulong> count_epi  = counts.Slice(i, vlen).ToVector();
 
-        Vector<double> count_f64 = Vector.ConvertToDouble(count);
+        Vector<double> countf64_epi = Vector.ConvertToDouble(count_epi);
 
-        m_abs_dev_epi += Vector.Abs(value - median_epi) * count_f64;
-        u_abs_dev_epi += Vector.Abs(value - mean_epi) * count_f64;
-        harm_sum_epi += Vector.AndNot(count_f64 / value,  //
-            Vector.Equals<double>(value, Vector<double>.Zero));
+        m_abs_dev_epi += Vector.Abs(value_epi - median_epi) * countf64_epi;
+        u_abs_dev_epi += Vector.Abs(value_epi - mean_epi) * countf64_epi;
+        harm_sum_epi += Vector.ConditionalSelect(  //
+            Vector.GreaterThan<double>(value_epi, Vector<double>.Zero), countf64_epi / value_epi,
+            Vector<double>.Zero);
 
-        Vector<long> cmp_lt      = Vector.LessThan(value, lower_epi);
-        Vector<long> cmp_gt      = Vector.GreaterThan(value, upper_epi);
+        Vector<long> cmp_lt      = Vector.LessThan(value_epi, lower_epi);
+        Vector<long> cmp_gt      = Vector.GreaterThan(value_epi, upper_epi);
         Vector<ulong> is_outlier = Vector.AsVectorUInt64(Vector.BitwiseOr(cmp_lt, cmp_gt));
-        outliers_epi += Vector.BitwiseAnd(is_outlier, count);
+        outliers_epi += Vector.BitwiseAnd(is_outlier, count_epi);
       }
       outliers += outliers_epi.SumElements();
       m_abs_dev += m_abs_dev_epi.SumElements();
@@ -160,16 +163,16 @@ public static partial class TotalStatisticsExtension {
 
       m_abs_dev += Math.Abs(value - quantiles[CommonQuantile.Median]) * count;
       u_abs_dev += Math.Abs(value - first_pass.Mean) * count;
-      harm_sum += value != 0 ? count / value : 0;
+      harm_sum += value > 0 ? count / value : 0;
 
       if (value < lower || value > upper)
         outliers += count;
     }
     m_abs_dev /= first_pass.CountF64;
     u_abs_dev /= first_pass.CountF64;
-    double harm_mean = (first_pass.Count == count_0 || harm_sum == 0)
+    double harm_mean = (count_positive == count_0 || harm_sum == 0)  //
                            ? double.NaN
-                           : (first_pass.Count - count_0) / harm_sum;
+                           : count_positive / harm_sum;
 
     return new TotalStatisticsV2 {
       Count         = first_pass.Count,
