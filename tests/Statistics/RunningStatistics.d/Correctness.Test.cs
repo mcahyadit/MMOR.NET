@@ -7,7 +7,7 @@ public partial class RunningStatisticsTest {
    * <summary>
    *  Wraps a shared <see cref="SampleData"/> fixture with the precisions the
    *  <see cref="RunningStatistics"/> path needs. Note <see cref="RunningStatistics"/> only
-   * implements a subset of the statistics <see cref="TotalStatisticsV2"/> reports; everything else
+   * implements a subset of the statistics <see cref="TotalStatistics"/> reports; everything else
    * on the fixture is simply ignored here.
    * </summary>
    */

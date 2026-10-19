@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace MMOR.NET.Statistics {
 [StructLayout(LayoutKind.Auto)]
-public readonly partial struct TotalStatisticsV2 {
+public readonly partial struct TotalStatistics {
   public readonly ulong Count { get; init; }
   public double CountF64 => Count;
   public readonly ulong Count0 { get; init; }
@@ -77,7 +77,7 @@ public readonly partial struct TotalStatisticsV2 {
   public readonly double TheilIndex { get; init; }
   public readonly double SimpsonDiversityIndex { get; init; }
 
-  public static readonly TotalStatisticsV2 kDefault = new TotalStatisticsV2 {
+  public static readonly TotalStatistics kDefault = new TotalStatistics {
     Count     = 0,
     MinValue  = double.NaN,
     MaxValue  = double.NaN,

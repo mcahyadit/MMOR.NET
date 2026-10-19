@@ -13,7 +13,7 @@
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       ""AsSpan()"")]
-  public static TotalStatisticsV2 CalculateCoreV2<TVal, TCnt>(
+  public static TotalStatistics Calculate<TVal, TCnt>(
       this in ReadOnlySpan<KeyValuePair<TVal, TCnt>> values)
       where TVal : unmanaged, IConvertible
       where TCnt : unmanaged, IConvertible {

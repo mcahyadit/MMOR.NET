@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Statistics {
-public readonly partial struct TotalStatisticsV2 {
+public readonly partial struct TotalStatistics {
   public double Median {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     get => CommonQuantiles[CommonQuantile.Median];

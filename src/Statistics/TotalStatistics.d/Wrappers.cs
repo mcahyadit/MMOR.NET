@@ -11,24 +11,24 @@ public static partial class TotalStatisticsExtension {
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
-  public static TotalStatisticsV2 Calculate<T>(this in ReadOnlySpan<T> values)
+  public static TotalStatistics Calculate<T>(this in ReadOnlySpan<T> values)
       where T : unmanaged, IConvertible {
     return Calculate<T, ulong>(values, stackalloc ulong[0]);
   }
 
-  public static TotalStatisticsV2 Calculate<TVal, TCnt>(
+  public static TotalStatistics Calculate<TVal, TCnt>(
       this IReadOnlyDictionary<TVal, TCnt> dictionary)
       where TVal : unmanaged, IConvertible
       where TCnt : unmanaged, IConvertible {
-    return CalculateCoreV2(dictionary.Keys.Select(x => x.ToDouble(null)),
+    return Calculate(dictionary.Keys.Select(x => x.ToDouble(null)),
         dictionary.Values.Select(x => x.ToUInt64(null)), dictionary.Count);
   }
 
-  public static TotalStatisticsV2 Calculate<TVal, TCnt>(
+  public static TotalStatistics Calculate<TVal, TCnt>(
       this IEnumerable<KeyValuePair<TVal, TCnt>> dictionary, int length)
       where TVal : unmanaged, IConvertible
       where TCnt : unmanaged, IConvertible {
-    return CalculateCoreV2(dictionary.Select(x => x.Key.ToDouble(null)),
+    return Calculate(dictionary.Select(x => x.Key.ToDouble(null)),
         dictionary.Select(x => x.Value.ToUInt64(null)), length);
   }
 }

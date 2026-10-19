@@ -9,7 +9,7 @@
   string contents = File.ReadAllText(original_path);
 
   string parms = @"
-  public static TotalStatisticsV2 CalculateCoreV2(in IEnumerable<double> values,
+  public static TotalStatistics Calculate(in IEnumerable<double> values,
     in IEnumerable<ulong> counts, int length) {
   ";
 

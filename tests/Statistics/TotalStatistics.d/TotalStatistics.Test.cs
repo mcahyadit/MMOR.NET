@@ -9,7 +9,7 @@ public partial class TotalStatisticsTest {
    *  Wraps a shared <see cref="SampleData"/> fixture with the precisions this suite asserts.
    *  The moments shared with <see cref="RunningStatistics"/> are held to a fixed number of decimal
    *  places (they are bit-for-bit the same Welford update), while the statistics that only
-   *  <see cref="TotalStatisticsV2"/> reports are held to a relative <see cref="tolerance"/> because
+   *  <see cref="TotalStatistics"/> reports are held to a relative <see cref="tolerance"/> because
    *  several of them accumulate over the whole sample.
    * </summary>
    */
@@ -30,7 +30,7 @@ public partial class TotalStatisticsTest {
   public void TotalStatisticsV2Test(TotalStatsParam p) {
     SampleData d                = p.data;
     ReadOnlySpan<double> values = d.values;
-    TotalStatisticsV2 v2        = values.Calculate();
+    TotalStatistics v2          = values.Calculate();
 
     Assert.Equal(d.count, v2.Count);
     Assert.Equal(d.count0, v2.Count0);

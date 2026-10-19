@@ -4,9 +4,9 @@ namespace MMOR.NET.Statistics {
 /**
  * <summary>
  *  Shared sample fixture: the input samples plus the ground truth for every statistic
- *  <see cref="TotalStatisticsV2"/> reports. <br/>
+ *  <see cref="TotalStatistics"/> reports. <br/>
  *  <br/>
- *  Both the <see cref="RunningStatistics"/> and <see cref="TotalStatisticsV2"/> suites wrap an
+ *  Both the <see cref="RunningStatistics"/> and <see cref="TotalStatistics"/> suites wrap an
  *  instance of this in their own param struct, which carries only the precisions that suite is
  *  able to assert.
  * </summary>

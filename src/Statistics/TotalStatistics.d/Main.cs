@@ -13,7 +13,7 @@ public static partial class TotalStatisticsExtension {
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
-  public static TotalStatisticsV2 Calculate<TVal, TCnt>(ReadOnlySpan<TVal> values,
+  public static TotalStatistics Calculate<TVal, TCnt>(ReadOnlySpan<TVal> values,
       ReadOnlySpan<TCnt> counts)
       where TVal : unmanaged, IConvertible
       where TCnt : unmanaged, IConvertible {
@@ -130,7 +130,7 @@ public static partial class TotalStatisticsExtension {
 
       // Empty Dataset
       if (stats.Count == 0)
-        return TotalStatisticsV2.kDefault;
+        return TotalStatistics.kDefault;
 
       val_buffer = val_buffer[..valid_cnt];
       cnt_buffer = cnt_buffer[..valid_cnt];

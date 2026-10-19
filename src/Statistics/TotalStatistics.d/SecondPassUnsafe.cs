@@ -8,7 +8,7 @@ using MMOR.NET.Mathematics;
 
 namespace MMOR.NET.Statistics {
 public static partial class TotalStatisticsExtension {
-  public static TotalStatisticsV2 SecondPassUnsafe(Span<double> values, Span<ulong> counts,
+  public static TotalStatistics SecondPassUnsafe(Span<double> values, Span<ulong> counts,
       RunningStatistics first_pass, ulong count_positive, ulong count_negative, ulong count_0) {
     double sum      = first_pass.Sum;
     double geom_sum = 0;
@@ -174,7 +174,7 @@ public static partial class TotalStatisticsExtension {
                            ? double.NaN
                            : count_positive / harm_sum;
 
-    return new TotalStatisticsV2 {
+    return new TotalStatistics {
       Count         = first_pass.Count,
       Count0        = count_0,
       CountNegative = count_negative,

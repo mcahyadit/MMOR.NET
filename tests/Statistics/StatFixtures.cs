@@ -5,8 +5,8 @@ namespace MMOR.NET.Statistics {
 /**
  * <summary>
  *  Catalogue of shared correctness fixtures. Each entry pairs the raw input sample with the
- *  ground truth for every <see cref="TotalStatisticsV2"/> statistic, so the
- *  <see cref="RunningStatistics"/> and <see cref="TotalStatisticsV2"/> suites assert against one
+ *  ground truth for every <see cref="TotalStatistics"/> statistic, so the
+ *  <see cref="RunningStatistics"/> and <see cref="TotalStatistics"/> suites assert against one
  *  source. Truth was cross-checked against an independent high-precision reference; the Gini
  *  and Herfindahl-Hirschman indices are omitted for <c>gauss1000</c> because its sample sum is
  *  close to zero, which makes them meaningless.
