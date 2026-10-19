@@ -50,22 +50,16 @@ public static partial class CollectionUtils {
           if (gallop < 0) {
             // Gallop right side
             T l_val = l_buff[l_idx];
-            while (r_idx + g_idx < length && slice[r_idx + g_idx].CompareTo(l_val) < 0) {
-              g_idx = Math.Min(length - r_idx, g_idx == 0 ? 1 : g_idx << 1);
-            }
 
-            g_idx = HeadBinarySearch(slice.Slice(r_idx, g_idx), l_val);
+            g_idx = HeadGallopSearch(slice[r_idx..], l_val);
             slice.Slice(r_idx, g_idx).CopyTo(slice[idx..]);
             r_idx += g_idx;
             gallop = g_idx;  // Switch to Left Gallop
           } else {
             // Gallop left side
             T r_val = slice[r_idx];
-            while (l_idx + g_idx < l_len && l_buff[l_idx + g_idx].CompareTo(r_val) <= 0) {
-              g_idx = Math.Min(l_len - l_idx, g_idx == 0 ? 1 : g_idx << 1);
-            }
 
-            g_idx = TailBinarySearch(l_buff.Slice(l_idx, g_idx), r_val);
+            g_idx = TailGallopSearch(l_buff[l_idx..], r_val);
             l_buff.Slice(l_idx, g_idx).CopyTo(slice[idx..]);
             l_idx += g_idx;
             gallop = -g_idx;  // Switch to Right Gallop

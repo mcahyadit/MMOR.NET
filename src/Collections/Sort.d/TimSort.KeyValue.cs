@@ -63,11 +63,8 @@ public static partial class CollectionUtils {
           if (gallop < 0) {
             // Gallop right side
             TKey l_val = l_buff[l_idx];
-            while (r_idx + g_idx < length && keys[r_idx + g_idx].CompareTo(l_val) < 0) {
-              g_idx = Math.Min(length - r_idx, g_idx == 0 ? 1 : g_idx << 1);
-            }
 
-            g_idx = HeadBinarySearch(keys.Slice(r_idx, g_idx), l_val);
+            g_idx = HeadGallopSearch(keys[r_idx..], l_val);
             keys.Slice(r_idx, g_idx).CopyTo(keys[idx..]);
             values.Slice(r_idx, g_idx).CopyTo(values[idx..]);
             r_idx += g_idx;
@@ -75,11 +72,8 @@ public static partial class CollectionUtils {
           } else {
             // Gallop left side
             TKey r_val = keys[r_idx];
-            while (l_idx + g_idx < l_len && l_buff[l_idx + g_idx].CompareTo(r_val) <= 0) {
-              g_idx = Math.Min(l_len - l_idx, g_idx == 0 ? 1 : g_idx << 1);
-            }
 
-            g_idx = TailBinarySearch(l_buff.Slice(l_idx, g_idx), r_val);
+            g_idx = TailGallopSearch(l_buff[l_idx..], r_val);
             l_buff.Slice(l_idx, g_idx).CopyTo(keys[idx..]);
             v_buff.Slice(l_idx, g_idx).CopyTo(values[idx..]);
             l_idx += g_idx;
