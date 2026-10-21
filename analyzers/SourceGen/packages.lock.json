@@ -51,6 +51,16 @@
           "System.Runtime.CompilerServices.Unsafe": "4.5.0"
         }
       },
+      "System.Collections.Immutable": {
+        "type": "Direct",
+        "requested": "[10.0.13, )",
+        "resolved": "10.0.13",
+        "contentHash": "mUiVD4AJ0way0QDXNEaU/zEMDgn0kzZEW+gjtQrrC7KsB74JKuLC54hCPUxyodlpiwS/ElbQYbiyjHpZfl6ghA==",
+        "dependencies": {
+          "System.Memory": "4.6.3",
+          "System.Runtime.CompilerServices.Unsafe": "6.1.2"
+        }
+      },
       "Microsoft.CodeAnalysis.Common": {
         "type": "Transitive",
         "resolved": "5.6.0",
@@ -76,15 +86,6 @@
         "type": "Transitive",
         "resolved": "4.6.1",
         "contentHash": "N8GXpmiLMtljq7gwvyS+1QvKT/W2J8sNAvx+HVg4NGmsG/H+2k/y9QI23auLJRterrzCiDH+IWAw4V/GPwsMlw=="
-      },
-      "System.Collections.Immutable": {
-        "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "kdTe61B8P7i2M1pODC3MLbZ/CfFGjpC6c6jzxjQoB5DHZNewayCRqgFUmx3JKB6vLQtozpMQEiw+R5fO32Jv4g==",
-        "dependencies": {
-          "System.Memory": "4.6.3",
-          "System.Runtime.CompilerServices.Unsafe": "6.1.2"
-        }
       },
       "System.Memory": {
         "type": "Transitive",
@@ -130,9 +131,6 @@
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
-      },
-      "mmor.roslyn": {
-        "type": "Project"
       }
     }
   }
