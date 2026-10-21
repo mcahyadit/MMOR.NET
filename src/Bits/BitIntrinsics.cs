@@ -42,6 +42,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong Bzhi64Sw(ulong value, int index) {
+    index &= byte.MaxValue;
     ulong mask = index >= 64 ? ~0ul : (1ul << index) - 1;
     return value & mask;
   }
@@ -82,6 +83,7 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static uint Bzhi32Sw(uint value, int index) {
+    index &= byte.MaxValue;
     uint mask = index >= 32 ? ~0u : (1u << index) - 1;
     return value & mask;
   }
