@@ -4,16 +4,21 @@ exclude: |
     .*third_party/.*
   )$
 
-
 repos:
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.8
+  - repo: builtin
     hooks:
-      - id: clang-format
-        exclude: .*\.json$
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: fix-byte-order-marker
+      - id: check-yaml
+      - id: check-vcs-permalinks
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+  - repo: local
     hooks:
-      - id: codespell
-        args: [--write-changes]
-        files: ^.*\.(cs|md|yml)$
+      - id: treefmt
+        name: treefmt
+        entry: treefmt
+        language: system

@@ -11,6 +11,7 @@ _: {
         roslyn-ls
         lemminx
         vscode-json-languageserver
+        yaml-language-server
 
         basedpyright
         ruff
