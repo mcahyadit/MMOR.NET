@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop --command bash {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: DeterminateSystems/nix-installer-action@v23
+      - uses: DeterminateSystems/magic-nix-cache-action@v15
+
+      - name: DevShell warmup
+        run: nix develop --command true
+        shell: bash
+
+      - name: Run Tests
+        run: |
+          tfms=("net8.0" "net10.0")
+          for tfm in "${tfm[@]}"; do
+            echo "Running tests for ${tfm}"
+            dotnet run --project ./tests --configuration Release --framework ${tfm}
+          done
+
+      - name: Full Build
+        run: nix build .#default

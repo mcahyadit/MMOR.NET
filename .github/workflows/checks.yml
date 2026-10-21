@@ -9,8 +9,13 @@ jobs:
     defaults:
       run:
         shell: nix develop --command bash {0}
+    outputs:
+      source-changes: ${{ steps.changes.outputs.source || steps.changes.outputs.common }}
+      docs-changes: ${{ steps.changes.outputs.docs || steps.changes.outputs.common }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: DeterminateSystems/nix-installer-action@v23
       - uses: DeterminateSystems/magic-nix-cache-action@v15
 
@@ -35,23 +40,29 @@ jobs:
             --from-ref "${{ steps.range.outputs.FROM_REF }}" \
             --to-ref "${{ steps.range.outputs.TO_REF }}"
 
-      # - uses: https://github.com/dorny/paths-filter@v4
       - uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
-            source:
-              - ./analyzers/**
+            common:
               - ./src/**
+              - ./MMOR.NET.csproj
+              - ./packages.lock.json
+              - ./Directory.Build.props
+              - ./flake.nix
+              - ./flake.lock
+              - ./nix/mmor-net.nix
+            source:
+              - ./.github/workflows/tests.yml
+              - ./nix/sourcegen.nix
+              - ./analyzers/**
               - ./tests/**
             docs:
-              - ./src/**
               - ./docs/**
-          base: master
-      - name: Run Tests
-        if: steps.changes.outputs.source == 'true'
-        run: dotnet run --project ./tests --configuration Release --framework net10.0
+              - ./zensical.toml
+              - ./nix/docs.nix
 
-      # - name: Build Docs
-      #   if: steps.changes.outputs.docs == 'true'
-      #   run: nix build .#docs
+  tests:
+    uses: ./.github/workflows/tests.yml
+    needs: checks
+    if: ${{ needs.checks.outputs.source-changes }}
