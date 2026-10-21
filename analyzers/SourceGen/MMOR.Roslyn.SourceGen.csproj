@@ -9,7 +9,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ANcpLua.Roslyn.Utilities.Sources" Version="2.2.40">
+    <PackageReference Include="ANcpLua.Roslyn.Utilities.Sources" Version="3.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

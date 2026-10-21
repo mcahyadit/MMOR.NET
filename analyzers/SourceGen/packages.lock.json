@@ -4,9 +4,9 @@
     ".NETStandard,Version=v2.0": {
       "ANcpLua.Roslyn.Utilities.Sources": {
         "type": "Direct",
-        "requested": "[2.2.40, )",
-        "resolved": "2.2.40",
-        "contentHash": "5KxMcM8o9RCoNxrRuk19M7HkqeCbb/lwdJncLUJxW+uVNyqvUn172XLeth9ue3PGK3amp3Wx+ufrp4JLfG+vvg=="
+        "requested": "[3.0.2, )",
+        "resolved": "3.0.2",
+        "contentHash": "DIukLzge8xUT2rzq4cJFPiv38d/ViHfN6u1i/dxVri3AuojDcGeH7WHKzg7mWqc4BnAVxYPol1CbXL+OwKUf0g=="
       },
       "Microsoft.CodeAnalysis.Analyzers": {
         "type": "Direct",
@@ -130,9 +130,6 @@
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
-      },
-      "mmor.roslyn": {
-        "type": "Project"
       }
     }
   }
