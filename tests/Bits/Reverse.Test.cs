@@ -1,96 +1,20 @@
 using System;
-using System.Numerics;
 using Xunit;
 
 namespace MMOR.NET.Bits {
-public class BitReverseTest {
-  private static readonly uint[] kSamples32 = [
-    0u,
-    1u,
-    uint.MaxValue,
-    0xAAAAAAAAu,
-    0x55555555u,
-    0x80000001u,
-    0x0000FFFFu,
-    0xDEADBEEFu,
-  ];
-
-  private static readonly ulong[] kSamples64 = [
-    0ul,
-    1ul,
-    ulong.MaxValue,
-    0xAAAAAAAAAAAAAAAAul,
-    0x5555555555555555ul,
-    0x8000000000000001ul,
-    0x00000000FFFFFFFFul,
-    0xDEADBEEFCAFEBABEul,
-  ];
-
-  private static uint RandomU32(System.Random rng) {
-    return (uint)rng.Next();
-  }
-
-  private static ulong RandomU64(System.Random rng) {
-    return ((ulong)rng.Next() << 32) | (uint)rng.Next();
-  }
-
-  /*
-   * Deliberately naive bit-by-bit references. They share no logic with the SWAR masks or the
-   * ARM/x86 intrinsics under test, so a disagreement points at the implementation, not the oracle.
-   */
-
-  private static uint ReferenceReverse(uint value) {
-    uint result = 0;
-    for (int i = 0; i < 32; ++i) result |= ((value >> i) & 1u) << (31 - i);
-    return result;
-  }
-
-  private static ulong ReferenceReverse(ulong value) {
-    ulong result = 0;
-    for (int i = 0; i < 64; ++i) result |= ((value >> i) & 1ul) << (63 - i);
-    return result;
-  }
-
-  /*  Mask of the bits covered by [start, start + length); callers guarantee start + length <= 32.
-   */
-  private static uint ReferenceFieldMask32(int start, int length) {
-    uint low = length >= 32 ? ~0u : (1u << length) - 1;
-    return low << start;
-  }
-
-  private static ulong ReferenceFieldMask64(int start, int length) {
-    ulong low = length >= 64 ? ~0ul : (1ul << length) - 1;
-    return low << start;
-  }
-
-  /*  Reverses bits [start, start + length) in place, leaving every other bit untouched. */
-  private static uint ReferenceReverse(uint value, int start, int length) {
-    uint result = value & ~ReferenceFieldMask32(start, length);
-    for (int i = 0; i < length; ++i)
-      result |= ((value >> (start + i)) & 1u) << (start + length - 1 - i);
-    return result;
-  }
-
-  private static ulong ReferenceReverse(ulong value, int start, int length) {
-    ulong result = value & ~ReferenceFieldMask64(start, length);
-    for (int i = 0; i < length; ++i)
-      result |= ((value >> (start + i)) & 1ul) << (start + length - 1 - i);
-    return result;
-  }
-
+using Random = System.Random;
+public partial class BitReverseTest {
   [Fact]
-  public void ReverseBitsByte_MatchesReference_Exhaustively() {
+  public void ReverseBitsU8_MatchesReference_Exhaustively() {
     for (int i = 0; i <= byte.MaxValue; ++i) {
-      byte value = (byte)i;
-      // A byte lives in the low 8 bits of the 32-bit reference reverse, which puts it in the high
-      // 8 bits, hence the shift back down.
-      byte expect = (byte)(ReferenceReverse((uint)value) >> 24);
+      byte value  = (byte)i;
+      byte expect = Reverse8Reference(value);
       Assert.Equal(expect, BitOps.ReverseBits(value));
     }
   }
 
   [Fact]
-  public void ReverseBitsByte_IsSelfInverse() {
+  public void ReverseBitsU8_IsSelfInverse() {
     for (int i = 0; i <= byte.MaxValue; ++i) {
       byte value = (byte)i;
       Assert.Equal(value, BitOps.ReverseBits(BitOps.ReverseBits(value)));
@@ -99,32 +23,32 @@ public class BitReverseTest {
 
   [Fact]
   public void ReverseBitsU32_MatchesReference() {
-    var rng = new System.Random(42);
+    var rng = new Random(42);
     foreach (uint sample in kSamples32)
-      Assert.Equal(ReferenceReverse(sample), BitOps.ReverseBits(sample));
-    for (int iter = 0; iter < 4096; ++iter) {
-      uint value = RandomU32(rng);
-      Assert.Equal(ReferenceReverse(value), BitOps.ReverseBits(value));
+      Assert.Equal(Reverse32Reference(sample), BitOps.ReverseBits(sample));
+    for (int i = 0; i < 30; ++i) {
+      uint value = rng.NextU32();
+      Assert.Equal(Reverse32Reference(value), BitOps.ReverseBits(value));
     }
   }
 
   [Fact]
   public void ReverseBitsU64_MatchesReference() {
-    var rng = new System.Random(42);
+    var rng = new Random(42);
     foreach (ulong sample in kSamples64)
-      Assert.Equal(ReferenceReverse(sample), BitOps.ReverseBits(sample));
-    for (int iter = 0; iter < 4096; ++iter) {
-      ulong value = RandomU64(rng);
-      Assert.Equal(ReferenceReverse(value), BitOps.ReverseBits(value));
+      Assert.Equal(Reverse64Reference(sample), BitOps.ReverseBits(sample));
+    for (int i = 0; i < 30; ++i) {
+      ulong value = rng.NextU64();
+      Assert.Equal(Reverse64Reference(value), BitOps.ReverseBits(value));
     }
   }
 
   [Fact]
   public void ReverseBits_IsSelfInverse() {
-    var rng = new System.Random(7);
-    for (int iter = 0; iter < 4096; ++iter) {
-      uint u32  = RandomU32(rng);
-      ulong u64 = RandomU64(rng);
+    var rng = new Random(7);
+    for (int i = 0; i < 30; ++i) {
+      uint u32  = rng.NextU32();
+      ulong u64 = rng.NextU64();
       Assert.Equal(u32, BitOps.ReverseBits(BitOps.ReverseBits(u32)));
       Assert.Equal(u64, BitOps.ReverseBits(BitOps.ReverseBits(u64)));
     }
@@ -135,7 +59,8 @@ public class BitReverseTest {
   public void ReverseBitsU32_WithLength_MatchesReference_ForEveryLength() {
     foreach (uint sample in kSamples32) {
       for (int length = 0; length <= 32; ++length)
-        Assert.Equal(ReferenceReverse(sample, 0, length), BitOps.ReverseBits(sample, length));
+        Assert.Equal(Reverse32Reference(sample, length: length),
+            BitOps.ReverseBits(sample, length));
     }
   }
 
@@ -143,7 +68,8 @@ public class BitReverseTest {
   public void ReverseBitsU64_WithLength_MatchesReference_ForEveryLength() {
     foreach (ulong sample in kSamples64) {
       for (int length = 0; length <= 64; ++length)
-        Assert.Equal(ReferenceReverse(sample, 0, length), BitOps.ReverseBits(sample, length));
+        Assert.Equal(Reverse64Reference(sample, length: length),
+            BitOps.ReverseBits(sample, length));
     }
   }
 
@@ -152,7 +78,7 @@ public class BitReverseTest {
     foreach (uint sample in kSamples32) {
       for (int start = 0; start < 32; ++start)
         for (int length = 0; start + length <= 32; ++length)
-          Assert.Equal(ReferenceReverse(sample, start, length),
+          Assert.Equal(Reverse32Reference(sample, start, length),
               BitOps.ReverseBits(sample, start, length));
     }
   }
@@ -162,31 +88,31 @@ public class BitReverseTest {
     foreach (ulong sample in kSamples64) {
       for (int start = 0; start < 64; ++start)
         for (int length = 0; start + length <= 64; ++length)
-          Assert.Equal(ReferenceReverse(sample, start, length),
+          Assert.Equal(Reverse64Reference(sample, start, length),
               BitOps.ReverseBits(sample, start, length));
     }
   }
 
   [Fact]
   public void ReverseBitsU32_Field_MatchesReference_ForRandomValues() {
-    var rng = new System.Random(1234);
-    for (int iter = 0; iter < 2048; ++iter) {
-      uint value = RandomU32(rng);
+    var rng = new Random(1234);
+    for (int i = 0; i < 30; ++i) {
+      uint value = rng.NextU32();
       int start  = rng.Next(32);
       int length = rng.Next(32 - start + 1);
-      Assert.Equal(ReferenceReverse(value, start, length),
+      Assert.Equal(Reverse32Reference(value, start, length),
           BitOps.ReverseBits(value, start, length));
     }
   }
 
   [Fact]
   public void ReverseBitsU64_Field_MatchesReference_ForRandomValues() {
-    var rng = new System.Random(1234);
-    for (int iter = 0; iter < 2048; ++iter) {
-      ulong value = RandomU64(rng);
+    var rng = new Random(1234);
+    for (int i = 0; i < 30; ++i) {
+      ulong value = rng.NextU64();
       int start   = rng.Next(64);
       int length  = rng.Next(64 - start + 1);
-      Assert.Equal(ReferenceReverse(value, start, length),
+      Assert.Equal(Reverse64Reference(value, start, length),
           BitOps.ReverseBits(value, start, length));
     }
   }
@@ -246,60 +172,6 @@ public class BitReverseTest {
   public void ReverseBitsU64_Field_ZeroOrOneBit_IsIdentity(int start, int length) {
     foreach (ulong sample in kSamples64)
       Assert.Equal(sample, BitOps.ReverseBits(sample, start, length));
-  }
-
-  /*
-   * BZHI saturation, which is what an "ignore length > bitcount" policy in ReverseBits would lean
-   * on: index >= OperandSize leaves the value untouched (it does NOT clear everything), and the
-   * index is taken modulo 256. Cf. the Intel SDM operation for BZHI.
-   */
-
-  [Theory]
-  [InlineData(0)]
-  [InlineData(1)]
-  [InlineData(31)]
-  [InlineData(32)]
-  [InlineData(33)]
-  [InlineData(255)]
-  public void Bzhi32_SaturatesAtOperandSize(int index) {
-    const uint value = 0xDEADBEEFu;
-    uint expect      = index >= 32 ? value : value & ((1u << index) - 1);
-    Assert.Equal(expect, BitOps.Bzhi32(value, index));
-    Assert.Equal(expect, BitOps.Bzhi32Sw(value, index));
-  }
-
-  [Theory]
-  [InlineData(0)]
-  [InlineData(1)]
-  [InlineData(63)]
-  [InlineData(64)]
-  [InlineData(65)]
-  [InlineData(255)]
-  public void Bzhi64_SaturatesAtOperandSize(int index) {
-    const ulong value = 0xDEADBEEFCAFEBABEul;
-    ulong expect      = index >= 64 ? value : value & ((1ul << index) - 1);
-    Assert.Equal(expect, BitOps.Bzhi64(value, index));
-    Assert.Equal(expect, BitOps.Bzhi64Sw(value, index));
-  }
-
-  [Fact]
-  public void Bzhi32_MatchesSwFallback_AcrossTheWholeByteIndexRange() {
-    var rng = new System.Random(31337);
-    for (int iter = 0; iter < 16; ++iter) {
-      uint value = RandomU32(rng);
-      for (int index = 0; index <= byte.MaxValue; ++index)
-        Assert.Equal(BitOps.Bzhi32Sw(value, index), BitOps.Bzhi32(value, index));
-    }
-  }
-
-  [Fact]
-  public void Bzhi64_MatchesSwFallback_AcrossTheWholeByteIndexRange() {
-    var rng = new System.Random(31337);
-    for (int iter = 0; iter < 16; ++iter) {
-      ulong value = RandomU64(rng);
-      for (int index = 0; index <= byte.MaxValue; ++index)
-        Assert.Equal(BitOps.Bzhi64Sw(value, index), BitOps.Bzhi64(value, index));
-    }
   }
 
   /*

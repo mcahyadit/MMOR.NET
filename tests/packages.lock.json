@@ -85,11 +85,6 @@
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
       },
-      "T4.Build": {
-        "type": "Transitive",
-        "resolved": "0.2.5",
-        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
-      },
       "xunit.analyzers": {
         "type": "Transitive",
         "resolved": "1.22.0",
@@ -148,13 +143,8 @@
       "mmor.net": {
         "type": "Project",
         "dependencies": {
-          "MMOR.Roslyn": "[0.1.0, )",
-          "Newtonsoft.Json": "[13.0.*, )",
-          "T4.Build": "[0.2.5, )"
+          "Newtonsoft.Json": "[13.0.*, )"
         }
-      },
-      "mmor.roslyn": {
-        "type": "Project"
       }
     },
     "net8.0": {
@@ -246,13 +236,8 @@
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "Ih5zrydoDc1H5I0eNP6f4Lzw3cjsPMN4Nikd86kbyi66y0flkM9GfjVo62aUbcxeTbypzBCFAFQ+/6RF2jRORg=="
-      },
-      "T4.Build": {
-        "type": "Transitive",
-        "resolved": "0.2.5",
-        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
+        "resolved": "10.0.7",
+        "contentHash": "0Ti4Jv1ga3eurH5HaCVsPybcBl+08YfzM9smqAJzHvqV494xK+0pSbytGrMTWhph+zsyKIaoGNiR5u3by5bj+A=="
       },
       "xunit.analyzers": {
         "type": "Transitive",
@@ -312,14 +297,8 @@
       "mmor.net": {
         "type": "Project",
         "dependencies": {
-          "MMOR.Roslyn": "[0.1.0, )",
-          "Newtonsoft.Json": "[13.0.*, )",
-          "System.Collections.Immutable": "[10.0.*, )",
-          "T4.Build": "[0.2.5, )"
+          "Newtonsoft.Json": "[13.0.*, )"
         }
-      },
-      "mmor.roslyn": {
-        "type": "Project"
       }
     },
     "net9.0": {
@@ -411,13 +390,8 @@
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "Ih5zrydoDc1H5I0eNP6f4Lzw3cjsPMN4Nikd86kbyi66y0flkM9GfjVo62aUbcxeTbypzBCFAFQ+/6RF2jRORg=="
-      },
-      "T4.Build": {
-        "type": "Transitive",
-        "resolved": "0.2.5",
-        "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
+        "resolved": "10.0.7",
+        "contentHash": "0Ti4Jv1ga3eurH5HaCVsPybcBl+08YfzM9smqAJzHvqV494xK+0pSbytGrMTWhph+zsyKIaoGNiR5u3by5bj+A=="
       },
       "xunit.analyzers": {
         "type": "Transitive",
@@ -477,14 +451,8 @@
       "mmor.net": {
         "type": "Project",
         "dependencies": {
-          "MMOR.Roslyn": "[0.1.0, )",
-          "Newtonsoft.Json": "[13.0.*, )",
-          "System.Collections.Immutable": "[10.0.*, )",
-          "T4.Build": "[0.2.5, )"
+          "Newtonsoft.Json": "[13.0.*, )"
         }
-      },
-      "mmor.roslyn": {
-        "type": "Project"
       }
     }
   }

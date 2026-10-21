@@ -3,34 +3,15 @@ using System.Numerics;
 using Xunit;
 
 namespace MMOR.NET.Bits {
-public partial class VectorIntrinsicsTest {
-  private static ulong ReferenceMovemask64(Vector<ulong> v) {
-    ulong result = 0;
-    for (int i = 0; i < Vector<ulong>.Count; ++i) {
-      result |= (v[i] >> 63) << i;
-    }
-    return result;
-  }
-
-  private static ulong ReferenceMovemask32(Vector<uint> v) {
-    ulong result = 0;
-    for (int i = 0; i < Vector<uint>.Count; ++i) {
-      result |= (ulong)(v[i] >> 31) << i;
-    }
-    return result;
-  }
-
-  private static ulong RandomU64(System.Random rng) {
-    return ((ulong)rng.Next() << 32) | (uint)rng.Next();
-  }
-
+using Random = System.Random;
+public partial class BitOpsTest {
   [Fact]
   public void MmMovemaskEpi64_MatchesSoftwareReference() {
-    var rng = new System.Random(42);
-    for (int iter = 0; iter < 512; ++iter) {
-      var lanes = new ulong[Vector<ulong>.Count];
-      for (int i = 0; i < lanes.Length; ++i) {
-        lanes[i] = RandomU64(rng);
+    Random rng = new Random(42);
+    for (int i = 0; i < 512; ++i) {
+      ulong[] lanes = new ulong[Vector<ulong>.Count];
+      for (int j = 0; j < lanes.Length; ++j) {
+        lanes[j] = rng.NextU64();
       }
       Vector<ulong> v = new(lanes);
       Assert.Equal(ReferenceMovemask64(v), BitOps.MmMovEpi64Mask(v));
@@ -40,11 +21,11 @@ public partial class VectorIntrinsicsTest {
 
   [Fact]
   public void MmMovemaskEpi32_MatchesSoftwareReference() {
-    var rng = new System.Random(42);
+    Random rng = new Random(42);
     for (int iter = 0; iter < 512; ++iter) {
-      var lanes = new uint[Vector<uint>.Count];
-      for (int i = 0; i < lanes.Length; ++i) {
-        lanes[i] = (uint)rng.Next();
+      uint[] lanes = new uint[Vector<uint>.Count];
+      for (int j = 0; j < lanes.Length; ++j) {
+        lanes[j] = (uint)rng.Next();
       }
       Vector<uint> v = new(lanes);
       Assert.Equal(ReferenceMovemask32(v), BitOps.MmMovEpi32Mask(v));
@@ -54,9 +35,9 @@ public partial class VectorIntrinsicsTest {
 
   [Fact]
   public void MmMovemaskEpi64_HandlesAllNegativeLanes() {
-    var lanes = new ulong[Vector<ulong>.Count];
-    for (int i = 0; i < lanes.Length; ++i) {
-      lanes[i] = ulong.MaxValue;
+    ulong[] lanes = new ulong[Vector<ulong>.Count];
+    for (int j = 0; j < lanes.Length; ++j) {
+      lanes[j] = ulong.MaxValue;
     }
     Vector<ulong> v = new(lanes);
     ulong expect    = (1ul << Vector<ulong>.Count) - 1;
@@ -73,9 +54,9 @@ public partial class VectorIntrinsicsTest {
 
   [Fact]
   public void MmMovemaskEpi32_HandlesAllNegativeLanes() {
-    var lanes = new uint[Vector<uint>.Count];
-    for (int i = 0; i < lanes.Length; ++i) {
-      lanes[i] = uint.MaxValue;
+    uint[] lanes = new uint[Vector<uint>.Count];
+    for (int j = 0; j < lanes.Length; ++j) {
+      lanes[j] = uint.MaxValue;
     }
     Vector<uint> v = new(lanes);
     ulong expect   = (1ul << Vector<uint>.Count) - 1;
@@ -92,35 +73,35 @@ public partial class VectorIntrinsicsTest {
 
   [Fact]
   public void MmMovmEpi64Emu_ExpandsActiveBits() {
-    var rng = new System.Random(7);
-    for (int iter = 0; iter < 512; ++iter) {
-      ulong mask      = RandomU64(rng);
+    Random rng = new Random(7);
+    for (int i = 0; i < 512; ++i) {
+      ulong mask      = rng.NextU64();
       Vector<ulong> v = BitOps.MmMovMaskEpi64Emu(mask);
-      for (int i = 0; i < Vector<ulong>.Count; ++i) {
-        ulong expect = ((mask >> i) & 1) == 1 ? ulong.MaxValue : 0;
-        Assert.Equal(expect, v[i]);
+      for (int j = 0; j < Vector<ulong>.Count; ++j) {
+        ulong expect = ((mask >> j) & 1) == 1 ? ulong.MaxValue : 0;
+        Assert.Equal(expect, v[j]);
       }
     }
   }
 
   [Fact]
   public void MmMovmEpi32Emu_ExpandsActiveBits() {
-    var rng = new System.Random(7);
-    for (int iter = 0; iter < 512; ++iter) {
+    Random rng = new Random(7);
+    for (int i = 0; i < 512; ++i) {
       uint mask      = (uint)rng.Next();
       Vector<uint> v = BitOps.MmMovMaskEpi32Emu(mask);
-      for (int i = 0; i < Vector<uint>.Count; ++i) {
-        uint expect = ((mask >> i) & 1) == 1 ? uint.MaxValue : 0;
-        Assert.Equal(expect, v[i]);
+      for (int j = 0; j < Vector<uint>.Count; ++j) {
+        uint expect = ((mask >> j) & 1) == 1 ? uint.MaxValue : 0;
+        Assert.Equal(expect, v[j]);
       }
     }
   }
 
   [Fact]
   public void MovemaskEpi64_Movm_Roundtrip() {
-    var rng = new System.Random(1234);
-    for (int iter = 0; iter < 512; ++iter) {
-      ulong mask   = RandomU64(rng);
+    Random rng = new Random(1234);
+    for (int i = 0; i < 512; ++i) {
+      ulong mask   = rng.NextU64();
       ulong expect = mask & ((1ul << Vector<ulong>.Count) - 1);
       Assert.Equal(expect, BitOps.MmMovEpi64Mask(BitOps.MmMovMaskEpi64Emu(mask)));
       Assert.Equal(expect, BitOps.MmMovEpi64MaskSw(BitOps.MmMovMaskEpi64Emu(mask)));
@@ -129,8 +110,8 @@ public partial class VectorIntrinsicsTest {
 
   [Fact]
   public void MovemaskEpi32_Movm_Roundtrip() {
-    var rng = new System.Random(1234);
-    for (int iter = 0; iter < 512; ++iter) {
+    Random rng = new Random(1234);
+    for (int i = 0; i < 512; ++i) {
       uint mask    = (uint)rng.Next();
       ulong expect = mask & ((1ul << Vector<uint>.Count) - 1);
       Assert.Equal(expect, BitOps.MmMovEpi32Mask(BitOps.MmMovMaskEpi32Emu(mask)));
