@@ -21,7 +21,7 @@ jobs:
       - name: Run Tests
         run: |
           tfms=("net8.0" "net10.0")
-          for tfm in "${tfm[@]}"; do
+          for tfm in "${tfms[@]}"; do
             echo "Running tests for ${tfm}"
             dotnet run --project ./tests --configuration Release --framework ${tfm}
           done
