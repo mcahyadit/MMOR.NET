@@ -21,6 +21,9 @@ public partial class BakeJsonGenerator {
     internal readonly EquatableArray<string> json_paths { get; init; }
     internal readonly EquatableArray<string> json_names { get; init; }
 
+    public readonly bool gen_seri { get; init; }
+    public readonly required string seri_name { get; init; }
+
     public BakedModel() {}
   }
 

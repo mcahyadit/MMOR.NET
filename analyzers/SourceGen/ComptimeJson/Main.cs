@@ -44,7 +44,11 @@ public partial class BakeJsonGenerator : IIncrementalGenerator {
     }
 
     foreach (BakedModel type_model in tuple.Item2.models) {
-      debug.Append("// ").AppendLine($"{type_model.name}.g.cs");
+      if (type_model.gen_seri) {
+        SourceText src = SourceText.From(GenerateSerializable(type_model), Encoding.UTF8);
+        debug.Append("// ").AppendLine($"{type_model.name}.g.cs");
+        ctx.AddSource($"{type_model.name}.g.cs", src);
+      }
 
       for (int i = 0; i < type_model.properties.Length; ++i) {
         PropertyModel prop = type_model.properties[i];

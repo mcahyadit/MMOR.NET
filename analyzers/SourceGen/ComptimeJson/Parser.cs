@@ -5,8 +5,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace MMOR.Roslyn {
 public partial class BakeJsonGenerator {
-  public const string kMetadataName      = "MMOR.Roslyn.BakedJsonAttribute";
-  public const string kJsonPathAttrShort = "BakedJsonFileAttribute";
+  public const string kMetadataName          = "MMOR.Roslyn.BakedJsonAttribute";
+  public const string kJsonPathAttrShort     = "BakedJsonFileAttribute";
+  public const string kSerializableAttrShort = "BakedJsonGenerateSerializableAttribute";
+
+  public static string? GetStringAtOrEmpty(AttributeData attr, int idx) {
+    if (attr.ConstructorArguments.Length > idx &&
+        attr.ConstructorArguments[idx].Value is string str && !string.IsNullOrWhiteSpace(str))
+      return str;
+    return null;
+  }
 
   public static BakedModel ParseBakedModel(GeneratorAttributeSyntaxContext ctx,
       CancellationToken ct) {
@@ -15,10 +23,24 @@ public partial class BakeJsonGenerator {
 
     ModelKind model_kind;
     string source_path;
+    bool seri        = false;
+    string seri_name = "";
     switch (ctx.TargetNode) {
       case InterfaceDeclarationSyntax syntax:
-        model_kind  = ModelKind.Interface;
-        source_path = syntax.SyntaxTree.FilePath;
+        model_kind               = ModelKind.Interface;
+        source_path              = syntax.SyntaxTree.FilePath;
+        AttributeData? seri_attr = symbol.GetAttributeByShortName(kSerializableAttrShort);
+        if (seri_attr is not null) {
+          seri      = true;
+          seri_name = GetStringAtOrEmpty(seri_attr, 0) ?? "";
+        }
+        if (string.IsNullOrWhiteSpace(seri_name)) {
+          if (symbol.Name.Length > 1 && symbol.Name[0] == 'I' && char.IsUpper(symbol.Name[1])) {
+            seri_name = symbol.Name[1..];
+          } else {
+            seri_name = symbol.Name + "Serializable";
+          }
+        }
         break;
       case ClassDeclarationSyntax syntax:
         model_kind  = ModelKind.Class;
@@ -52,8 +74,8 @@ public partial class BakeJsonGenerator {
     // Json Paths
     string dirname                    = Path.GetDirectoryName(source_path);
     IEnumerable<AttributeData>? jsons = symbol.GetAttributesByShortName(kJsonPathAttrShort);
-    List<string> json_paths           = new List<string>();
-    List<string> json_names           = new List<string>();
+    List<string> json_paths           = [];
+    List<string> json_names           = [];
     foreach (AttributeData json in jsons) {
       if (json.ConstructorArguments[0].Value is not string attr_path) {
         continue;
@@ -62,9 +84,8 @@ public partial class BakeJsonGenerator {
       string path = Path.GetFullPath(Path.Combine(dirname, attr_path));
       json_paths.Add(path);
 
-      if (json.ConstructorArguments.Length > 1 &&
-          json.ConstructorArguments[1].Value is string comp_name &&
-          !string.IsNullOrWhiteSpace(comp_name)) {
+      string? comp_name = GetStringAtOrEmpty(json, 1);
+      if (comp_name is not null) {
         json_names.Add(comp_name);
       } else {
         // No name provided, transform from path
@@ -90,6 +111,8 @@ public partial class BakeJsonGenerator {
       properties = resolved_props.ToEquatableArray(),
       json_paths = json_paths.ToEquatableArray(),
       json_names = json_names.ToEquatableArray(),
+      gen_seri   = seri,
+      seri_name  = seri_name,
     };
   }
 }
