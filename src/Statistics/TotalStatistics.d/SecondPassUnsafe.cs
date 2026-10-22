@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Numerics;
 using MMOR.NET.Collections;
 using MMOR.NET.Mathematics;
@@ -52,7 +51,7 @@ public static partial class TotalStatisticsExtension {
         }
         run_idx = Math.Min(length - idx, run_idx << 1);
       }
-      int dupes   = CollectionUtils.TailBinarySearch(values.Slice(idx, run_idx), value);
+      int dupes   = CollectionUtils.TailGallopSearch(values.Slice(idx, run_idx), value);
       ulong count = dupes > 1 ? CollectionUtils.Sum(counts.Slice(idx, dupes)) : counts[idx];
 
       values[unique] = value;
