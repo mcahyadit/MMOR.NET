@@ -18,6 +18,7 @@ public partial class BakeJsonGenerator {
   public const ulong kDictKeyEnum  = 1ul << 1;
   public const ulong kDictKeyStr   = 1ul << 2;
   public const ulong kDictKeyChar  = 1ul << 3;
+  public const ulong kImmutable    = 1ul << 4;
 
   public static List<ulong> GetContainerMetadata(ITypeSymbol type) {
     List<ulong> result  = [];
@@ -34,8 +35,13 @@ public partial class BakeJsonGenerator {
         int sublen     = dis_str.IndexOf('<');
 
         if (kListTypes.Contains(dis_str[..sublen])) {
+          ulong cont_type = 0ul;
+          if (!dis_str.Contains("Generic")) {
+            cont_type |= kImmutable;
+          }
+
           current = current.GetAllTypeArguments()[0];
-          result.Add(0ul);
+          result.Add(cont_type);
           continue;
         }  // List Types
 
@@ -50,6 +56,10 @@ public partial class BakeJsonGenerator {
               SpecialType.System_Char   => kDictKeyChar,
               _                         => 0,
             };
+          }
+
+          if (!dis_str.Contains("Generic")) {
+            cont_type |= kImmutable;
           }
 
           current = current.GetAllTypeArguments()[1];

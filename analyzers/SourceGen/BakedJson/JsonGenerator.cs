@@ -111,29 +111,47 @@ public partial class BakeJsonGenerator {
     };
   }
 
-  public static string GenericType(in string container) {
+  public static void GenericType(in string container, out string cont_type, out string val_type) {
     if (container.EndsWith("[]")) {
-      return container[..^ 2];
+      cont_type = "";
+      val_type  = container[..^ 2];
     } else {
-      return container[(container.IndexOf('<') + 1)..^ 1];
+      int idx   = container.IndexOf('<');
+      cont_type = container[..idx];
+      val_type  = container[(container.IndexOf('<') + 1)..^ 1];
     }
   }
 
-  public static void GetDictTypes(string dict_type, out string key_type, out string val_type) {
-    string generic = GenericType(dict_type);
-    int idx        = generic.IndexOf(',');
-    key_type       = generic[..idx];
-    val_type       = generic[(idx + 1)..];
+  public static void GetDictTypes(in string dict_type, out string cont_type, out string key_type,
+      out string val_type) {
+    GenericType(dict_type, out cont_type, out string generic);
+    int idx  = generic.IndexOf(',');
+    key_type = generic[..idx].Trim();
+    val_type = generic[(idx + 1)..].Trim();
+  }
+
+  public static void ImmutableCompat(in string cont_type, out string nspace, out string cname) {
+    int idx = cont_type.LastIndexOf('.');
+    nspace  = cont_type[..idx];
+    cname   = cont_type[(idx + 1)..];
   }
 
   internal static void TranspileDictionary(StringBuilder sb, in JsonElement element,
       in TraverseInfo info) {
-    sb.AppendFormat("new {0} ", info.current_type).Append('{');
-
-    string indent   = new(' ', info.object_depth * 2);
     ulong cont_meta = info.container_metadata[0];
+    GetDictTypes(info.current_type, out string dict_type, out string key_type, out string val_type);
+    string indent = new(' ', info.object_depth * 2);
 
-    GetDictTypes(info.current_type, out string enum_name, out string val_type);
+    if ((cont_meta & kImmutable) != 0) {
+      ImmutableCompat(dict_type, out string nspace, out string cname);
+      sb.AppendFormat("{0}.{1}.To{1}(\n", nspace, cname)
+          .AppendFormat("{0}new System.Collections.Generic.Dictionary<{1}, {2}> ", indent, key_type,
+              val_type)
+          .Append('{');
+    } else {
+      sb.AppendFormat("new {0} ", info.current_type).Append('{');
+    }
+
     foreach (JsonProperty prop in element.EnumerateObject()) {
       sb.AppendFormat("\n    {0}", indent);
       // Transpile Key
@@ -151,7 +169,7 @@ public partial class BakeJsonGenerator {
           } else {
             sb.Append(" | ");
           }
-          sb.Append(enum_name).Append('.').Append(split);
+          sb.Append(key_type).Append('.').Append(split);
         }
         sb.Append("] = ");
       } else {
@@ -179,14 +197,26 @@ public partial class BakeJsonGenerator {
       sb.Append(',');
     }
     sb.AppendFormat("\n  {0}", indent).Append('}');
+    if ((cont_meta & kImmutable) != 0) {
+      sb.Append(')');
+    }
   }
 
   internal static void TranspileArray(StringBuilder sb, in JsonElement element,
       in TraverseInfo info) {
-    sb.AppendFormat("new {0} ", info.current_type).Append('{');
+    ulong cont_meta = info.container_metadata[0];
+    GenericType(info.current_type, out string list_type, out string val_type);
+    string indent = new(' ', info.object_depth * 2);
 
-    string val_type = GenericType(info.current_type);
-    string indent   = new(' ', info.object_depth * 2);
+    if ((cont_meta & kImmutable) != 0) {
+      ImmutableCompat(list_type, out string nspace, out string cname);
+      sb.AppendFormat("{0}.{1}.Create(\n", nspace, cname)
+          .AppendFormat("{0}new {1}[] ", indent, val_type)
+          .Append('{');
+    } else {
+      sb.AppendFormat("new {0} ", info.current_type).Append('{');
+    }
+
     foreach (JsonElement value in element.EnumerateArray()) {
       if (value.ValueKind == JsonValueKind.Array) {
         sb.Append('\n');
@@ -208,7 +238,10 @@ public partial class BakeJsonGenerator {
       }
       sb.Append(',');
     }
-    sb.Append("}");
+    sb.Append('}');
+    if ((cont_meta & kImmutable) != 0) {
+      sb.Append(')');
+    }
   }
 }
 }
