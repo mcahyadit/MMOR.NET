@@ -3,18 +3,29 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <WarningsAsErrors>
+      $(WarningAsErrors);
+      CS8785;  <!-- SourceGen Failures -->
+    </WarningsAsErrors>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Statistics/fixtures/*.json"/>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
     <PackageReference Include="System.Reflection.Metadata" Version="10.0.7"/>
     <PackageReference Include="xunit.v3" Version="2.0.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1"/>
     <ProjectReference Include="../MMOR.NET.csproj"/>
+    <ProjectReference Include="../analyzers/Roslyn/MMOR.Roslyn.csproj" PrivateAssets="all"/>
+    <ProjectReference Include="../analyzers/SourceGen/MMOR.Roslyn.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <PackageReference Include="MMOR.Roslyn" Version="*" Condition="'$(ContinuousIntegrationBuild)'=='true'" PrivateAssets="true"/>
   </ItemGroup>
 </Project>

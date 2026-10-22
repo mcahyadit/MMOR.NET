@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Statistics {
 /**
@@ -17,7 +18,15 @@ namespace MMOR.NET.Statistics {
  * so a sample whose sum is close to zero leaves them meaningless).
  * </remarks>
  */
-public struct SampleData {
+[BakedJson]
+[BakedJsonFile("./fixtures/len4.json")]
+[BakedJsonFile("./fixtures/len8.json")]
+[BakedJsonFile("./fixtures/lognorm100.json")]
+[BakedJsonFile("./fixtures/lognorm1000.json")]
+[BakedJsonFile("./fixtures/gauss1000.json")]
+[BakedJsonFile("./fixtures/heavy-tail-155.json")]
+[BakedJsonFile("./fixtures/heavy-tail-count-10k.json")]
+public partial struct SampleData {
   public string identifier { get; init; } = "Generic Test";
 
   public double[] values { get; init; } = [];

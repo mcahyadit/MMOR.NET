@@ -18,6 +18,14 @@ _: {
 
         prek
         nixd
+
+        (rWrapper.override {
+          packages = with rPackages; [
+            languageserver
+            styler
+            DescTools
+          ];
+        })
       ];
       env = {
         inherit (self'.packages.default) DOTNET_ROOT;
