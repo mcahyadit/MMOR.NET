@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace MMOR.NET.Bits {
 public partial class BitOpsTest {
   public static ulong Bzhi64Reference(ulong value, int index) {

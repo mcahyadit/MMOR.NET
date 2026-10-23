@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using MMOR.NET.Bits;
 
 namespace MMOR.NET.Collections {
 public partial class RentedList<T> : IList<T> {
