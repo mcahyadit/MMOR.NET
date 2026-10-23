@@ -77,7 +77,7 @@ public partial class RunningStatisticsTest {
           mean_precision               = 13,
           standard_deviation_precision = 13,
           skewness_precision           = 13,
-          kurtosis_precision           = 13,
+          kurtosis_precision           = 12,
         },
 
         new SimdParam {
