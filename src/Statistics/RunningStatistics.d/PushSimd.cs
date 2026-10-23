@@ -112,21 +112,21 @@ public static partial class RunningStatisticsExtensions {
             cnt += count_epi;
           }
 
-          Vector<long> cnt_nz =
-              Vector.AsVectorInt64(Vector.GreaterThan(count_epi, Vector<ulong>.Zero));
+          Vector<long> cnt_nz = (Vector<long>)Vector.GreaterThan(count_epi, Vector<ulong>.Zero);
 
-          min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
-                                                 Vector.LessThan(value_epi, min_val))),
-              count_epi, min_cnt);
-          min_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
-                                                 Vector.Equals(value_epi, min_val))),
-              min_cnt + count_epi, min_cnt);
-          max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
-                                                 Vector.GreaterThan(value_epi, max_val))),
-              count_epi, max_cnt);
-          max_cnt = Vector.ConditionalSelect(Vector.AsVectorUInt64(Vector.BitwiseAnd(cnt_nz,  //
-                                                 Vector.Equals(value_epi, max_val))),
-              max_cnt + count_epi, max_cnt);
+          // Min
+          Vector<long> cmp_lt = Vector.BitwiseAnd(cnt_nz, Vector.LessThan(value_epi, min_val));
+          min_cnt             = Vector.ConditionalSelect((Vector<ulong>)cmp_lt, count_epi, min_cnt);
+          Vector<long> is_min = Vector.BitwiseAnd(cnt_nz, Vector.Equals(value_epi, min_val));
+          min_cnt = Vector.ConditionalSelect((Vector<ulong>)is_min, min_cnt + count_epi, min_cnt);
+
+          // Max
+          Vector<long> cmp_gt = Vector.BitwiseAnd(cnt_nz, Vector.GreaterThan(value_epi, max_val));
+          max_cnt             = Vector.ConditionalSelect((Vector<ulong>)cmp_gt, count_epi, max_cnt);
+          Vector<long> is_max = Vector.BitwiseAnd(cnt_nz, Vector.Equals(value_epi, max_val));
+          max_cnt = Vector.ConditionalSelect((Vector<ulong>)is_max, max_cnt + count_epi, max_cnt);
+
+          // Count update
           min_val = Vector.ConditionalSelect(cnt_nz, Vector.Min(min_val, value_epi), min_val);
           max_val = Vector.ConditionalSelect(cnt_nz, Vector.Max(max_val, value_epi), max_val);
         }  // End of SIMD Loop
