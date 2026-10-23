@@ -6,8 +6,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace MMOR.Roslyn {
 public partial class BakeJsonGenerator {
   public const string kMetadataName          = "MMOR.Roslyn.BakedJsonAttribute";
+  public const string kMetadataNameShort     = "BakedJsonAttribute";
   public const string kJsonPathAttrShort     = "BakedJsonFileAttribute";
-  public const string kSerializableAttrShort = "BakedJsonGenerateSerializableAttribute";
+  public const string kSerializableAttrShort = "BakedJsonSerializableAttribute";
 
   public static string? GetStringAtOrEmpty(AttributeData attr, int idx) {
     if (attr.ConstructorArguments.Length > idx &&

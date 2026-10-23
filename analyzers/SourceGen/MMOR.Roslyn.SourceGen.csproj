@@ -7,6 +7,10 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>
+      $(NoWarn);
+      RS2008;
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ANcpLua.Roslyn.Utilities.Sources" Version="3.0.2">
