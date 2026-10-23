@@ -13,7 +13,7 @@ public static class TestUtils {
     }
 
     if (!MathExt.Approximately(expected, actual))
-      throw EqualException.ForMismatchedValues(expected, actual);
+      throw EqualException.ForMismatchedValues(expected.ToString(), actual.ToString());
   }
 
   public static void AssertApproximately(double expected, double actual, double tolerance) {

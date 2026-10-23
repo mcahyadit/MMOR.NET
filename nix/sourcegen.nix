@@ -25,6 +25,7 @@
             pkgs.lib.fileset.unions [
               ../analyzers
               ../Directory.Build.props
+              ../global.json
             ]
           );
         };

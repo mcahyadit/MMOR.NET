@@ -4,23 +4,20 @@
     <Version>$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)/VERSION.txt).TrimEnd())</Version>
     <TargetFrameworks>netstandard2.1;net8.0;net9.0;net10.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
-    <Nullable>enable</Nullable>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>
-     $(NoWarn);
-     1573;    <!-- Missing parameter XML tag -->
-     1587;    <!-- XML comment is not placed on a valid language element -->
-     1591;    <!-- Missing XML comment -->
+      $(NoWarn);
+      1573;    <!-- Missing parameter XML tag -->
+      1587;    <!-- XML comment is not placed on a valid language element -->
+      1591;    <!-- Missing XML comment -->
     </NoWarn>
+    <SourceRoot>./src</SourceRoot>
+    <TextTemplateTransformAll>false</TextTemplateTransformAll>
     <WarningsAsErrors>
       $(WarningAsErrors);
-      CS8785;
+      CS8785;  <!-- SourceGen Failures -->
     </WarningsAsErrors>
-    <RestoreUseLegacyDependencyResolver>true</RestoreUseLegacyDependencyResolver>
-    <SourceRoot>./src</SourceRoot>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <TextTemplateTransformAll>false</TextTemplateTransformAll>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="third_party/**"/>
