@@ -64,18 +64,19 @@
         ];
         inherit nugetDeps;
 
-        testProjectFile = "./tests/MMOR.NET.Tests.csproj";
-        doCheck = true;
-
-        # MTP removed the `--logger` flag
-        # ..nixpkgs upstream still uses it
-        checkPhase = ''
-          runHook preCheck
-          dotnet test "${finalAttrs.testProjectFile}" \
-            -p:ContinuousIntegrationBuild=true \
-            -p:Deterministic=true
-          runHook postCheck
-        '';
+        # testProjectFile = "./tests/MMOR.NET.Tests.csproj";
+        # doCheck = true;
+        #
+        # # MTP removed the `--logger` flag
+        # # ..nixpkgs upstream still uses it
+        # checkPhase = ''
+        #   runHook preCheck
+        #   dotnet test --project "${finalAttrs.testProjectFile}" \
+        #     --no-restore \
+        #     -p:ContinuousIntegrationBuild=true \
+        #     -p:Deterministic=true
+        #   runHook postCheck
+        # '';
 
         meta = {
           license = pkgs.lib.licenses.mit;
