@@ -1,165 +1,171 @@
+// https://prng.di.unimi.it
+
+using System.Numerics;
+using System.Runtime.CompilerServices;
+
 namespace MMOR.NET.Random {
-  internal class SplitMix64 {
-    private ulong x_;
+/**
+ * <summary>
+ * <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate</strong>
+ * <br/> - Developed by David Blackman and Sebastiano Vigna (2018).
+ * <br/> - Statistical improvement from xorshift.
+ * </summary>
+ */
+public abstract class XoroshiroBase<T> : IRandom<T>, IRandomDoubleSeed
+    where T : XoroshiroBase<T>, new() {
+  public ulong Seed2 { get; }
+  public bool IsDoubleSeeded { get; }
 
-    public SplitMix64(ulong seed) => x_ = seed;
+  public ulong state0_;
+  public ulong state1_;
 
-    public ulong Next() {
-      ulong z = x_ += 0x9e3779b97f4a7c15;
-      z       = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-      z       = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-      return z ^ (z >> 31);
+  public XoroshiroBase(ulong seed, ulong? mix = null) {
+    Seed = seed;
+
+    if (mix == null) {
+      RandUtils.SplitMix64(seed, out state0_, out state1_);
+    } else {
+      IsDoubleSeeded = true;
+
+      Seed2   = mix.Value;
+      state0_ = seed;
+      state1_ = mix.Value;
     }
   }
+}
 
-  /**
-   * <summary>
-   * <strong><u>Xo</u>r <u>Ro</u>tate <u>S</u>hift <u>Ro</u>tate</strong>
-   * <br/> - Developed by David Blackman and Sebastiano Vigna (2018).
-   * <br/> - Statistical improvement from xorshift.
-   * </summary>
-   * */
-  internal interface IXoroshiroDocs {}
+/**
+ * <inheritdoc cref="XoroshiroBase{T}"/>
+ * <remarks>
+ * <br/> 128++ Variant.
+ * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+ * </remarks>
+ */
+public class Xoroshiro : XoroshiroBase<Xoroshiro> {
+  public ulong NextU64() {
+    ++StateCount;
+    ulong s0     = state0_;
+    ulong s1     = state1_;
+    ulong result = unchecked(BitOperations.RotateLeft(unchecked(s0 + s1), 17) + s0);
 
-  /**
-   * <inheritdoc cref="IXoroshiroDocs"/>
-   * <remarks>
-   * <br/> 128++ Variant.
-   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
-   * </remarks>
-   * */
-  public class Xoroshiro : IRandom<Xoroshiro> {
-    protected (ulong x, ulong y) s;
+    s1 ^= s0;
+    state0_ = BitOperations.RotateLeft(s0, 49) ^ s1 ^ (s1 << 21);
+    state1_ = BitOperations.RotateLeft(s1, 28);
 
-    protected virtual ulong RotateLeft(ulong x, int k) => (x << k) | (x >> (64 - k));
-
-    public override string ToString() => @$"XSR_128pp-0x{Seed:X}";
-
-    public override uint NextUInt() {
-      ++StateCount;
-      ulong s0     = s.x;
-      ulong s1     = s.y;
-      ulong result = unchecked(RotateLeft(unchecked(s0 + s1), 17) + s0);
-
-      s1 ^= s0;
-      s.x = RotateLeft(s0, 49) ^ s1 ^ (s1 << 21);
-      s.y = RotateLeft(s1, 28);
-
-      return (uint)(result >> 32);
-    }
-
-    public Xoroshiro() : this(DefaultReSeed()) {}
-
-    public Xoroshiro(ulong seed, ulong? mix = null) {
-      Seed = seed;
-
-      if (mix == null) {
-        SplitMix64 sm = new(seed);
-        s             = new(sm.Next(), sm.Next());
-      } else {
-        s = new(seed, mix.Value);
-      }
-    }
+    return result;
   }
 
-  /**
-   * <inheritdoc cref="IXoroshiroDocs"/>
-   * <remarks>
-   * <br/> 64* Variant.
-   * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
-   * </remarks>
-   * */
-  public class Xoroshiro64s : IRandom<Xoroshiro64s> {
-    protected (uint x, uint y) s;
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public override uint NextUInt() => (uint)(NextU64() >> 32);
 
-    protected uint RotateLeft(uint x, int k) => (x << k) | (x >> (32 - k));
+  public Xoroshiro() : this(RandUtils.GenericU32RandomSeed()) {}
+  public Xoroshiro(ulong seed, ulong? mix = null) : base(seed, mix) {}
+}
 
-    public override string ToString() => @$"XSR_64s-0x{Seed:X}";
+/**
+ * <inheritdoc cref="XoroshiroBase{T}"/>
+ * <remarks>
+ * <br/> 64* Variant.
+ * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
+ * </remarks>
+ */
+public class Xoroshiro64s : XoroshiroBase<Xoroshiro64s> {
+  public override uint NextUInt() {
+    ++StateCount;
+    uint s0     = (uint)state0_;
+    uint s1     = (uint)state1_;
+    uint result = unchecked(s0 * 0x9E3779BBU);
 
-    public override uint NextUInt() {
-      ++StateCount;
-      uint s0     = s.x;
-      uint s1     = s.y;
-      uint result = unchecked(s0 * 0x9E3779BBU);
+    s1 ^= s0;
+    state0_ = BitOperations.RotateLeft(s0, 26) ^ s1 ^ (s1 << 9);
+    state1_ = BitOperations.RotateLeft(s1, 13);
 
-      s1 ^= s0;
-      s.x = RotateLeft(s0, 26) ^ s1 ^ (s1 << 9);
-      s.y = RotateLeft(s1, 13);
-
-      return result;
-    }
+    return result;
   }
 
-  //
-  /**
-   * <inheritdoc cref="IXoroshiroDocs"/>
-   * <remarks>
-   * <br/> 64** Variant.
-   * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
-   * </remarks>
-   * */
-  public class Xoroshiro64ss : Xoroshiro64s {
-    public override string ToString() => @$"XSR_64ss-0x{Seed:X}";
+  public Xoroshiro64s() : this(RandUtils.GenericU32RandomSeed()) {}
+  public Xoroshiro64s(ulong seed, ulong? mix = null) : base(seed, mix) {}
+}
 
-    public override uint NextUInt() {
-      ++StateCount;
-      uint s0     = s.x;
-      uint s1     = s.y;
-      uint result = unchecked(RotateLeft(unchecked(s0 * 0x9E3779BBU), 5) * 5);
+//
+/**
+ * <inheritdoc cref="XoroshiroBase{T}"/>
+ * <remarks>
+ * <br/> 64** Variant.
+ * <br/> Has a period of 2^64 - 1 󰾞 1.8e+19.
+ * </remarks>
+ */
+public class Xoroshiro64ss : XoroshiroBase<Xoroshiro64ss> {
+  public override uint NextUInt() {
+    ++StateCount;
+    uint s0     = (uint)state0_;
+    uint s1     = (uint)state1_;
+    uint result = unchecked(BitOperations.RotateLeft(unchecked(s0 * 0x9E3779BBU), 5) * 5);
 
-      s1 ^= s0;
-      s.x = RotateLeft(s0, 26) ^ s1 ^ (s1 << 9);
-      s.y = RotateLeft(s1, 13);
+    s1 ^= s0;
+    state0_ = BitOperations.RotateLeft(s0, 26) ^ s1 ^ (s1 << 9);
+    state1_ = BitOperations.RotateLeft(s1, 13);
 
-      return result;
-    }
+    return result;
   }
 
-  /**
-   * <inheritdoc cref="IXoroshiroDocs"/>
-   * <remarks>
-   * <br/> 128** Variant.
-   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
-   * </remarks>
-   * */
-  public class Xoroshiro128ss : Xoroshiro {
-    public override string ToString() => @$"XSR_128ss-0x{Seed:X}";
+  public Xoroshiro64ss() : this(RandUtils.GenericU32RandomSeed()) {}
+  public Xoroshiro64ss(ulong seed, ulong? mix = null) : base(seed, mix) {}
+}
 
-    public override uint NextUInt() {
-      ++StateCount;
-      ulong s0     = s.x;
-      ulong s1     = s.y;
-      ulong result = unchecked(RotateLeft(unchecked(s0 * 5), 7) * 9);
+/**
+ * <inheritdoc cref="XoroshiroBase{T}"/>
+ * <remarks>
+ * <br/> 128** Variant.
+ * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+ * </remarks>
+ */
+public class Xoroshiro128ss : XoroshiroBase<Xoroshiro128ss>, IRandom64 {
+  public ulong NextU64() {
+    ++StateCount;
+    ulong s0     = state0_;
+    ulong s1     = state1_;
+    ulong result = unchecked(BitOperations.RotateLeft(unchecked(s0 * 5), 7) * 9);
 
-      s1 ^= s0;
-      s.x = RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
-      s.y = RotateLeft(s1, 37);
+    s1 ^= s0;
+    state0_ = BitOperations.RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
+    state1_ = BitOperations.RotateLeft(s1, 37);
 
-      return (uint)(result >> 32);
-    }
+    return result;
   }
 
-  /**
-   * <inheritdoc cref="IXoroshiroDocs"/>
-   * <remarks>
-   * <br/> 128+ Variant.
-   * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
-   * </remarks>
-   * */
-  public class Xoroshiro128p : Xoroshiro {
-    public override string ToString() => @$"XSR_128p-0x{Seed:X}";
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public override uint NextUInt() => (uint)(NextU64() >> 32);
 
-    public override uint NextUInt() {
-      ++StateCount;
-      ulong s0     = s.x;
-      ulong s1     = s.y;
-      ulong result = unchecked(s0 + s1);
+  public Xoroshiro128ss() : this(RandUtils.GenericU32RandomSeed()) {}
+  public Xoroshiro128ss(ulong seed, ulong? mix = null) : base(seed, mix) {}
+}
 
-      s1 ^= s0;
-      s.x = RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
-      s.y = RotateLeft(s1, 37);
+/**
+ * <inheritdoc cref="XoroshiroBase{T}"/>
+ * <remarks>
+ * <br/> 128+ Variant.
+ * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
+ * </remarks>
+ */
+public class Xoroshiro128p : XoroshiroBase<Xoroshiro128p>, IRandom64 {
+  public ulong NextU64() {
+    ++StateCount;
+    ulong s0     = state0_;
+    ulong s1     = state1_;
+    ulong result = unchecked(s0 + s1);
 
-      return (uint)(result >> 32);
-    }
+    s1 ^= s0;
+    state0_ = BitOperations.RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
+    state1_ = BitOperations.RotateLeft(s1, 37);
+
+    return result;
   }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public override uint NextUInt() => (uint)(NextU64() >> 32);
+
+  public Xoroshiro128p() : this(RandUtils.GenericU32RandomSeed()) {}
+  public Xoroshiro128p(ulong seed, ulong? mix = null) : base(seed, mix) {}
+}
 }

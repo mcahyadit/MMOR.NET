@@ -128,6 +128,7 @@ public static partial class Utilities {
    *  otherwise the index of the randomly selected active bit.
    * </returns>
    * */
+  [Obsolete("Moved to RandUtils")]
   public static int GetRandomActiveBit(ulong bitmask, IRandom rng) {
     if (bitmask == 0)
       return -1;
