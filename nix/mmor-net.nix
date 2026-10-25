@@ -49,17 +49,13 @@
 
         buildInputs = [
           self'.packages.sourcegen
+          self'.packages.bcl-collectionsmarshal
           (pkgs.dotnetCorePackages.fetchNupkg {
             # Issue with nixpkgs.dotnet-sdk-10
             # Patch in NETStandard2.1
             pname = "NETStandard.Library.Ref";
             version = "2.1.0";
             hash = "sha256-Ruovy9EKgXaFuFr3zgw5fRKUS9yBIJ4nLeHgXv0zx4o=";
-          })
-          (pkgs.callPackage ../third_party/Bcl.CollectionsMarshal/default.nix {
-            inherit pkgs;
-            inherit (finalAttrs) dotnet-sdk;
-            inherit (finalAttrs) dotnet-runtime;
           })
         ];
         inherit nugetDeps;

@@ -18,6 +18,7 @@
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         ./nix/dev-shell.nix
+        ./nix/bcl-collectionmarshal.nix
         ./nix/mmor-net.nix
         ./nix/sourcegen.nix
         inputs.treefmt-nix.flakeModule
