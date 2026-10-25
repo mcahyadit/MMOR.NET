@@ -1,28 +1,32 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
   /// <inheritdoc cref="MergeSort{T}(Span{T})"/>
-  public static void MergeSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void MergeSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
+      in TComparer cmp)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     if (length <= 1)
       return;
 
     int midx = length / 2;
-    MergeSort(keys[..midx], values[..midx]);
-    MergeSort(keys[midx..], values[midx..]);
-    MergeSortMutate(keys, values, midx);
+    MergeSort(keys[..midx], values[..midx], cmp);
+    MergeSort(keys[midx..], values[midx..], cmp);
+    MergeSortMutate(keys, values, cmp, midx);
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void MergeSortMutate<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values,
-      in int midx)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void MergeSortMutate<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp, in int midx)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length      = keys.Length;
     int l_len       = midx;
     TKey[]? l_mem   = length > kHeapThreshold ? ArrayPool<TKey>.Shared.Rent(l_len) : null;
@@ -37,7 +41,7 @@ public static partial class CollectionUtils {
       int l_idx = 0;
       int r_idx = midx;
       for (; l_idx < l_len && r_idx < length; ++idx) {
-        if (l_buff[l_idx].CompareTo(keys[r_idx]) <= 0) {
+        if (cmp.Compare(l_buff[l_idx], keys[r_idx]) <= 0) {
           keys[idx]   = l_buff[l_idx];
           values[idx] = v_buff[l_idx];
           l_idx++;
@@ -58,5 +62,10 @@ public static partial class CollectionUtils {
       }
     }
   }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void MergeSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
+      where TKey : unmanaged
+      where TValue : unmanaged => MergeSort(keys, values, Comparer<TKey>.Default);
 }
 }

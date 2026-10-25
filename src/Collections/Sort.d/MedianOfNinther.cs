@@ -67,15 +67,15 @@ public static partial class CollectionUtils {
       int midx = i - frac;
       for (int x = 0; x < 3; ++x) {
         Span<T> group = slice[(left + x)..(right + x + 1)];
-        Sort3Unsafe(group, midx + frac * x - (left + x));
+        Sort3Unsafe(group, Comparer<T>.Default, midx + frac * x - (left + x));
       }
-      Sort3Unsafe(slice.Slice(i - frac, 2 * frac + 1), frac);
+      Sort3Unsafe(slice.Slice(i - frac, 2 * frac + 1), Comparer<T>.Default, frac);
     }
 
     T pivot  = MedianOfNintherMutable(slice.Slice(lo, frac), middle + 1, insertion_sort_threshold);
     int pidx = 0;
     while (pidx < length && Comparer<T>.Default.Compare(slice[pidx], pivot) != 0) ++pidx;
-    QuickSortMutate(slice, pidx, out int lt_idx, out int gt_idx);
+    QuickSortMutate(slice, Comparer<T>.Default, pidx, out int lt_idx, out int gt_idx);
 
     if (k <= lt_idx) {
       return MedianOfNintherMutable(slice[..lt_idx], k, insertion_sort_threshold);

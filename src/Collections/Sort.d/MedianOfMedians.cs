@@ -66,7 +66,7 @@ public static partial class CollectionUtils {
       T pivot  = MedianOfMediansMutable(med_buff, grp_cnt / 2 + 1);
       int pidx = 0;
       while (pidx < length && Comparer<T>.Default.Compare(slice[pidx], pivot) != 0) ++pidx;
-      QuickSortMutate(slice, pidx, out int lt_idx, out int gt_idx);
+      QuickSortMutate(slice, Comparer<T>.Default, pidx, out int lt_idx, out int gt_idx);
 
       if (k <= lt_idx)
         return MedianOfMediansMutable(slice[..lt_idx], k);

@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Collections {
@@ -10,21 +11,23 @@ public static partial class CollectionUtils {
    *  <i>O(n log n)</i> all cases. <br/>
    * </summary>
    */
-  public static void MergeSort<T>(this Span<T> slice)
-      where T : unmanaged, IComparable<T> {
+  public static void MergeSort<T, TComparer>(this Span<T> slice, in TComparer cmp)
+      where T : unmanaged
+      where TComparer : IComparer<T> {
     int length = slice.Length;
     if (length <= 1)
       return;
 
     int midx = length / 2;
-    MergeSort(slice[..midx]);
-    MergeSort(slice[midx..]);
-    MergeSortMutate(slice, midx);
+    MergeSort(slice[..midx], cmp);
+    MergeSort(slice[midx..], cmp);
+    MergeSortMutate(slice, cmp, midx);
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void MergeSortMutate<T>(in Span<T> slice, in int midx)
-      where T : unmanaged, IComparable<T> {
+  public static void MergeSortMutate<T, TComparer>(in Span<T> slice, in TComparer cmp, in int midx)
+      where T : unmanaged
+      where TComparer : IComparer<T> {
     int length = slice.Length;
     int l_len  = midx;
     T[]? l_mem = length > kHeapThreshold ? ArrayPool<T>.Shared.Rent(l_len) : null;
@@ -36,7 +39,7 @@ public static partial class CollectionUtils {
       int l_idx = 0;
       int r_idx = midx;
       for (; l_idx < l_len && r_idx < length; ++idx) {
-        if (l_buff[l_idx].CompareTo(slice[r_idx]) <= 0) {
+        if (cmp.Compare(l_buff[l_idx], slice[r_idx]) <= 0) {
           slice[idx] = l_buff[l_idx++];
         } else {
           slice[idx] = slice[r_idx++];
@@ -51,5 +54,9 @@ public static partial class CollectionUtils {
       }
     }
   }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void MergeSort<T>(this Span<T> slice)
+      where T : unmanaged, IComparable<T> => MergeSort(slice, Comparer<T>.Default);
 }
 }

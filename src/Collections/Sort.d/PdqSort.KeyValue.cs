@@ -1,14 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  /// <inheritdoc cref="OrlpNintherSortUnsafe{T}(in Span{T})"/>
+  /// <inheritdoc cref="OrlpNintherSortUnsafe{T, TComparer}(in Span{T}, in TComparer)"/>
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void NintherSortUnsafe<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void NintherSortUnsafe<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     // Cheat from orlp definition
     // From: ABC...BAC...CBA
@@ -18,23 +21,24 @@ public static partial class CollectionUtils {
       Span<TKey> k_group   = keys[i..(length - i)];
       Span<TValue> v_group = values[i..(length - i)];
       // We don't do `midx + i` because the Slice already does it
-      Sort3Unsafe(k_group, v_group, midx);
+      Sort3Unsafe(k_group, v_group, cmp, midx);
     }
-    Sort3Unsafe(keys.Slice(midx, 3), values.Slice(midx, 3), 1);
+    Sort3Unsafe(keys.Slice(midx, 3), values.Slice(midx, 3), cmp, 1);
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static bool PartialInsertionSort<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values,
-      int limit)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static bool PartialInsertionSort<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp, int limit)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     for (int c_idx = 1; c_idx < length; ++c_idx) {
       TKey pivot   = keys[c_idx];
       TValue p_val = values[c_idx];
       int s_idx    = c_idx - 1;
 
-      while (s_idx >= 0 && keys[s_idx].CompareTo(pivot) > 0) {
+      while (s_idx >= 0 && cmp.Compare(keys[s_idx], pivot) > 0) {
         keys[s_idx + 1]   = keys[s_idx];
         values[s_idx + 1] = values[s_idx];
         --s_idx;
@@ -50,10 +54,11 @@ public static partial class CollectionUtils {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void BreakPatterns<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values, int t1,
-      in int t2)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void BreakPatterns<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp, int t1, in int t2)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     if (keys.Length >= t1) {
       int l4                    = keys.Length / 4;
       (keys[0], keys[l4])       = (keys[l4], keys[0]);
@@ -74,28 +79,31 @@ public static partial class CollectionUtils {
     }
   }
 
-  /// <inheritdoc cref="PdqSort{T}"/>
-  public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
-      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+  /// <inheritdoc cref="PdqSort{T, TComparer}(Span{T}, in TComparer, in int, in int, in int,
+  /// int?)"/>
+  public static void PdqSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
+      in TComparer cmp, in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     if (length <= 1)
       return;
 
     if (length < insertion_sort_threshold) {
-      InsertionSort(keys, values);
+      InsertionSort(keys, values, cmp);
       return;
     }
 
     int pivot_idx = length / 2;
     if (length > ninther_threshold) {
-      NintherSortUnsafe(keys, values);
+      NintherSortUnsafe(keys, values, cmp);
     } else {
-      Sort3Unsafe(keys, values, pivot_idx);
+      Sort3Unsafe(keys, values, cmp, pivot_idx);
     }
-    bool partitioned = QuickSelectMutate(keys, values, pivot_idx, out int lt_idx, out int gt_idx);
+    bool partitioned =
+        QuickSelectMutate(keys, values, cmp, pivot_idx, out int lt_idx, out int gt_idx);
 
     int l8                 = length / 8;
     bool highly_unbalanced = lt_idx < l8 || length - gt_idx < l8;
@@ -105,25 +113,40 @@ public static partial class CollectionUtils {
     if (highly_unbalanced) {
       depth_limit ??= BitOperations.Log2((uint)length);
       if (--depth_limit == 0) {
-        HeapSort(keys, values);
+        HeapSort(keys, values, cmp);
         return;
       }
 
-      BreakPatterns(keys[..lt_idx], values[..lt_idx], insertion_sort_threshold, ninther_threshold);
-      BreakPatterns(keys[gt_idx..], values[gt_idx..], insertion_sort_threshold, ninther_threshold);
+      BreakPatterns(keys[..lt_idx], values[..lt_idx], cmp, insertion_sort_threshold,
+          ninther_threshold);
+      BreakPatterns(keys[gt_idx..], values[gt_idx..], cmp, insertion_sort_threshold,
+          ninther_threshold);
     } else if (partitioned) {
-      lt_sort = PartialInsertionSort(keys[..lt_idx], values[..lt_idx],  //
+      lt_sort = PartialInsertionSort(keys[..lt_idx], values[..lt_idx], cmp,  //
           partial_insertion_sort_limit);
-      gt_sort = PartialInsertionSort(keys[gt_idx..], values[gt_idx..],  //
+      gt_sort = PartialInsertionSort(keys[gt_idx..], values[gt_idx..], cmp,  //
           partial_insertion_sort_limit);
     }
 
     if (!lt_sort)
-      PdqSort(keys[..lt_idx], values[..lt_idx], insertion_sort_threshold, ninther_threshold,
+      PdqSort(keys[..lt_idx], values[..lt_idx], cmp, insertion_sort_threshold, ninther_threshold,
           partial_insertion_sort_limit, depth_limit);
     if (!gt_sort)
-      PdqSort(keys[gt_idx..], values[gt_idx..], insertion_sort_threshold, ninther_threshold,
+      PdqSort(keys[gt_idx..], values[gt_idx..], cmp, insertion_sort_threshold, ninther_threshold,
           partial_insertion_sort_limit, depth_limit);
   }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
+      in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
+      in int partial_insertion_sort_limit = 8, int? depth_limit = null)
+      where TKey : unmanaged
+      where TValue : unmanaged => PdqSort(keys,
+                     values,
+                     Comparer<TKey>.Default,
+                     insertion_sort_threshold,
+                     ninther_threshold,
+                     partial_insertion_sort_limit,
+                     depth_limit);
 }
 }

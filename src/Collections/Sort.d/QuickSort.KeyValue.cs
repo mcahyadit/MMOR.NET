@@ -1,26 +1,31 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
   /// <inheritdoc cref="QuickSort{T}(Span{T})"/>
-  public static void QuickSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void QuickSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
+      in TComparer cmp)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     if (length <= 1)
       return;
 
-    int pivot_idx = IndexMedian3<TKey>(keys);
-    QuickSelectMutate(keys, values, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<TKey, TComparer>(keys, cmp);
+    QuickSelectMutate(keys, values, cmp, pivot_idx, out int lt_idx, out int gt_idx);
 
-    QuickSort(keys[..lt_idx], values[..lt_idx]);
-    QuickSort(keys[gt_idx..], values[gt_idx..]);
+    QuickSort(keys[..lt_idx], values[..lt_idx], cmp);
+    QuickSort(keys[gt_idx..], values[gt_idx..], cmp);
   }
 
-  public static bool QuickSelectMutate<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values,
-      in int pidx, out int lt_idx, out int gt_idx)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static bool QuickSelectMutate<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp, in int pidx, out int lt_idx, out int gt_idx)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
     TKey pivot = keys[pidx];
 
@@ -31,7 +36,7 @@ public static partial class CollectionUtils {
     bool partitioned = true;
 
     for (int i = 0; i < gt_idx;) {
-      switch (keys[i].CompareTo(pivot)) {
+      switch (cmp.Compare(keys[i], pivot)) {
         case < 0:
           (keys[lt_idx], keys[i])     = (keys[i], keys[lt_idx]);
           (values[lt_idx], values[i]) = (values[i], values[lt_idx]);
@@ -54,5 +59,10 @@ public static partial class CollectionUtils {
     }
     return partitioned;
   }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void QuickSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
+      where TKey : unmanaged
+      where TValue : unmanaged => QuickSort(keys, values, Comparer<TKey>.Default);
 }
 }

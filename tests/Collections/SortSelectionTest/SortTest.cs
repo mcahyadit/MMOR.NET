@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Xunit.Sdk;
@@ -9,10 +10,13 @@ namespace MMOR.NET.Collections {
  *  Scalar sort algorithms checked against <see cref="Array.Sort" />. Each kind runs both its
  *  single-span entry point and its two-span key/value overload (which keeps a parallel payload in
  *  lock-step), and the stable kinds additionally assert that equal keys keep their original
- *  relative order.
+ *  relative order. Every case is repeated with a reverse comparer to exercise the IComparer
+ *  overloads rather than the default <see cref="IComparable{T}" /> path.
  * </summary>
  */
 public class SortTest {
+  static readonly IComparer<int> kReverse = Comparer<int>.Create((x, y) => y.CompareTo(x));
+
   [Theory]
   [MemberData(nameof(SortSelectionData.Params), MemberType = typeof(SortSelectionData))]
   public void InsertionSort_MatchesSortedOracle(SortSelectionParam p) {
@@ -27,6 +31,19 @@ public class SortTest {
     CollectionUtils.InsertionSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("InsertionSort/key-value", p.values, keys, payload, expected,
         assert_stable: true);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().InsertionSort(kReverse);
+    AssertSorted("InsertionSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.InsertionSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("InsertionSort/key-value/reverse", p.values, keys, payload,
+        reverse_expected, assert_stable: true);
   }
 
   [Theory]
@@ -43,6 +60,19 @@ public class SortTest {
     CollectionUtils.BinaryInsertionSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("BinaryInsertionSort/key-value", p.values, keys, payload, expected,
         assert_stable: true);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().BinaryInsertionSort(kReverse);
+    AssertSorted("BinaryInsertionSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.BinaryInsertionSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("BinaryInsertionSort/key-value/reverse", p.values, keys, payload,
+        reverse_expected, assert_stable: true);
   }
 
   [Theory]
@@ -58,6 +88,19 @@ public class SortTest {
     int[] payload = [..p.payload];
     CollectionUtils.MergeSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("MergeSort/key-value", p.values, keys, payload, expected,
+        assert_stable: true);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().MergeSort(kReverse);
+    AssertSorted("MergeSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.MergeSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("MergeSort/key-value/reverse", p.values, keys, payload, reverse_expected,
         assert_stable: true);
   }
 
@@ -75,6 +118,19 @@ public class SortTest {
     CollectionUtils.QuickSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("QuickSort/key-value", p.values, keys, payload, expected,
         assert_stable: false);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().QuickSort(kReverse);
+    AssertSorted("QuickSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.QuickSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("QuickSort/key-value/reverse", p.values, keys, payload, reverse_expected,
+        assert_stable: false);
   }
 
   [Theory]
@@ -90,6 +146,19 @@ public class SortTest {
     int[] payload = [..p.payload];
     CollectionUtils.HeapSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("HeapSort/key-value", p.values, keys, payload, expected,
+        assert_stable: false);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().HeapSort(kReverse);
+    AssertSorted("HeapSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.HeapSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("HeapSort/key-value/reverse", p.values, keys, payload, reverse_expected,
         assert_stable: false);
   }
 
@@ -107,6 +176,19 @@ public class SortTest {
     CollectionUtils.IntroSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("IntroSort/key-value", p.values, keys, payload, expected,
         assert_stable: false);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().IntroSort(kReverse);
+    AssertSorted("IntroSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.IntroSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("IntroSort/key-value/reverse", p.values, keys, payload, reverse_expected,
+        assert_stable: false);
   }
 
   [Theory]
@@ -123,6 +205,19 @@ public class SortTest {
     CollectionUtils.PdqSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("PdqSort/key-value", p.values, keys, payload, expected,
         assert_stable: false);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().PdqSort(kReverse);
+    AssertSorted("PdqSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.PdqSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("PdqSort/key-value/reverse", p.values, keys, payload, reverse_expected,
+        assert_stable: false);
   }
 
   [Theory]
@@ -138,6 +233,19 @@ public class SortTest {
     int[] payload = [..p.payload];
     CollectionUtils.TimSort(keys.AsSpan(), payload.AsSpan());
     AssertKeyValueOracle("TimSort/key-value", p.values, keys, payload, expected,
+        assert_stable: true);
+
+    int[] reverse_expected = [..expected];
+    Array.Reverse(reverse_expected);
+
+    span = [..p.values];
+    span.AsSpan().TimSort(kReverse);
+    AssertSorted("TimSort/single-span/reverse", span, reverse_expected);
+
+    keys    = [..p.values];
+    payload = [..p.payload];
+    CollectionUtils.TimSort(keys.AsSpan(), payload.AsSpan(), kReverse);
+    AssertKeyValueOracle("TimSort/key-value/reverse", p.values, keys, payload, reverse_expected,
         assert_stable: true);
   }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using MMOR.NET.Bits;
@@ -16,20 +17,24 @@ public static partial class CollectionUtils {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static int CountRun<T>(in ReadOnlySpan<T> slice)
-      where T : IComparable<T> {
+  public static int CountRun<T, TComparer>(in ReadOnlySpan<T> slice, in TComparer cmp)
+      where TComparer : IComparer<T> {
     int length = slice.Length;
     if (length <= 1)
       return length;
 
     int run = 2;
-    if (slice[1].CompareTo(slice[0]) >= 0) {
-      while (run < length && slice[run].CompareTo(slice[run - 1]) >= 0) ++run;
+    if (cmp.Compare(slice[1], slice[0]) >= 0) {
+      while (run < length && cmp.Compare(slice[run], slice[run - 1]) >= 0) ++run;
       return run;
     } else {
-      while (run < length && slice[run].CompareTo(slice[run - 1]) < 0) ++run;
+      while (run < length && cmp.Compare(slice[run], slice[run - 1]) < 0) ++run;
       return -run;
     }
   }
+  //
+  // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  // public static int CountRun<T>(in ReadOnlySpan<T> slice)
+  //     where T : IComparable<T> => CountRun(slice, Comparer<T>.Default);
 }
 }

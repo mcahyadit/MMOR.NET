@@ -19,13 +19,14 @@ public static partial class CollectionUtils {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static int TailBinarySearch<T>(this in ReadOnlySpan<T> slice, in T item)
-      where T : IComparable<T> {
+  public static int TailBinarySearch<T, TComparer>(this in ReadOnlySpan<T> slice, in T item,
+      in TComparer cmp)
+      where TComparer : IComparer<T> {
     int hi = slice.Length;
     int lo = 0;
     while (lo < hi) {
       int mid = lo + ((hi - lo) >> 1);
-      if (slice[mid].CompareTo(item) <= 0) {
+      if (cmp.Compare(slice[mid], item) <= 0) {
         lo = mid + 1;
       } else {
         hi = mid;
@@ -33,6 +34,17 @@ public static partial class CollectionUtils {
     }
     return lo;
   }
+
+  /**
+   * <inheritdoc cref="TailBinarySearch{T}(in ReadOnlySpan{T}, in T)"/>
+   */
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static int TailBinarySearch<T>(this in ReadOnlySpan<T> slice, in T item)
+      where T : IComparable<T> => TailBinarySearch(slice, item, Comparer<T>.Default);
 
   /**
    * <summary>
@@ -46,13 +58,14 @@ public static partial class CollectionUtils {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static int HeadBinarySearch<T>(this in ReadOnlySpan<T> slice, in T item)
-      where T : IComparable<T> {
+  public static int HeadBinarySearch<T, TComparer>(this in ReadOnlySpan<T> slice, in T item,
+      in TComparer cmp)
+      where TComparer : IComparer<T> {
     int hi = slice.Length;
     int lo = 0;
     while (lo < hi) {
       int mid = lo + ((hi - lo) >> 1);
-      if (slice[mid].CompareTo(item) < 0) {
+      if (cmp.Compare(slice[mid], item) < 0) {
         lo = mid + 1;
       } else {
         hi = mid;
@@ -61,21 +74,55 @@ public static partial class CollectionUtils {
     return lo;
   }
 
+  /**
+   * <inheritdoc cref="HeadBinarySearch{T}(in ReadOnlySpan{T}, in T)"/>
+   */
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static int HeadBinarySearch<T>(this in ReadOnlySpan<T> slice, in T item)
+      where T : IComparable<T> => HeadBinarySearch(slice, item, Comparer<T>.Default);
+
+  public static int HeadGallopSearch<T, TComparer>(this in ReadOnlySpan<T> slice, in T item,
+      in TComparer cmp)
+      where TComparer : IComparer<T> {
+    int length = slice.Length;
+
+    int g_idx = 1;
+    while (g_idx < length && cmp.Compare(item, slice[g_idx]) > 0) {
+      g_idx <<= 1;
+    }
+
+    int idx = HeadBinarySearch(slice[(g_idx >> 1)..Math.Min(g_idx, length)], item, cmp);
+    return idx + (g_idx >> 1);
+  }
+
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static int HeadGallopSearch<T>(this in ReadOnlySpan<T> slice, in T item)
-      where T : IComparable<T> {
+      where T : IComparable<T> => HeadGallopSearch(slice, item, Comparer<T>.Default);
+
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static int TailGallopSearch<T, TComparer>(this in ReadOnlySpan<T> slice, in T item,
+      in TComparer cmp)
+      where TComparer : IComparer<T> {
     int length = slice.Length;
 
     int g_idx = 1;
-    while (g_idx < length && item.CompareTo(slice[g_idx]) > 0) {
+    while (g_idx < length && cmp.Compare(item, slice[g_idx]) >= 0) {
       g_idx <<= 1;
     }
 
-    int idx = HeadBinarySearch(slice[(g_idx >> 1)..Math.Min(g_idx, length)], item);
+    int idx = TailBinarySearch(slice[(g_idx >> 1)..Math.Min(g_idx, length)], item, cmp);
     return idx + (g_idx >> 1);
   }
 
@@ -85,16 +132,6 @@ public static partial class CollectionUtils {
       "AsSpan()")]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static int TailGallopSearch<T>(this in ReadOnlySpan<T> slice, in T item)
-      where T : IComparable<T> {
-    int length = slice.Length;
-
-    int g_idx = 1;
-    while (g_idx < length && item.CompareTo(slice[g_idx]) >= 0) {
-      g_idx <<= 1;
-    }
-
-    int idx = TailBinarySearch(slice[(g_idx >> 1)..Math.Min(g_idx, length)], item);
-    return idx + (g_idx >> 1);
-  }
+      where T : IComparable<T> => TailGallopSearch(slice, item, Comparer<T>.Default);
 }
 }

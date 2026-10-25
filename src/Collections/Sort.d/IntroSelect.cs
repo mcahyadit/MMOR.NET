@@ -58,7 +58,7 @@ public static partial class CollectionUtils {
     if (length == k)
       return MaxElement<T>(slice);
     if (length == 3) {
-      Sort3Unsafe(slice, 1);
+      Sort3Unsafe(slice, Comparer<T>.Default, 1);
       return slice[k - 1];
     }
 
@@ -70,8 +70,8 @@ public static partial class CollectionUtils {
         return HeapSelectMutable(slice, k);
     }
 
-    int pivot_idx = IndexMedian3<T>(slice);
-    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<T, Comparer<T>>(slice, Comparer<T>.Default);
+    QuickSortMutate(slice, Comparer<T>.Default, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k <= lt_idx) {
       return IntroSelectMutable(slice[..lt_idx], k, depth_limit - 1, bad_path);

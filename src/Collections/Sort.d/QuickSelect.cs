@@ -52,8 +52,8 @@ public static partial class CollectionUtils {
     if (length == k)
       return MaxElement<T>(slice);
 
-    int pivot_idx = IndexMedian3<T>(slice);
-    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    int pivot_idx = IndexMedian3<T, Comparer<T>>(slice, Comparer<T>.Default);
+    QuickSortMutate(slice, Comparer<T>.Default, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k <= lt_idx) {
       return QuickSelectMutable(slice[..lt_idx], k);

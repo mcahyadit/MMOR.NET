@@ -71,7 +71,7 @@ public static partial class CollectionUtils {
       return MaxElement<T>(slice);
     if (length <= Math.Max(k, insertion_sort_threshold)) {
       if (length == 3)
-        Sort3Unsafe(slice, 1);
+        Sort3Unsafe(slice, Comparer<T>.Default, 1);
       else
         IntroSort(slice);
       return slice[k - 1];
@@ -80,11 +80,11 @@ public static partial class CollectionUtils {
     int pivot_idx = length / 2;
     if (length > ninther_threshold) {
       BreakDescendingUnsafe(slice);
-      OrlpNintherSortUnsafe(slice);
+      OrlpNintherSortUnsafe(slice, Comparer<T>.Default);
     } else {
-      Sort3Unsafe(slice, pivot_idx);
+      Sort3Unsafe(slice, Comparer<T>.Default, pivot_idx);
     }
-    QuickSortMutate(slice, pivot_idx, out int lt_idx, out int gt_idx);
+    QuickSortMutate(slice, Comparer<T>.Default, pivot_idx, out int lt_idx, out int gt_idx);
 
     if (k > lt_idx && k <= gt_idx)
       return slice[lt_idx];
@@ -101,12 +101,12 @@ public static partial class CollectionUtils {
     }
     if (k <= lt_idx) {
       if (highly_unbalanced)
-        BreakPatterns(lt_span, insertion_sort_threshold, ninther_threshold);
+        BreakPatterns(lt_span, Comparer<T>.Default, insertion_sort_threshold, ninther_threshold);
       return PdqSelectMutable(lt_span, k, insertion_sort_threshold, ninther_threshold,
           partial_insertion_sort_limit, depth_limit);
     } else if (k > gt_idx) {
       if (highly_unbalanced)
-        BreakPatterns(gt_span, insertion_sort_threshold, ninther_threshold);
+        BreakPatterns(gt_span, Comparer<T>.Default, insertion_sort_threshold, ninther_threshold);
       return PdqSelectMutable(gt_span, k - gt_idx, insertion_sort_threshold, ninther_threshold,
           partial_insertion_sort_limit, depth_limit);
     } else {

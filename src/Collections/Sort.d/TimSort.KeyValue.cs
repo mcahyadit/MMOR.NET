@@ -1,15 +1,17 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
-  /// <inheritdoc cref="TimMerge{T}(in Span{T}, in int, int)"/>
-  public static int TimMerge<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values, in int l_len,
-      int min_gallop)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  /// <inheritdoc cref="TimMerge{T, TComparer}(in Span{T}, in TComparer, in int, int)"/>
+  public static int TimMerge<TKey, TValue, TComparer>(in Span<TKey> keys, in Span<TValue> values,
+      in TComparer cmp, in int l_len, int min_gallop)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
 
     TKey[]? l_mem   = l_len > kHeapThreshold ? ArrayPool<TKey>.Shared.Rent(l_len) : null;
@@ -35,7 +37,7 @@ public static partial class CollectionUtils {
             ++min_gallop;
             galloping = false;
           }
-          int curr_cmp = l_buff[l_idx].CompareTo(keys[r_idx]);
+          int curr_cmp = cmp.Compare(l_buff[l_idx], keys[r_idx]);
           if (curr_cmp <= 0) {
             keys[idx]   = l_buff[l_idx];
             values[idx] = v_buff[l_idx];
@@ -63,7 +65,7 @@ public static partial class CollectionUtils {
             // Gallop right side
             TKey l_val = l_buff[l_idx];
 
-            g_idx = HeadGallopSearch(keys[r_idx..], l_val);
+            g_idx = HeadGallopSearch(keys[r_idx..], l_val, cmp);
             keys.Slice(r_idx, g_idx).CopyTo(keys[idx..]);
             values.Slice(r_idx, g_idx).CopyTo(values[idx..]);
             r_idx += g_idx;
@@ -72,7 +74,7 @@ public static partial class CollectionUtils {
             // Gallop left side
             TKey r_val = keys[r_idx];
 
-            g_idx = TailGallopSearch(l_buff[l_idx..], r_val);
+            g_idx = TailGallopSearch(l_buff[l_idx..], r_val, cmp);
             l_buff.Slice(l_idx, g_idx).CopyTo(keys[idx..]);
             v_buff.Slice(l_idx, g_idx).CopyTo(values[idx..]);
             l_idx += g_idx;
@@ -95,11 +97,12 @@ public static partial class CollectionUtils {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static void TimCollapse<TKey, TValue>(in Span<TKey> keys, in Span<TValue> values,
-      bool finish, ref int min_gallop, ref int count, in Span<int> run_start,
-      in Span<int> run_length)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void TimCollapse<TKey, TValue, TComparer>(in Span<TKey> keys,
+      in Span<TValue> values, in TComparer cmp, bool finish, ref int min_gallop, ref int count,
+      in Span<int> run_start, in Span<int> run_length)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     while (count > 1) {
       int len_1 = run_length[count - 2];
       int len_2 = run_length[count - 1];
@@ -109,7 +112,7 @@ public static partial class CollectionUtils {
       if (finish || len_1 <= len_2 || inv3 || inv4) {
         int len_combined      = len_1 + len_2;
         min_gallop            = TimMerge(keys.Slice(run_start[count - 2], len_combined),  //
-                       values.Slice(run_start[count - 2], len_combined), len_1, min_gallop);
+                       values.Slice(run_start[count - 2], len_combined), cmp, len_1, min_gallop);
         run_length[count - 2] = len_combined;
         --count;
       } else {
@@ -119,14 +122,16 @@ public static partial class CollectionUtils {
   }
 
   /// <inheritdoc cref="TimSort{T}(Span{T})"/>
-  public static void TimSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged, IComparable<TKey>
-      where TValue : unmanaged {
+  public static void TimSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
+      in TComparer cmp)
+      where TKey : unmanaged
+      where TValue : unmanaged
+      where TComparer : IComparer<TKey> {
     int length = keys.Length;
 
     int min_run = ComputeMinRun(length);
     if (length <= min_run) {
-      BinaryInsertionSort(keys, values);
+      BinaryInsertionSort(keys, values, cmp);
       return;
     }
 
@@ -138,7 +143,7 @@ public static partial class CollectionUtils {
     int min_gallop       = 7;
 
     for (int i = 0; i < length;) {
-      int stride = CountRun<TKey>(keys[i..]);
+      int stride = CountRun<TKey, TComparer>(keys[i..], cmp);
       if (stride < 0) {
         stride = -stride;
         keys.Slice(i, stride).Reverse();
@@ -147,17 +152,23 @@ public static partial class CollectionUtils {
 
       if (stride < min_run) {
         stride = Math.Min(min_run, length - i);
-        BinaryInsertionSort(keys.Slice(i, stride), values.Slice(i, stride));
+        BinaryInsertionSort(keys.Slice(i, stride), values.Slice(i, stride), cmp);
       }
       run_start[runs_count]  = i;
       run_length[runs_count] = stride;
       ++runs_count;
       i += stride;
 
-      TimCollapse(keys, values, false, ref min_gallop, ref runs_count, run_start, run_length);
+      TimCollapse(keys, values, cmp, false, ref min_gallop, ref runs_count, run_start, run_length);
     }
 
-    TimCollapse(keys, values, true, ref min_gallop, ref runs_count, run_start, run_length);
+    TimCollapse(keys, values, cmp, true, ref min_gallop, ref runs_count, run_start, run_length);
   }
+
+  /// <inheritdoc cref="TimSort{T}(Span{T})"/>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void TimSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
+      where TKey : unmanaged
+      where TValue : unmanaged => TimSort(keys, values, Comparer<TKey>.Default);
 }
 }
