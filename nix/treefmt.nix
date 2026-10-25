@@ -1,4 +1,4 @@
-_: {
+{pkgs, ...}: {
   perSystem = _: {
     treefmt = {
       programs = {
@@ -16,10 +16,17 @@ _: {
           enable = true;
           includes = ["*.csproj" "*.props"];
         };
-        taplo.enable = true;
         actionlint.enable = true;
       };
-      settings.excludes = ["third_party/**"];
+      settings = {
+        excludes = ["third_party/**"];
+        # https://github.com/numtide/treefmt-nix/pull/466
+        toml = {
+          command = "${pkgs.lib.getExe pkgs.tombi}";
+          option = ["format"];
+          includes = ["*.toml"];
+        };
+      };
     };
   };
 }
