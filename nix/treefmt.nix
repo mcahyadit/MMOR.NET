@@ -1,5 +1,5 @@
-{pkgs, ...}: {
-  perSystem = _: {
+_: {
+  perSystem = {pkgs, ...}: {
     treefmt = {
       programs = {
         clang-format = {
