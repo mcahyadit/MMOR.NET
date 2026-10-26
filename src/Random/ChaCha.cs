@@ -5,7 +5,7 @@ namespace MMOR.NET.Random {
  * <see href="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
  * </summary>
  */
-public class ChaCha20 : IRandom<ChaCha20>, IRandomDoubleSeed {
+public class ChaCha20 : IRandom<ChaCha20>, IRandomDoubleSeed, IRandomJumpable {
   public ulong Seed2 { get; }
   public bool IsDoubleSeeded { get; }
 
@@ -105,7 +105,7 @@ public class ChaCha20 : IRandom<ChaCha20>, IRandomDoubleSeed {
     keysetup_[7] = 0xdeadbeef;
   }
 
-  public override void Jump(ulong delta) {
+  public void Jump(ulong delta) {
     ctr_ += delta;
     StateCount += delta;
   }

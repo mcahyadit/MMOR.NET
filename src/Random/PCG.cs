@@ -1,5 +1,3 @@
-using System;
-
 namespace MMOR.NET.Random {
 /**
  * <summary>
@@ -9,7 +7,7 @@ namespace MMOR.NET.Random {
  * <br/> - Have period of 2^64.
  * </summary>
  */
-public class PCG : IRandom<PCG>, IRandomDoubleSeed {
+public class PCG : IRandom<PCG>, IRandomDoubleSeed, IRandomJumpable {
   public ulong Seed2 { get; }
   public bool IsDoubleSeeded { get; }
 
@@ -54,7 +52,7 @@ public class PCG : IRandom<PCG>, IRandomDoubleSeed {
     }
   }
 
-  public override void Jump(ulong steps) {
+  public void Jump(ulong steps) {
     if (steps == 0)
       return;
 

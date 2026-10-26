@@ -128,7 +128,7 @@ public static class RandomExtensions {
 
   /**
    * <summary>
-   *  Calls <see cref="IRandom.Jump(ulong)"/> in respect to the current <see
+   *  Calls <see cref="Jump{T}(T, ulong)"/> in respect to the current <see
    * cref="IRandom.StateCount"/>.
    * </summary>
    * <param name="state_count_target">The desired final <see cref="IRandom.StateCount"/>
@@ -143,7 +143,18 @@ public static class RandomExtensions {
       throw new InvalidOperationException(
           $"[ERROR] Jumping Backwards is unsupported. Current state is {rng.StateCount}, while the target state is {state_count_target}");
 
-    rng.Jump(state_count_target - rng.StateCount);
+    Jump(rng, state_count_target - rng.StateCount);
+  }
+
+  /// <inheritdoc cref="IRandomJumpable.Jump(ulong)"/>
+  public static void Jump<T>(this T rng, ulong steps)
+      where T : IRandom {
+    if (rng is IRandomJumpable jmp) {
+      jmp.Jump(steps);
+      return;
+    }
+
+    for (ulong i = 0; i < steps; ++i) rng.NextUInt();
   }
 }
 }

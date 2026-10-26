@@ -18,10 +18,6 @@ public abstract class IRandom<T> : IRandom
 
   public abstract uint NextUInt();
 
-  public virtual void Jump(ulong steps) {
-    for (ulong i = 0; i < steps; i++) NextUInt();
-  }
-
   /**
    * <summary>
    * A lazyily instantiated <see langword="static"/> instance of <typeparamref name="T"/>.
@@ -59,7 +55,14 @@ public interface IRandom {
    * </summary>
    */
   public ulong StateCount { get; }
+}
 
+public interface IRandomDoubleSeed : IRandom {
+  public bool IsDoubleSeeded { get; }
+  public ulong Seed2 { get; }
+}
+
+public interface IRandomJumpable : IRandom {
   /**
    * <summary>
    *  <br/> Jump aheads the PRNG as if it has called <see cref="NextUInt()"/>
@@ -70,11 +73,6 @@ public interface IRandom {
    * <param name="steps">Length of the jump ahead.</param>
    */
   public void Jump(ulong steps);
-}
-
-public interface IRandomDoubleSeed : IRandom {
-  public bool IsDoubleSeeded { get; }
-  public ulong Seed2 { get; }
 }
 
 public interface IRandom64 : IRandom {
