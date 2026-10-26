@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using MMOR.NET.Mathematics;
 
 namespace MMOR.NET.Random {
-public static class RandomExtensions {
+public static partial class RandomExtensions {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void ThrowIfMaxExclIsLt<T>(T min_inclusive, T max_exclusive)
       where T : IComparable<T> {

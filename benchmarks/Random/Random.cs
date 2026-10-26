@@ -1,9 +1,8 @@
 using BenchmarkDotNet.Attributes;
-using MMOR.NET.Random;
 
-namespace MMOR.NET.Benchmarks.Collections {
+namespace MMOR.NET.Random {
 [MemoryDiagnoser]
-public class RandomBench {
+public class RandomEngineBench {
   [Params(1024, 65536, 1048576)]
   public int N;
 
