@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MMOR.NET.Mathematics;
 
 namespace MMOR.NET.Random {
@@ -155,6 +156,25 @@ public static class RandomExtensions {
     }
 
     for (ulong i = 0; i < steps; ++i) rng.NextUInt();
+  }
+
+  public static void WriteToBytes<T>(this T rng, Span<byte> buffer)
+      where T : IRandom {
+    int length     = buffer.Length;
+    int c_len      = length >> 4;
+    int p_len      = (c_len + 3) & ~3;
+    Span<uint> tmp = stackalloc uint[p_len];
+    for (int i = 0; i < p_len; ++i) {
+      tmp[i] = rng.NextUInt();
+    }
+    MemoryMarshal.Cast<uint, byte>(tmp) [..length].CopyTo(buffer);
+  }
+
+  public static byte[] NextBytes<T>(this T rng)
+      where T : IRandom {
+    byte[] result = new byte[4];
+    WriteToBytes(rng, result);
+    return result;
   }
 }
 }
