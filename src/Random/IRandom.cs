@@ -76,7 +76,7 @@ public interface IRandomJumpable : IRandom {
 }
 
 public interface IRandom64 : IRandom {
-  public ulong NextU64();
+  public ulong NextUInt64();
 }
 
 /**

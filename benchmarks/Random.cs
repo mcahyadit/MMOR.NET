@@ -15,9 +15,27 @@ public class RandomBench {
     return work;
   }
 
+  public ulong[] RandFill64<T>(ulong[] work, T rng)
+      where T : IRandom64 {
+    for (int i = 0; i < N; ++i) {
+      work[i] = rng.NextUInt64();
+    }
+    return work;
+  }
+
   [Benchmark(Baseline = true)]
   public uint[] MT19937() {
     return RandFill(new uint[N], new MT19937());
+  }
+
+  [Benchmark]
+  public uint[] MT11213b() {
+    return RandFill(new uint[N], new MT11213b());
+  }
+
+  [Benchmark]
+  public ulong[] MT19937u64() {
+    return RandFill64(new ulong[N], new MT19937u64());
   }
 
   [Benchmark]

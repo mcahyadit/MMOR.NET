@@ -41,8 +41,8 @@ public abstract class XoroshiroBase<T> : IRandom<T>, IRandomDoubleSeed
  * <br/> Has a period of 2^128 - 1 󰾞 3.4e+38.
  * </remarks>
  */
-public class Xoroshiro : XoroshiroBase<Xoroshiro> {
-  public ulong NextU64() {
+public class Xoroshiro : XoroshiroBase<Xoroshiro>, IRandom64 {
+  public ulong NextUInt64() {
     ++StateCount;
     ulong s0     = state0_;
     ulong s1     = state1_;
@@ -56,7 +56,7 @@ public class Xoroshiro : XoroshiroBase<Xoroshiro> {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextU64() >> 32);
+  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
 
   public Xoroshiro() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro(ulong seed, ulong? mix = null) : base(seed, mix) {}
@@ -121,7 +121,7 @@ public class Xoroshiro64ss : XoroshiroBase<Xoroshiro64ss> {
  * </remarks>
  */
 public class Xoroshiro128ss : XoroshiroBase<Xoroshiro128ss>, IRandom64 {
-  public ulong NextU64() {
+  public ulong NextUInt64() {
     ++StateCount;
     ulong s0     = state0_;
     ulong s1     = state1_;
@@ -135,7 +135,7 @@ public class Xoroshiro128ss : XoroshiroBase<Xoroshiro128ss>, IRandom64 {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextU64() >> 32);
+  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
 
   public Xoroshiro128ss() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro128ss(ulong seed, ulong? mix = null) : base(seed, mix) {}
@@ -149,7 +149,7 @@ public class Xoroshiro128ss : XoroshiroBase<Xoroshiro128ss>, IRandom64 {
  * </remarks>
  */
 public class Xoroshiro128p : XoroshiroBase<Xoroshiro128p>, IRandom64 {
-  public ulong NextU64() {
+  public ulong NextUInt64() {
     ++StateCount;
     ulong s0     = state0_;
     ulong s1     = state1_;
@@ -163,7 +163,7 @@ public class Xoroshiro128p : XoroshiroBase<Xoroshiro128p>, IRandom64 {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextU64() >> 32);
+  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
 
   public Xoroshiro128p() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro128p(ulong seed, ulong? mix = null) : base(seed, mix) {}

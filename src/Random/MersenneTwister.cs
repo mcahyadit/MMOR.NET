@@ -1,4 +1,37 @@
+using System;
+using System.Runtime.CompilerServices;
+
 namespace MMOR.NET.Random {
+public abstract class MersenneTwister32Base<T> : IRandom<T>
+    where T : MersenneTwister32Base<T>, new() {
+  public readonly uint[] state_;
+  public int s_idx_;
+
+  public MersenneTwister32Base(int size) {
+    state_ = new uint[size];
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static void MersenneTwist32(Span<uint> state, in int middle, in int mask_base,
+      in uint twist_matrix) {
+    uint upper_mask = (uint)(~0 << mask_base);
+    uint lower_mask = ~upper_mask;
+    int length      = state.Length;
+    unchecked {
+      for (int idx = 0; idx < length - middle; ++idx) {
+        uint y     = (state[idx] & upper_mask) | (state[idx + 1] & lower_mask);
+        state[idx] = state[idx + middle] ^ (y >> 1) ^ ((0u - (y & 1)) & twist_matrix);
+      }
+      for (int idx = length - middle; idx < length - 1; ++idx) {
+        uint y     = (state[idx] & upper_mask) | (state[idx + 1] & lower_mask);
+        state[idx] = state[idx + (middle - length)] ^ (y >> 1) ^ ((0u - (y & 1)) & twist_matrix);
+      }
+      uint ylast        = (state[length - 1] & upper_mask) | (state[0] & lower_mask);
+      state[length - 1] = state[middle - 1] ^ (ylast >> 1) ^ ((0u - (ylast & 1)) & twist_matrix);
+    }
+  }
+}
+
 /**
  * <summary>
  * <strong><u>M</u>ersenne <u>T</u>wister 19937</strong>
@@ -6,40 +39,20 @@ namespace MMOR.NET.Random {
  * <br/> - Meaning the RNG will exhaust its randomness in 2 ^ 19937 - 1 iterations.
  * </summary>
  */
-public class MT19937 : IRandom<MT19937> {
-  protected const int N             = 624;
-  protected const int M             = 397;
-  protected const uint matrix_a_    = 0X9908B0DFu;
-  protected const uint upper_mask_  = 0x80000000u;
-  protected const uint lower_mask_  = 0x7FFFFFFFu;
-  protected readonly uint[] mt_val_ = new uint[N];
-  protected int mt_dex_             = N + 1;
-
+public class MT19937 : MersenneTwister32Base<MT19937> {
   public override uint NextUInt() {
     ++StateCount;
-    if (mt_dex_ >= N) {
-      for (var k = 0; k < N - M; k++) {
-        uint y     = (mt_val_[k] & upper_mask_) | (mt_val_[k + 1] & lower_mask_);
-        mt_val_[k] = mt_val_[k + M] ^ (y >> 1) ^ ((y & 0x1) * matrix_a_);
-      }
-
-      for (int k = N - M; k < N - 1; k++) {
-        uint y     = (mt_val_[k] & upper_mask_) | (mt_val_[k + 1] & lower_mask_);
-        mt_val_[k] = mt_val_[k + (M - N)] ^ (y >> 1) ^ ((y & 0x1) * matrix_a_);
-      }
-
-      uint last_y    = (mt_val_[N - 1] & upper_mask_) | (mt_val_[0] & lower_mask_);
-      mt_val_[N - 1] = mt_val_[M - 1] ^ (last_y >> 1) ^ ((last_y & 0x1) * matrix_a_);
-
-      mt_dex_ = 0;
+    if (s_idx_ >= state_.Length) {
+      MersenneTwist32(state_, 397, 31, 0x9908B0DFu);
+      s_idx_ = 0;
     }
 
-    uint number = mt_val_[mt_dex_++];
+    uint number = state_[s_idx_++];
 
     // Tempering
     number ^= number >> 11;
-    number ^= (number << 7) & 0x9d2c5680;
-    number ^= (number << 15) & 0xefc60000;
+    number ^= (number << 7) & 0x9D2C5680;
+    number ^= (number << 15) & 0xEFC60000;
     number ^= number >> 18;
 
     return number;
@@ -47,12 +60,51 @@ public class MT19937 : IRandom<MT19937> {
 
   public MT19937() : this(RandUtils.GenericU32RandomSeed()) {}
 
-  public MT19937(ulong seed) {
-    Seed       = seed;
-    mt_val_[0] = (uint)seed;
-    for (mt_dex_ = 1; mt_dex_ < N; mt_dex_++)
-      mt_val_[mt_dex_] =
-          1812433253u * (mt_val_[mt_dex_ - 1] ^ (mt_val_[mt_dex_ - 1] >> 30)) + (uint)mt_dex_;
+  public MT19937(ulong seed) : base(624) {
+    Seed = seed & 0xFFFFFFFFu;
+
+    state_[0] = (uint)Seed;
+    for (int idx = 1; idx < state_.Length; ++idx) {
+      state_[idx] = 1812433253u * (state_[idx - 1] ^ (state_[idx - 1] >> 30)) + (uint)idx;
+    }
+    s_idx_ = state_.Length;
+  }
+}
+
+/**
+ * <remarks>
+ *  Only slightly lower length, but more cache friendly compared to MT19937
+ * </remarks>
+ */
+public class MT11213b : MersenneTwister32Base<MT11213b> {
+  public override uint NextUInt() {
+    ++StateCount;
+    if (s_idx_ >= state_.Length) {
+      MersenneTwist32(state_, 175, 19, 0xCCAB8EE7);
+      s_idx_ = 0;
+    }
+
+    uint number = state_[s_idx_++];
+
+    // Tempering
+    number ^= number >> 11;
+    number ^= (number << 7) & 0x31B6AB00;
+    number ^= (number << 15) & 0xFFE50000;
+    number ^= number >> 17;
+
+    return number;
+  }
+
+  public MT11213b() : this(RandUtils.GenericU32RandomSeed()) {}
+
+  public MT11213b(ulong seed) : base(351) {
+    Seed = seed & 0xFFFFFFFFu;
+
+    state_[0] = (uint)Seed;
+    for (int idx = 1; idx < state_.Length; ++idx) {
+      state_[idx] = 1812433253u * (state_[idx - 1] ^ (state_[idx - 1] >> 30)) + (uint)idx;
+    }
+    s_idx_ = state_.Length;
   }
 }
 }
