@@ -1,5 +1,8 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
+#if NETSTANDARD
+using UltimateOrb.Mathematics;
+using UInt128 = UltimateOrb.UInt128;
+#endif
 
 namespace MMOR.NET.Random {
 public static partial class RandomExtensions {

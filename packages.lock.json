@@ -38,6 +38,12 @@
         "resolved": "0.2.5",
         "contentHash": "RP2vSTtlN98mcRNUYx4ncOvT1sD9Ne9/4OF84CrWMxf/jtNGEl2i2NxiwLWDk/cDBvIL2wJ33ufSsN7OiIYwOA=="
       },
+      "UltimateOrb.Core": {
+        "type": "Direct",
+        "requested": "[1.4.0.5, )",
+        "resolved": "1.4.0.5",
+        "contentHash": "sC7YuCCX4Fhl19EXIA59ClG+KbXOBdFcp5htjIfGG0w13T9kp8cPSfkQkgf1POMprdDKQWcJ55XCBOa735XhSQ=="
+      },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",
         "resolved": "6.0.0",
