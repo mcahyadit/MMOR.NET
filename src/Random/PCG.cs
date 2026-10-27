@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace MMOR.NET.Random {
 /**
  * <summary>
@@ -25,7 +27,7 @@ public class PCG : IRandom<PCG>, IRandomDoubleSeed, IRandomJumpable {
       uint xor_shift = (uint)(((p_state >> 18) ^ p_state) >> 27);
       int rotate     = (int)(p_state >> 59);
 
-      return (xor_shift >> rotate) | (xor_shift << (-rotate & 31));
+      return BitOperations.RotateRight(xor_shift, rotate);
     }
   }
 
