@@ -6,9 +6,30 @@ using UInt128 = UltimateOrb.UInt128;
 
 namespace MMOR.NET.Random {
 public static partial class RandomExtensions {
+  public static uint NextUInt32Simple<T>(this T rng, uint min_inclusive, uint max_inclusive)
+      where T : IRandom {
+    ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
+    uint range = max_inclusive - min_inclusive;
+    if (range == 0)
+      return min_inclusive;
+    if (range == uint.MaxValue)
+      return rng.NextUInt();
+    range += 1;
+
+    uint limit = uint.MaxValue - uint.MaxValue % range;
+    uint result;
+
+    do {
+      result = rng.NextUInt();
+    } while (result >= limit);
+
+    return min_inclusive + result % range;
+  }
+
   // https://salivity.github.io/binary/article/lemire-s-fast-alternative-to-modulo-reduction
   public static uint NextUInt32Lemire<T>(this T rng, uint min_inclusive, uint max_inclusive)
       where T : IRandom {
+    ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     uint range = max_inclusive - min_inclusive;
     if (range == 0)
       return min_inclusive;
@@ -30,6 +51,7 @@ public static partial class RandomExtensions {
 
   public static ulong NextUInt64Lemire<T>(this T rng, uint min_inclusive, uint max_inclusive)
       where T : IRandom64 {
+    ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     ulong range = max_inclusive - min_inclusive;
     if (range == 0)
       return min_inclusive;
@@ -51,6 +73,7 @@ public static partial class RandomExtensions {
   // https://github.com/boostorg/random/blob/develop/include/boost/random/uniform_int_distribution.hpp
   public static uint NextUInt32Boost<T>(this T rng, uint min_inclusive, uint max_inclusive)
       where T : IRandom {
+    ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     uint range = max_inclusive - min_inclusive;
     if (range == 0)
       return min_inclusive;
@@ -71,6 +94,7 @@ public static partial class RandomExtensions {
 
   public static ulong NextUInt64Boost<T>(this T rng, ulong min_inclusive, ulong max_inclusive)
       where T : IRandom64 {
+    ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     ulong range = max_inclusive - min_inclusive;
     if (range == 0)
       return min_inclusive;

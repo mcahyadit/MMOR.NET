@@ -65,7 +65,7 @@ public interface IRandomDoubleSeed : IRandom {
 public interface IRandomJumpable : IRandom {
   /**
    * <summary>
-   *  <br/> Jump aheads the PRNG as if it has called <see cref="NextUInt()"/>
+   *  <br/> Jump aheads the PRNG as if it has called <see cref="IRandom.NextUInt()"/>
    *    <paramref name="steps"/> times.
    *  <br/> Efficiency depends purely on the PRNG algorithm, with <see cref="MT19937"/> and
    *    <see cref="Xoroshiro"/> being pure linear loop.

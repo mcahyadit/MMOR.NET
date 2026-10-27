@@ -20,10 +20,7 @@ public class RandomDistributionBench {
   [Benchmark(Baseline = true)]
   public uint[] Basic32() {
     for (int i = 0; i < N; ++i) {
-      if (Range == uint.MaxValue)
-        work[i] = rng.NextUInt();
-      else
-        work[i] = rng.NextUInt(0, Range);
+      work[i] = rng.NextUInt32Simple(0, Range);
     }
     return work;
   }

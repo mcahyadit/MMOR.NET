@@ -3,6 +3,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MMOR.NET.Mathematics;
 
+#if NETSTANDARD
+using UltimateOrb.Mathematics;
+using UInt128 = UltimateOrb.UInt128;
+#endif
+
 namespace MMOR.NET.Random {
 public static partial class RandomExtensions {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -41,15 +46,72 @@ public static partial class RandomExtensions {
       where T : IRandom {
     ThrowIfMaxExclIsLt(min_inclusive, max_exclusive);
 
-    uint range = max_exclusive - min_inclusive;
-    uint limit = uint.MaxValue - uint.MaxValue % range;
-    uint result;
+    // Based on Lemire
+    uint range         = max_exclusive - min_inclusive;
+    ulong range_u64    = range;
+    ulong full_product = rng.NextUInt() * range_u64;
+    uint low_bits      = (uint)full_product;
+    if (low_bits < range) {
+      uint threshold = (0u - range) % range;
+      while (low_bits < threshold) {
+        full_product = rng.NextUInt() * range_u64;
+        low_bits     = (uint)full_product;
+      }
+    }
+    return min_inclusive + (uint)(full_product >> 32);
+  }
 
-    do {
-      result = rng.NextUInt();
-    } while (result >= limit);
+  /**
+   * <summary>
+   *  Generates a random 64-bit unsigned integer from the full range of <see cref="ulong"/>.
+   *  <br/> Uses <see cref="IRandom64.NextUInt64"/> directly if supported, otherwise combines
+   *  two calls to <see cref="IRandom.NextUInt"/>, incrementing <see cref="IRandom.StateCount"/>
+   *  twice.
+   * </summary>
+   * <returns>
+   *  Random 64-bit unsigned integer from the full range of <see cref="ulong"/>.
+   * </returns>
+   */
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong NextUInt64<T>(this T rng)
+      where T : IRandom {
+    if (rng is IRandom64 rng_u64)
+      return rng_u64.NextUInt64();
+    return ((ulong)rng.NextUInt() << 32) | rng.NextUInt();
+  }
 
-    return min_inclusive + result % range;
+  /**
+   * <summary>
+   *  Generates a random 64-bit unsigned integer between <paramref name="min_inclusive"/> and
+   *  <paramref name="max_exclusive"/>.
+   *  <br/> Respecting modulo bias.
+   *  <br/> In turn, <see cref="IRandom.StateCount"/> might be incremented more than once.
+   * </summary>
+   * <returns>
+   *  Random 64-bit unsigned integer between <paramref name="min_inclusive"/> and
+   *  <paramref name="max_exclusive"/>.
+   * </returns>
+   * <exception cref="ArgumentException">
+   *  Thrown when <paramref name="max_exclusive"/> is less than or equal to
+   *  <paramref name="min_inclusive"/>.
+   * </exception>
+   */
+  public static ulong NextUInt64<T>(this T rng, ulong min_inclusive, ulong max_exclusive)
+      where T : IRandom {
+    ThrowIfMaxExclIsLt(min_inclusive, max_exclusive);
+
+    ulong range          = max_exclusive - min_inclusive;
+    UInt128 range_u128   = range;
+    UInt128 full_product = NextUInt64(rng) * range_u128;
+    ulong low_bits       = (ulong)full_product;
+    if (low_bits < range) {
+      ulong threshold = (0ul - range) % range;
+      while (low_bits < threshold) {
+        full_product = NextUInt64(rng) * range_u128;
+        low_bits     = (ulong)full_product;
+      }
+    }
+    return min_inclusive + (ulong)(full_product >> 64);
   }
 
   /**
@@ -71,11 +133,34 @@ public static partial class RandomExtensions {
   public static int NextInt<T>(this T rng, int min_inclusive, int max_exclusive)
       where T : IRandom {
     ThrowIfMaxExclIsLt(min_inclusive, max_exclusive);
-    var range = (uint)(max_exclusive - min_inclusive);
+    uint range = (uint)(max_exclusive - min_inclusive);
     return min_inclusive + (int)rng.NextUInt(0, range);
   }
 
-  public const float kU32MaxF32 = uint.MaxValue;
+  /**
+   * <summary>
+   *  Generates a random 64-bit signed integer between <paramref name="min_inclusive"/> and
+   *  <paramref name="max_exclusive"/>.
+   *  <br/> Respecting modulo bias.
+   *  <br/> In turn, <see cref="IRandom.StateCount"/> might be incremented more than once.
+   * </summary>
+   * <returns>
+   *  Random 64-bit signed integer between <paramref name="min_inclusive"/> and
+   *  <paramref name="max_exclusive"/>.
+   * </returns>
+   * <exception cref="ArgumentException">
+   *  Thrown when <paramref name="max_exclusive"/> is less than or equal to
+   *  <paramref name="min_inclusive"/>.
+   * </exception>
+   */
+  public static long NextInt64<T>(this T rng, long min_inclusive, long max_exclusive)
+      where T : IRandom {
+    ThrowIfMaxExclIsLt(min_inclusive, max_exclusive);
+    ulong range = (ulong)(max_exclusive - min_inclusive);
+    return min_inclusive + (long)rng.NextUInt64(0, range);
+  }
+
+  public const float k0x1p24 = 5.9604645E-08f;  // 0x1p-24 | 2^-24
 
   /**
    * <summary>
@@ -98,10 +183,11 @@ public static partial class RandomExtensions {
     if (MathExt.Approximately(min_inclusive, max_inclusive))
       return min_inclusive;
     ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
-    return min_inclusive + rng.NextUInt() / kU32MaxF32 * (max_inclusive - min_inclusive);
+    float val = rng.NextUInt(0, (1u << 24) + 1) * k0x1p24;
+    return min_inclusive + val * (max_inclusive - min_inclusive);
   }
 
-  public const double kU32MaxF64 = uint.MaxValue;
+  public const double k0x1p53 = 1.1102230246251565E-16;  // 0x1p-53 | 2^-53
 
   /**
    * <summary>
@@ -124,7 +210,8 @@ public static partial class RandomExtensions {
     if (MathExt.Approximately(min_inclusive, max_inclusive))
       return min_inclusive;
     ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
-    return min_inclusive + rng.NextUInt() / kU32MaxF64 * (max_inclusive - min_inclusive);
+    double val = rng.NextUInt64(0, (1ul << 53) + 1) * k0x1p53;
+    return min_inclusive + val * (max_inclusive - min_inclusive);
   }
 
   /**
