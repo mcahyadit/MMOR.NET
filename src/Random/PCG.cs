@@ -36,7 +36,7 @@ public class PCG : IRandom<PCG>, IRandomDoubleSeed, IRandomJumpable {
 
     ulong sequence;
     if (inc is null) {
-      RandUtils.SplitMix64(seed, out seed, out sequence);
+      RandUtils.SplitMix64(RandUtils.SplitMix64(seed, out seed), out sequence);
     } else {
       IsDoubleSeeded = true;
       Seed2          = inc.Value;

@@ -84,7 +84,7 @@ public class ChaCha20 : IRandom<ChaCha20>, IRandomDoubleSeed, IRandomJumpable {
 
     uint seed_val;
     if (stream == null) {
-      RandUtils.SplitMix64(seed, out ulong one, out ulong two);
+      RandUtils.SplitMix64(RandUtils.SplitMix64(seed, out ulong one), out ulong two);
       seed_val = (uint)one;
       stream_  = (uint)two;
     } else {

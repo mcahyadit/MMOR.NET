@@ -33,14 +33,22 @@ public static class RandUtils {
     return buffer[..len].ToString();
   }
 
-  public static void SplitMix64(ulong seed, out ulong first, out ulong second) {
-    static ulong Next(ulong seed) {
-      seed = (seed ^ (seed >> 30)) * 0xbf58476d1ce4e5b9;
-      seed = (seed ^ (seed >> 27)) * 0x94d049bb133111eb;
-      return seed ^ (seed >> 31);
-    }
-    first  = Next(seed += 0x9e3779b97f4a7c15);
-    second = Next(seed += 0x9e3779b97f4a7c15);
+  public static ulong SplitMix64(ulong seed, out ulong next) {
+    seed += 0x9e3779b97f4a7c15;
+    ulong z = seed;
+    z       = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+    z       = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+    next    = z ^ (z >> 31);
+    return seed;
+  }
+
+  public static uint SplitMix32(uint seed, out uint next) {
+    seed   = 1664525u * (seed + 314159265u);
+    uint z = seed;
+    z      = (z ^ (z >> 15)) * 0x5ce4e5b9u;
+    z      = (z ^ (z >> 13)) * 0x1331c1ebu;
+    next   = z ^ (z >> 15);
+    return seed;
   }
 
   public static void ShuffleArray<T, TRandom>(this in Span<T> arr, TRandom rng)
