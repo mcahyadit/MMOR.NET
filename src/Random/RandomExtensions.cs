@@ -26,6 +26,12 @@ public static partial class RandomExtensions {
           $"[ERROR]: max_inclusive: {max_inclusive} must be greater than min_inclusive: {min_inclusive}.");
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static uint NextUInt<T>(this T rng)
+      where T : IRandom64 {
+    return (uint)rng.NextUInt64(0, uint.MaxValue);
+  }
+
   /**
    * <summary>
    *  Generates a random 32-bit unsigned integer between <paramref name="min_inclusive"/> and
@@ -242,7 +248,12 @@ public static partial class RandomExtensions {
       return;
     }
 
-    for (ulong i = 0; i < steps; ++i) rng.NextUInt();
+    for (ulong i = 0; i < steps; ++i) {
+      if (rng is IRandom64 rng_u64)
+        rng_u64.NextUInt64();
+      else
+        rng.NextUInt();
+    }
   }
 
   public static void WriteToBytes<T>(this T rng, Span<byte> buffer)

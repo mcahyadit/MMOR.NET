@@ -56,7 +56,7 @@ public class Xoroshiro : XoroshiroBase<Xoroshiro>, IRandom64 {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
+  public override uint NextUInt() => (uint)this.NextUInt64(0, uint.MaxValue);
 
   public Xoroshiro() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro(ulong seed, ulong? mix = null) : base(seed, mix) {}
@@ -135,7 +135,7 @@ public class Xoroshiro128ss : XoroshiroBase<Xoroshiro128ss>, IRandom64 {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
+  public override uint NextUInt() => (uint)this.NextUInt64(0, uint.MaxValue);
 
   public Xoroshiro128ss() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro128ss(ulong seed, ulong? mix = null) : base(seed, mix) {}
@@ -163,7 +163,7 @@ public class Xoroshiro128p : XoroshiroBase<Xoroshiro128p>, IRandom64 {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)(NextUInt64() >> 32);
+  public override uint NextUInt() => (uint)this.NextUInt64(0, uint.MaxValue);
 
   public Xoroshiro128p() : this(RandUtils.GenericU32RandomSeed()) {}
   public Xoroshiro128p(ulong seed, ulong? mix = null) : base(seed, mix) {}
