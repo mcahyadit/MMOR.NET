@@ -60,10 +60,10 @@ public class MT19937 : MersenneTwister32Base<MT19937> {
 
   public MT19937() : this(RandUtils.GenericU32RandomSeed()) {}
 
-  public MT19937(ulong seed) : base(624) {
-    Seed = seed & 0xFFFFFFFFu;
+  public MT19937(uint seed) : base(624) {
+    Seed = seed;
 
-    state_[0] = (uint)Seed;
+    state_[0] = seed;
     for (int idx = 1; idx < state_.Length; ++idx) {
       state_[idx] = 1812433253u * (state_[idx - 1] ^ (state_[idx - 1] >> 30)) + (uint)idx;
     }
@@ -97,10 +97,10 @@ public class MT11213b : MersenneTwister32Base<MT11213b> {
 
   public MT11213b() : this(RandUtils.GenericU32RandomSeed()) {}
 
-  public MT11213b(ulong seed) : base(351) {
-    Seed = seed & 0xFFFFFFFFu;
+  public MT11213b(uint seed) : base(351) {
+    Seed = seed;
 
-    state_[0] = (uint)Seed;
+    state_[0] = seed;
     for (int idx = 1; idx < state_.Length; ++idx) {
       state_[idx] = 1812433253u * (state_[idx - 1] ^ (state_[idx - 1] >> 30)) + (uint)idx;
     }
