@@ -9,6 +9,7 @@ using MMOR.Roslyn;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
+  /// <inheritdoc cref="FirstSubmask{T}(ReadOnlySpan{T}, T)"/>
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
       nameof(CollectionsMarshal.AsSpan))]
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
