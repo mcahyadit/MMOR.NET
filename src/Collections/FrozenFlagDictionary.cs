@@ -21,7 +21,7 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
   public FrozenFlagDictionary() {}
 #pragma warning restore CS8618
 
-  public static TKey kZero = (TKey)Enum.ToObject(typeof(TKey), 0);
+  public static readonly TKey kZero = (TKey)Enum.ToObject(typeof(TKey), 0);
   public FrozenDictionary<TKey, TValue> frozen_ { get; init; }
   public ImmutableArray<TKey> keys_ { get; init; }
   public TKey hot_key_;
