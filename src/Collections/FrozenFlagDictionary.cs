@@ -83,6 +83,28 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
     public void Reset() => idx = -1;
   }
 
+  public override string ToString() {
+    StringBuilder sb = new(string.Format("{0}[{1}]: {{\n",  //
+        base.ToString(), Count));
+    foreach (var kvp in this) {
+      bool first = true;
+      sb.Append("  [");
+      foreach (TKey flag in Enum.GetValues(typeof(TKey))) {
+        if (kvp.Key.HasFlag(flag)) {
+          if (!first)
+            sb.Append('|');
+          sb.Append(flag);
+          first = false;
+        }
+        if (first)
+          sb.Append(kZero);
+        sb.AppendFormat("]: {0}\n", kvp.Value);
+      }
+    }
+    sb.Append('}');
+    return sb.ToString();
+  }
+
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public Enumerator GetEnumerator() => new Enumerator(this);
   IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() =>
