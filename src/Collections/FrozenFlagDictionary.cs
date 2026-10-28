@@ -1,3 +1,4 @@
+#pragma warning disable CS8600
 using System;
 using System.Collections;
 using System.Collections.Frozen;
