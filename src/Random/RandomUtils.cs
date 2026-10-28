@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics.X86;
@@ -33,22 +34,34 @@ public static class RandUtils {
     return buffer[..len].ToString();
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong SplitMix64(ulong seed, out ulong next) {
+    next = SplitMix64(ref seed);
+    return seed;
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong SplitMix64(ref ulong seed) {
     seed += 0x9e3779b97f4a7c15;
     ulong z = seed;
     z       = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
     z       = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-    next    = z ^ (z >> 31);
+    return z ^ (z >> 31);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static uint SplitMix32(uint seed, out uint next) {
+    next = SplitMix32(ref seed);
     return seed;
   }
 
-  public static uint SplitMix32(uint seed, out uint next) {
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static uint SplitMix32(ref uint seed) {
     seed   = 1664525u * (seed + 314159265u);
     uint z = seed;
     z      = (z ^ (z >> 15)) * 0x5ce4e5b9u;
     z      = (z ^ (z >> 13)) * 0x1331c1ebu;
-    next   = z ^ (z >> 15);
-    return seed;
+    return z ^ (z >> 15);
   }
 
   public static void ShuffleArray<T, TRandom>(this in Span<T> arr, TRandom rng)
