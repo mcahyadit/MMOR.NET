@@ -258,21 +258,38 @@ public static partial class RandomExtensions {
 
   public static void WriteToBytes<T>(this T rng, Span<byte> buffer)
       where T : IRandom {
-    int length     = buffer.Length;
-    int c_len      = length >> 4;
-    int p_len      = (c_len + 3) & ~3;
-    Span<uint> tmp = stackalloc uint[p_len];
-    for (int i = 0; i < p_len; ++i) {
-      tmp[i] = rng.NextUInt();
+    if (rng is IRandom64 rng_u64) {
+      int length      = buffer.Length;
+      int c_len       = length >> 8;
+      int p_len       = (c_len + 7) & ~7;
+      Span<ulong> tmp = stackalloc ulong[p_len];
+      for (int i = 0; i < p_len; ++i) {
+        tmp[i] = rng_u64.NextUInt64();
+      }
+      MemoryMarshal.Cast<ulong, byte>(tmp) [..length].CopyTo(buffer);
+    } else {
+      int length     = buffer.Length;
+      int c_len      = length >> 4;
+      int p_len      = (c_len + 3) & ~3;
+      Span<uint> tmp = stackalloc uint[p_len];
+      for (int i = 0; i < p_len; ++i) {
+        tmp[i] = rng.NextUInt();
+      }
+      MemoryMarshal.Cast<uint, byte>(tmp) [..length].CopyTo(buffer);
     }
-    MemoryMarshal.Cast<uint, byte>(tmp) [..length].CopyTo(buffer);
   }
 
   public static byte[] NextBytes<T>(this T rng)
       where T : IRandom {
-    byte[] result = new byte[4];
-    WriteToBytes(rng, result);
-    return result;
+    if (rng is IRandom64 rng_u64) {
+      byte[] result = new byte[8];
+      WriteToBytes(rng_u64, result);
+      return result;
+    } else {
+      byte[] result = new byte[4];
+      WriteToBytes(rng, result);
+      return result;
+    }
   }
 }
 }
