@@ -32,7 +32,8 @@ public abstract class Xoroshiro128Base<T> : IRandom<T>, IRandomDoubleSeed, IRand
     }
   }
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)RandomExtensions.NextUInt64(this, 0, uint.MaxValue);
+  public override uint NextUInt() =>  //
+      (uint)RandomExtensions.NextUInt64(this, 0, uint.MaxValue + 1ul);
   public abstract ulong NextUInt64();
 }
 

@@ -13,7 +13,7 @@ public abstract class MersenneTwister64Base<T> : IRandom<T>, IRandom64
 
   public abstract ulong NextUInt64();
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)this.NextUInt64(0, uint.MaxValue);
+  public override uint NextUInt() => (uint)this.NextUInt64(0, uint.MaxValue + 1ul);
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void MersenneTwist64(Span<ulong> state, in int middle, in int mask_base,

@@ -30,7 +30,7 @@ public static partial class RandomExtensions {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static uint NextUInt<T>(this T rng)
       where T : IRandom64 {
-    return (uint)rng.NextUInt64(0, uint.MaxValue);
+    return (uint)rng.NextUInt64(0, uint.MaxValue + 1ul);
   }
 
   /**

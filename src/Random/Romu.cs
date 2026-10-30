@@ -6,7 +6,8 @@ namespace MMOR.NET.Random {
 public abstract class Romu64Base<T> : IRandom<T>, IRandom64
     where T : Romu64Base<T>, new() {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public override uint NextUInt() => (uint)RandomExtensions.NextUInt64(this, 0, uint.MaxValue);
+  public override uint NextUInt() =>  //
+      (uint)RandomExtensions.NextUInt64(this, 0, uint.MaxValue + 1ul);
   public abstract ulong NextUInt64();
 }
 
