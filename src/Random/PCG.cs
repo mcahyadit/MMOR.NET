@@ -13,8 +13,7 @@ public class PCG : IRandom<PCG>, IRandomDoubleSeed, IRandomJumpable {
   public ulong Seed2 { get; }
   public bool IsDoubleSeeded { get; }
 
-  protected const ulong kDefaultSequence = 721347520444481703ul;
-  protected const ulong kMultiplier      = 6364136223846793005ul;
+  protected const ulong kMultiplier = 6364136223846793005ul;
   protected ulong inc_;
 
   protected ulong state_;
@@ -45,11 +44,11 @@ public class PCG : IRandom<PCG>, IRandomDoubleSeed, IRandomJumpable {
       sequence       = inc.Value;
     }
     state_ = 0ul;
-    inc_   = (seed << 1) | 1;  // PCG Needs inc to be always odd
+    inc_   = (sequence << 1) | 1;  // PCG Needs inc to be always odd
 
     unchecked {
       state_ = state_ * kMultiplier + inc_;
-      state_ += sequence;
+      state_ += seed;
       state_ = state_ * kMultiplier + inc_;
     }
   }
