@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MMOR.NET.Mathematics;
@@ -260,7 +261,7 @@ public static partial class RandomExtensions {
       where T : IRandom {
     if (rng is IRandom64 rng_u64) {
       int length      = buffer.Length;
-      int c_len       = length >> 8;
+      int c_len       = length >> 3;
       int p_len       = (c_len + 7) & ~7;
       Span<ulong> tmp = stackalloc ulong[p_len];
       for (int i = 0; i < p_len; ++i) {
@@ -269,7 +270,7 @@ public static partial class RandomExtensions {
       MemoryMarshal.Cast<ulong, byte>(tmp) [..length].CopyTo(buffer);
     } else {
       int length     = buffer.Length;
-      int c_len      = length >> 4;
+      int c_len      = length >> 2;
       int p_len      = (c_len + 3) & ~3;
       Span<uint> tmp = stackalloc uint[p_len];
       for (int i = 0; i < p_len; ++i) {
