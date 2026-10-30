@@ -260,23 +260,25 @@ public static partial class RandomExtensions {
   public static void WriteToBytes<T>(this T rng, Span<byte> buffer)
       where T : IRandom {
     if (rng is IRandom64 rng_u64) {
-      int length      = buffer.Length;
-      int c_len       = length >> 3;
-      int p_len       = (c_len + 7) & ~7;
-      Span<ulong> tmp = stackalloc ulong[p_len];
-      for (int i = 0; i < p_len; ++i) {
-        tmp[i] = rng_u64.NextUInt64();
+      while (buffer.Length >= 8) {
+        BinaryPrimitives.WriteUInt64LittleEndian(buffer, rng_u64.NextUInt64());
+        buffer = buffer[8..];
       }
-      MemoryMarshal.Cast<ulong, byte>(tmp) [..length].CopyTo(buffer);
+      if (!buffer.IsEmpty) {
+        Span<byte> tail = stackalloc byte[8];
+        BinaryPrimitives.WriteUInt64LittleEndian(buffer, rng_u64.NextUInt64());
+        tail[..buffer.Length].CopyTo(buffer);
+      }
     } else {
-      int length     = buffer.Length;
-      int c_len      = length >> 2;
-      int p_len      = (c_len + 3) & ~3;
-      Span<uint> tmp = stackalloc uint[p_len];
-      for (int i = 0; i < p_len; ++i) {
-        tmp[i] = rng.NextUInt();
+      while (buffer.Length >= 4) {
+        BinaryPrimitives.WriteUInt32LittleEndian(buffer, rng.NextUInt());
+        buffer = buffer[4..];
       }
-      MemoryMarshal.Cast<uint, byte>(tmp) [..length].CopyTo(buffer);
+      if (!buffer.IsEmpty) {
+        Span<byte> tail = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buffer, rng.NextUInt());
+        tail[..buffer.Length].CopyTo(buffer);
+      }
     }
   }
 
