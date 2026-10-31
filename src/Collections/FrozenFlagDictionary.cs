@@ -5,8 +5,10 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using MMOR.NET.Bits;
 
 namespace MMOR.NET.Collections {
 /**
@@ -22,38 +24,53 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
   public FrozenFlagDictionary() {}
 #pragma warning restore CS8618
 
-  public static readonly TKey kZero = (TKey)Enum.ToObject(typeof(TKey), 0);
-  public FrozenDictionary<TKey, TValue> frozen_ { get; init; }
+  public static readonly int kHashThreshold = 8 * Vector<byte>.Count / Unsafe.SizeOf<TKey>();
+  public static readonly TKey kZero         = (TKey)Enum.ToObject(typeof(TKey), 0);
+
+  public FrozenDictionary<TKey, TValue>? frozen_ { get; init; }
+  public ImmutableArray<TValue> values_ { get; init; }
   public ImmutableArray<TKey> keys_ { get; init; }
-  public TKey hot_key_;
-  public TValue hot_value_;
+  public TKey key_union_ { get; init; }
+
+  // public readonly object hot_lock_ = new();
+  // public TKey hot_key_;
+  // public TValue hot_value_;
 
   public int Count                  => keys_.Length;
   public IEnumerable<TKey> Keys     => keys_;
-  public IEnumerable<TValue> Values => frozen_.Values;
+  public IEnumerable<TValue> Values => frozen_ is not null ? frozen_.Values : values_!;
 
   public TValue this[TKey key] {
     get {
-      if (EqualityComparer<TKey>.Default.Equals(hot_key_, key))
-        return hot_value_;
+      // if (EqualityComparer<TKey>.Default.Equals(hot_key_, key))
+      //   return hot_value_;
 
-      if (frozen_.TryGetValue(key, out TValue result))
-        return result;
-
-      int idx = CollectionUtils.FirstSubmask(keys_, key);
-      if (idx == -1) {
-        hot_key_   = kZero;
-        hot_value_ = frozen_[kZero];
-        return hot_value_;
+      key = EnumBitwise<TKey>.And(key, key_union_);
+      if (frozen_ is not null) {
+        if (frozen_.TryGetValue(key, out TValue result))
+          return result;
+        int idx = CollectionUtils.FirstSubmask(keys_, key);
+        return frozen_[keys_[idx]];
+      } else {
+        return values_[CollectionUtils.IndexOfOrFirstSubmask(keys_, key)];
       }
-      hot_key_   = keys_[idx];
-      hot_value_ = frozen_[hot_key_];
-      return hot_value_;
+
+      // bool locked = false;
+      // try {
+      //   Monitor.TryEnter(hot_lock_, ref locked);
+      //   if (locked) {
+      //     hot_key_   = key;
+      //     hot_value_ = frozen_[keys_[idx]];
+      //   }
+      // } finally {
+      //   if (locked)
+      //     Monitor.Exit(hot_lock_);
+      // }
+      // return hot_value_;
     }
   }
 
-  /// <remarks> Perform stricter check than <see cref="TryGetValue"/> </remarks>
-  public bool ContainsKey(TKey key) => frozen_.ContainsKey(key);
+  public bool ContainsKey(TKey key) => true;
 
   public bool TryGetValue(TKey key, out TValue value) {
     value = this[key];
@@ -62,19 +79,24 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
 
   public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>> {
     readonly ReadOnlyMemory<TKey> keys_;
-    readonly Func<TKey, TValue> values_;
+    readonly ReadOnlyMemory<TValue> values_;
+    readonly Func<TKey, TValue>? hashtable_;
     int idx;
 
     public Enumerator(FrozenFlagDictionary<TKey, TValue> self) {
-      idx     = -1;
-      keys_   = self.keys_.AsMemory();
-      values_ = x => self.frozen_[x];
+      idx        = -1;
+      keys_      = self.keys_.AsMemory();
+      values_    = self.values_.AsMemory();
+      hashtable_ = self.frozen_ is not null? x => self.frozen_[x] : null;
     }
 
     public readonly KeyValuePair<TKey, TValue> Current {
       get {
+        if (hashtable_ is null)
+          return new KeyValuePair<TKey, TValue>(keys_.Span[idx], values_.Span[idx]);
+
         TKey key = keys_.Span[idx];
-        return new KeyValuePair<TKey, TValue>(key, values_(key));
+        return new KeyValuePair<TKey, TValue>(key, hashtable_(key));
       }
     }
     readonly object IEnumerator.Current => Current;
@@ -135,14 +157,18 @@ public static class FrozenFlagDictionary {
   public static FrozenFlagDictionary<TKey, TValue> Create<TKey, TValue>(
       IDictionary<TKey, TValue> source)
       where TKey : unmanaged, Enum {
-    int length      = source.Count;
+    int length    = source.Count;
+    bool use_hash = length >= FrozenFlagDictionary<TKey, TValue>.kHashThreshold;
+
     Span<TKey> keys = stackalloc TKey[length];
     int i           = 0;
     bool has_zero   = false;
     TKey zero       = (TKey)Enum.ToObject(typeof(TKey), 0);
-    foreach ((TKey key, _) in source) {
+    TKey key_union  = zero;
+    foreach ((TKey key, TValue val) in source) {
       keys[i] = key;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
+      key_union = EnumBitwise<TKey>.Or(key_union, key);
       ++i;
     }
     if (!has_zero) {
@@ -153,23 +179,29 @@ public static class FrozenFlagDictionary {
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
-      frozen_    = FrozenDictionary.ToFrozenDictionary(source),
-      hot_key_   = keys[^1],
-      hot_value_ = source[keys[^1]],
+      frozen_    = use_hash ? FrozenDictionary.ToFrozenDictionary(source) : null,
+      values_    = use_hash ? ImmutableArray<TValue>.Empty : source.Values.ToImmutableArray(),
+      key_union_ = key_union,
+      // hot_key_   = keys[^1],
+      // hot_value_ = source[keys[^1]],
     };
   }
 
   public static FrozenFlagDictionary<TKey, TValue> Create<TKey, TValue>(
       IReadOnlyDictionary<TKey, TValue> source)
       where TKey : unmanaged, Enum {
-    int length      = source.Count;
+    int length    = source.Count;
+    bool use_hash = length >= FrozenFlagDictionary<TKey, TValue>.kHashThreshold;
+
     Span<TKey> keys = stackalloc TKey[length];
     int i           = 0;
     bool has_zero   = false;
     TKey zero       = (TKey)Enum.ToObject(typeof(TKey), 0);
+    TKey key_union  = zero;
     foreach ((TKey key, _) in source) {
       keys[i] = key;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
+      key_union = EnumBitwise<TKey>.Or(key_union, key);
       ++i;
     }
     if (!has_zero) {
@@ -180,25 +212,36 @@ public static class FrozenFlagDictionary {
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
-      frozen_    = FrozenDictionary.ToFrozenDictionary(source),
-      hot_key_   = keys[^1],
-      hot_value_ = source[keys[^1]],
+      frozen_    = use_hash ? FrozenDictionary.ToFrozenDictionary(source) : null,
+      values_    = use_hash ? ImmutableArray<TValue>.Empty : source.Values.ToImmutableArray(),
+      key_union_ = key_union,
+      // hot_key_   = keys[^1],
+      // hot_value_ = source[keys[^1]],
     };
   }
 
   public static FrozenFlagDictionary<TKey, TValue> Create<TKey, TValue>(
       ReadOnlySpan<KeyValuePair<TKey, TValue>> source)
       where TKey : unmanaged, Enum {
-    int length                    = source.Length;
-    Span<TKey> keys               = stackalloc TKey[length];
-    Dictionary<TKey, TValue> dict = new(length);
-    bool has_zero                 = false;
-    TKey zero                     = (TKey)Enum.ToObject(typeof(TKey), 0);
+    int length    = source.Length;
+    bool use_hash = length >= FrozenFlagDictionary<TKey, TValue>.kHashThreshold;
+
+    Span<TKey> keys                = stackalloc TKey[length];
+    TValue[]? values               = use_hash ? null : new TValue[length];
+    Dictionary<TKey, TValue>? dict = use_hash ? new(length) : null;
+    bool has_zero                  = false;
+    TKey zero                      = (TKey)Enum.ToObject(typeof(TKey), 0);
+    TKey key_union                 = zero;
     for (int i = 0; i < length; ++i) {
       (TKey key, TValue val) = source[i];
       keys[i]                = key;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
-      dict.Add(key, val);
+      key_union = EnumBitwise<TKey>.Or(key_union, key);
+      if (use_hash) {
+        dict!.Add(key, val);
+      } else {
+        values![i] = val;
+      }
     }
     if (!has_zero) {
       ThrowNoZero<TKey>(keys);
@@ -208,9 +251,11 @@ public static class FrozenFlagDictionary {
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
-      frozen_    = FrozenDictionary.ToFrozenDictionary(dict),
-      hot_key_   = keys[^1],
-      hot_value_ = source[^1].Value,
+      frozen_    = use_hash ? FrozenDictionary.ToFrozenDictionary(dict!) : null,
+      values_    = use_hash ? ImmutableArray<TValue>.Empty : ImmutableArray.Create(values),
+      key_union_ = key_union,
+      // hot_key_   = keys[^1],
+      // hot_value_ = source[keys[^1]],
     };
   }
 }
