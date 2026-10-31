@@ -190,8 +190,13 @@ public static partial class RandomExtensions {
     if (MathExt.Approximately(min_inclusive, max_inclusive))
       return min_inclusive;
     ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
-    float val = rng.NextUInt(0, (1u << 24) + 1) * k0x1p24;
-    return min_inclusive + val * (max_inclusive - min_inclusive);
+    if (rng is IRandom64 rng_u64) {
+      float val = rng_u64.NextUInt64(0, (1u << 24) + 1) * k0x1p24;
+      return min_inclusive + val * (max_inclusive - min_inclusive);
+    } else {
+      float val = rng.NextUInt(0, (1u << 24) + 1) * k0x1p24;
+      return min_inclusive + val * (max_inclusive - min_inclusive);
+    }
   }
 
   public const double k0x1p53 = 1.1102230246251565E-16;  // 0x1p-53 | 2^-53
