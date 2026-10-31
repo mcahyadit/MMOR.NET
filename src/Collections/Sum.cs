@@ -13,19 +13,26 @@ public static partial class CollectionUtils {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   public static ulong Sum(this ReadOnlySpan<ulong> self) {
-    int alen = self.Length;
-    int vlen = Vector<ulong>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start  = 0;
 
-    Vector<ulong> acc_v = Vector<ulong>.Zero;
+    ulong result = 0;
+    if (Vector.IsHardwareAccelerated) {
+      start = length - (length % Vector<ulong>.Count);
+      if (start == 0)
+        goto scalar_tail;
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      Vector<ulong> self_v = self.Slice(i, vlen).ToVector();
-      acc_v += self_v;
+      Vector<ulong> result_epi = Vector<ulong>.Zero;
+      ReadOnlySpan<Vector<ulong>> self_epi =
+          MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      int length_epi = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        result_epi += self_epi[i];
+      }
+      result = MathExt.SumElements(result_epi);
     }
-    ulong result = MathExt.SumElements(acc_v);
-    for (; i < alen; ++i) {
+  scalar_tail:
+    for (int i = start; i < length; ++i) {
       result += self[i];
     }
     return result;

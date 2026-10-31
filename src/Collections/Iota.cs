@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
@@ -13,21 +14,28 @@ public static partial class CollectionUtils {
   })).Invoke();
   public static readonly Vector<ulong> kUInt64IotaInc  = new((ulong)Vector<ulong>.Count);
   public static void IotaFill(this Span<ulong> self) {
-    int alen = self.Length;
-    int vlen = Vector<ulong>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start  = 0;
 
-    Vector<ulong> acc_v = kUInt64IotaBase;
+    if (Vector.IsHardwareAccelerated) {
+      start = length - (length % Vector<ulong>.Count);
+      if (start == 0)
+        goto scalar_tail;
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      acc_v.CopyTo(self.Slice(i, vlen));
-      acc_v += kUInt64IotaInc;
+      Vector<ulong> curr_epi       = kUInt64IotaBase;
+      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      int length_epi               = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        self_epi[i] = curr_epi;
+        curr_epi += kUInt64IotaBase;
+      }
     }
-    for (; i < alen; ++i) {
+  scalar_tail:
+    for (int i = start; i < length; ++i) {
       self[i] = (ulong)i;
     }
   }
+
   public static readonly Vector<int> kInt32IotaBase = ((Func<Vector<int>>)(() => {
     int len      = Vector<int>.Count;
     int[] result = new int[len];
@@ -38,18 +46,24 @@ public static partial class CollectionUtils {
   })).Invoke();
   public static readonly Vector<int> kInt32IotaInc  = new(Vector<int>.Count);
   public static void IotaFill(this Span<int> self) {
-    int alen = self.Length;
-    int vlen = Vector<int>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start  = 0;
 
-    Vector<int> acc_v = kInt32IotaBase;
+    if (Vector.IsHardwareAccelerated) {
+      start = length - (length % Vector<int>.Count);
+      if (start == 0)
+        goto scalar_tail;
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      acc_v.CopyTo(self.Slice(i, vlen));
-      acc_v += kInt32IotaInc;
+      Vector<int> curr_epi       = kInt32IotaBase;
+      Span<Vector<int>> self_epi = MemoryMarshal.Cast<int, Vector<int>>(self[..start]);
+      int length_epi             = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        self_epi[i] = curr_epi;
+        curr_epi += kInt32IotaBase;
+      }
     }
-    for (; i < alen; ++i) {
+  scalar_tail:
+    for (int i = start; i < length; ++i) {
       self[i] = i;
     }
   }
@@ -64,18 +78,24 @@ public static partial class CollectionUtils {
   })).Invoke();
   public static readonly Vector<double> kDoubleIotaInc  = new(Vector<double>.Count);
   public static void IotaFill(this Span<double> self) {
-    int alen = self.Length;
-    int vlen = Vector<double>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start  = 0;
 
-    Vector<double> acc_v = kDoubleIotaBase;
+    if (Vector.IsHardwareAccelerated) {
+      start = length - (length % Vector<double>.Count);
+      if (start == 0)
+        goto scalar_tail;
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      acc_v.CopyTo(self.Slice(i, vlen));
-      acc_v += kDoubleIotaInc;
+      Vector<double> curr_epi       = kDoubleIotaBase;
+      Span<Vector<double>> self_epi = MemoryMarshal.Cast<double, Vector<double>>(self[..start]);
+      int length_epi                = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        self_epi[i] = curr_epi;
+        curr_epi += kDoubleIotaBase;
+      }
     }
-    for (; i < alen; ++i) {
+  scalar_tail:
+    for (int i = start; i < length; ++i) {
       self[i] = i;
     }
   }

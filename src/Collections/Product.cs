@@ -1,48 +1,62 @@
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
   public static int Product(this ReadOnlySpan<int> self) {
-    int alen = self.Length;
-    int vlen = Vector<int>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start;
 
-    Vector<int> acc_v = Vector<int>.One;
+    int result;
+    if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
+      start = length - (length % Vector<int>.Count);
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      Vector<int> self_v = self.Slice(i, vlen).ToVector();
-      acc_v *= self_v;
+      Vector<int> result_epi             = Vector<int>.One;
+      ReadOnlySpan<Vector<int>> self_epi = MemoryMarshal.Cast<int, Vector<int>>(self[..start]);
+      int length_epi                     = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        result_epi *= self_epi[i];
+      }
+      result = result_epi[0];
+      for (int i = 1; i < Vector<ulong>.Count; ++i) {
+        result *= result_epi[i];
+      }
+    } else {
+      start  = 1;
+      result = self[0];
     }
-    int result = 1;
-    for (; i < alen; ++i) {
+    for (int i = start; i < length; ++i) {
       result *= self[i];
-    }
-    for (i = 0; i < vlen; ++i) {
-      result *= acc_v[i];
     }
     return result;
   }
 
   public static double Product(this ReadOnlySpan<double> self) {
-    int alen = self.Length;
-    int vlen = Vector<double>.Count;
-    int rem  = alen - vlen;
+    int length = self.Length;
+    int start;
 
-    Vector<double> acc_v = Vector<double>.One;
+    double result;
+    if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
+      start = length - (length % Vector<double>.Count);
 
-    int i = 0;
-    for (; i <= rem; i += vlen) {
-      Vector<double> self_v = self.Slice(i, vlen).ToVector();
-      acc_v *= self_v;
+      Vector<double> result_epi = Vector<double>.One;
+      ReadOnlySpan<Vector<double>> self_epi =
+          MemoryMarshal.Cast<double, Vector<double>>(self[..start]);
+      int length_epi = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        result_epi *= self_epi[i];
+      }
+      result = result_epi[0];
+      for (int i = 1; i < Vector<ulong>.Count; ++i) {
+        result *= result_epi[i];
+      }
+    } else {
+      start  = 1;
+      result = self[0];
     }
-    double result = 1;
-    for (; i < alen; ++i) {
+    for (int i = start; i < length; ++i) {
       result *= self[i];
-    }
-    for (i = 0; i < vlen; ++i) {
-      result *= acc_v[i];
     }
     return result;
   }

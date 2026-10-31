@@ -1,7 +1,7 @@
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using MMOR.Roslyn;
 
@@ -14,19 +14,24 @@ public static partial class CollectionUtils {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   public static void AndNotAssign(this Span<ulong> self, ReadOnlySpan<ulong> other) {
-    int alen = self.Length;
-    if (alen != other.Length)
-      throw new ArgumentException(string.Format("[ERROR]: self.Length: {0} != other.Length: {1}",
-          self.Length, other.Length));
-    int vlen = Vector<ulong>.Count;
-    int rem  = alen - vlen;
-    int i    = 0;
-    for (; i <= rem; i += vlen) {
-      Vector<ulong> self_v  = self.Slice(i, vlen).ToVector();
-      Vector<ulong> other_v = other.Slice(i, vlen).ToVector();
-      Vector.AndNot(self_v, other_v).CopyTo(self.Slice(i, vlen));
+    int length = self.Length;
+    int start  = 0;
+
+    if (Vector.IsHardwareAccelerated) {
+      start = length - (length % Vector<ulong>.Count);
+      if (start == 0)
+        goto scalar_tail;
+
+      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      ReadOnlySpan<Vector<ulong>> other_epi =
+          MemoryMarshal.Cast<ulong, Vector<ulong>>(other[..start]);
+      int length_epi = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        self_epi[i] &= ~other_epi[i];
+      }
     }
-    for (; i < alen; ++i) {
+  scalar_tail:
+    for (int i = start; i < length; ++i) {
       self[i] &= ~other[i];
     }
   }

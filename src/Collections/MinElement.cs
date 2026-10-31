@@ -12,29 +12,29 @@ public static partial class CollectionUtils {
   [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
       "AsSpan()")]
   public static ulong MinElement(this ReadOnlySpan<ulong> self) {
-    if (self.IsEmpty)
-      throw new ArgumentException("[ERROR]: passed span is empty.");
-    int alen = self.Length;
-    int vlen = Vector<ulong>.Count;
+    int length = self.Length;
+    int start  = 0;
 
-    int i;
     ulong result;
-    if (Vector.IsHardwareAccelerated && alen > 2 * vlen) {
-      int rem             = alen - vlen;
-      Vector<ulong> acc_v = self[..vlen].ToVector();
-      i                   = vlen;
-      for (; i <= rem; i += vlen) {
-        acc_v = Vector.Min(acc_v, self.Slice(i, vlen).ToVector());
+    if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
+      start = length - (length % Vector<ulong>.Count);
+
+      Vector<ulong> result_epi = Vector<ulong>.Zero;
+      ReadOnlySpan<Vector<ulong>> self_epi =
+          MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      int length_epi = self_epi.Length;
+      for (int i = 0; i < length_epi; ++i) {
+        result_epi = Vector.Min(result_epi, self_epi[i]);
       }
-      result = acc_v[0];
-      for (int j = 1; j < vlen; ++j) {
-        result = Math.Min(result, acc_v[j]);
+      result = result_epi[0];
+      for (int i = 1; i < Vector<ulong>.Count; ++i) {
+        result = Math.Min(result, result_epi[i]);
       }
     } else {
       result = self[0];
-      i      = 1;
+      start  = 1;
     }
-    for (; i < alen; ++i) {
+    for (int i = start; i < length; ++i) {
       result = Math.Min(result, self[i]);
     }
     return result;
