@@ -118,7 +118,7 @@ public static class FrozenFlagDictionary {
       where T : unmanaged, Enum {
     StringBuilder sb = new StringBuilder(
         string.Format("[ERROR]: {0} requires key of {1} to exist.\nKeys registered in source: [ ",
-            typeof(FrozenDictionary), (T)Enum.ToObject(typeof(T), 0)));
+            typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
     foreach (T key in keys) {
       sb.AppendFormat("{0}, ", key);
     }
