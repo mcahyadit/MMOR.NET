@@ -55,6 +55,16 @@ public class RandomEngineBench {
   }
 
   [Benchmark]
+  public ulong Xoshiro256Plus() {
+    return RandN64(new Xoshiro256Plus());
+  }
+
+  [Benchmark]
+  public ulong Xoshiro256PlusPlus() {
+    return RandN64(new Xoshiro256PlusPlus());
+  }
+
+  [Benchmark]
   public ulong RomuTrio() {
     return RandN64(new RomuTrio());
   }
@@ -67,6 +77,11 @@ public class RandomEngineBench {
   [Benchmark]
   public uint ChaCha20() {
     return RandN(new ChaCha20());
+  }
+
+  [Benchmark]
+  public uint ChaCha8() {
+    return RandN(new ChaCha8());
   }
 }
 }

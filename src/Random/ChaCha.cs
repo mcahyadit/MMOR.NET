@@ -1,113 +1,245 @@
+using System;
+using System.Buffers.Binary;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+#if !NETSTANDARD
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
+
 namespace MMOR.NET.Random {
-/**
- * <summary>
- * Based on
- * <see href="https://gist.github.com/orlp/32f5d1b631ab092608b1" />
- * </summary>
- */
-public class ChaCha20 : IRandom<ChaCha20>, IRandomDoubleSeed, IRandomJumpable {
+public abstract partial class DjbChaChaBase<T> : IRandom<T>, IRandomJumpable, IRandomDoubleSeed
+    where T : IRandom<T>, new() {
+  [DoesNotReturn]
+  public static void ThrowKeyLength<TKeys>(ReadOnlySpan<TKeys> keys)
+      where TKeys : unmanaged {
+    throw new ArgumentException(
+        "[ERROR]: ChaCha keys length must be exactly 32 or 16 bytes.\n" +
+        $"Passed keys have {keys.Length} {typeof(TKeys)}" +
+        (typeof(TKeys) == typeof(byte) ? $" ({keys.Length * Unsafe.SizeOf<TKeys>()} bytes)" : ""));
+  }
+
+  [DoesNotReturn]
+  public static void ThrowRounds(int rounds) {
+    throw new ArgumentException(
+        "[ERROR]: ChaCha rounds needs to be a multiple of 2 and at least 2.\n" +
+        $"Passed rounds is {rounds}");
+  }
+
   public ulong Seed2 { get; }
   public bool IsDoubleSeeded { get; }
 
-  protected uint[] block_ = new uint[16];
-  protected ulong block_dex_;
+  public static readonly ImmutableArray<uint> kConstants32 =
+      ImmutableArray.Create(stackalloc uint[4] {
+        0x61707865,  //  "expa"
+        0x3320646E,  //  "nd 3"
+        0x79622D32,  //  "2-by"
+        0x6b206574,  //  "te k"
+      });
+  public static readonly ImmutableArray<uint> kConstants16 =
+      ImmutableArray.Create(stackalloc uint[4] {
+        0x61707865,  //  "expa"
+        0x3120646E,  //  "nd 1"
+        0x79622D36,  //  "6-by"
+        0x6b206574,  //  "te k"
+      });
 
-  protected uint[] constants_ = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
-  protected ulong ctr_;
-  protected uint[] input_    = new uint[16];
-  protected uint[] keysetup_ = new uint[8];
-  protected uint stream_;
+  public const int kBlockWords              = 16;  // 512-bit
+  public static readonly int kBlockWordsEpi = kBlockWords / Vector<uint>.Count;
+  public uint[] block_                      = new uint[kBlockWords];
+  public ulong block_index_                 = ulong.MaxValue;
 
-  protected void GenerateBlock() {
-    for (var i = 0; i < 4; ++i) input_[i] = constants_[i];
-    for (var i = 0; i < 8; ++i) input_[4 + i] = keysetup_[i];
-    input_[12] = (uint)(block_dex_ & 0xffffffffu);
-    input_[13] = (uint)(block_dex_ >> 32);
-    input_[14] = input_[15] = 0xdeadbeef;  // Could use 128-bit counter.
+  public readonly ImmutableArray<uint> seed_;
+  public readonly ulong kNonce = 0ul;
+  public readonly int kRounds  = 0;
 
-    for (var i = 0; i < 16; ++i) block_[i] = input_[i];
-    ChaChaCore();
-    for (var i = 0; i < 16; ++i) block_[i] += input_[i];
+  public void GenerateBlock(ulong counter) {
+    unchecked {
+      Span<uint> state = stackalloc uint[kBlockWords];
+      if (seed_.Length == 8) {
+        kConstants32.CopyTo(state);
+        seed_.CopyTo(state[4..]);
+      } else {
+        kConstants16.CopyTo(state);
+        seed_.CopyTo(state[4..]);
+        seed_.CopyTo(state[8..]);
+      }
+      state[12] = (uint)(counter & ~0u);
+      state[13] = (uint)(counter >> 32);
+      state[14] = (uint)(kNonce & ~0u);
+      state[15] = (uint)(kNonce >> 32);
+
+      state.CopyTo(block_);
+      for (int i = 0; i < kRounds; i += 2) {
+#if !NETSTANDARD
+        if (Avx512F.IsSupported && Vector512.IsHardwareAccelerated && Vector512<uint>.IsSupported) {
+          Mm256DoubleRound();
+          continue;
+        }
+        if (Vector256.IsHardwareAccelerated && Vector256<uint>.IsSupported) {
+          Mm256DoubleRound();
+          continue;
+        }
+        if (Vector128.IsHardwareAccelerated && Vector128<uint>.IsSupported) {
+          Mm128DoubleRound();
+          continue;
+        }
+#endif
+        // NOTE: Read this column-major
+        QuarterRound(0, 4, 8, 12);
+        QuarterRound(1, 5, 9, 13);
+        QuarterRound(2, 6, 10, 14);
+        QuarterRound(3, 7, 11, 15);
+        // 4 QuarterRound => 1 Round
+        QuarterRound(0, 5, 10, 15);
+        QuarterRound(1, 6, 11, 12);
+        QuarterRound(2, 7, 8, 13);
+        QuarterRound(3, 4, 9, 14);
+        // 8 QuarterRound => 2 Rounds
+      }
+
+      if (Vector.IsHardwareAccelerated) {
+        int lane_cnt                 = Vector<uint>.Count;
+        int length_epi               = kBlockWords / lane_cnt;
+        Span<Vector<uint>> block_epi = MemoryMarshal.Cast<uint, Vector<uint>>(block_);
+        Span<Vector<uint>> state_epi = MemoryMarshal.Cast<uint, Vector<uint>>(state);
+        for (int i = 0; i < kBlockWordsEpi; ++i) {
+          block_epi[i] += state_epi[i];
+        }
+      } else {
+        for (int i = 0; i < kBlockWords; ++i) {
+          block_[i] += state[i];
+        }
+      }
+    }
   }
 
-  protected static uint ROTL(uint v, int n) => (v << n) | (v >> (32 - n));
-
-  protected static void QuarterRound(uint[] x, int a, int b, int c, int d) {
-    x[a] += x[b];
-    x[d] ^= x[a];
-    x[d] = ROTL(x[d], 16);
-    x[c] += x[d];
-    x[b] ^= x[c];
-    x[b] = ROTL(x[b], 12);
-    x[a] += x[b];
-    x[d] ^= x[a];
-    x[d] = ROTL(x[d], 8);
-    x[c] += x[d];
-    x[b] ^= x[c];
-    x[b] = ROTL(x[b], 7);
-  }
-
-  protected void ChaChaCore() {
-    for (var i = 0; i < 10; i += 2) {
-      QuarterRound(block_, 0, 4, 8, 12);
-      QuarterRound(block_, 1, 5, 9, 13);
-      QuarterRound(block_, 2, 6, 10, 14);
-      QuarterRound(block_, 3, 7, 11, 15);
-      QuarterRound(block_, 0, 5, 10, 15);
-      QuarterRound(block_, 1, 6, 11, 12);
-      QuarterRound(block_, 2, 7, 8, 13);
-      QuarterRound(block_, 3, 4, 9, 14);
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public void QuarterRound(int a, int b, int c, int d) {
+    unchecked {
+      block_[a] += block_[b];
+      block_[d] = BitOperations.RotateLeft(block_[d] ^ block_[a], 16);
+      block_[c] += block_[d];
+      block_[b] = BitOperations.RotateLeft(block_[b] ^ block_[c], 12);
+      block_[a] += block_[b];
+      block_[d] = BitOperations.RotateLeft(block_[d] ^ block_[a], 8);
+      block_[c] += block_[d];
+      block_[b] = BitOperations.RotateLeft(block_[b] ^ block_[c], 7);
     }
   }
 
   public override uint NextUInt() {
-    ++StateCount;
-    ulong next_block_dex = ctr_ / 16;
-    ulong dex_in_block   = ctr_ % 16;
-    if (next_block_dex != block_dex_) {
-      block_dex_ = next_block_dex;
-      GenerateBlock();
+    unchecked {
+      ulong block = StateCount / kBlockWords;
+      if (block != block_index_) {
+        GenerateBlock(block);
+        block_index_ = block;
+      }
+      return block_[(int)(StateCount++ % kBlockWords)];
     }
-
-    ++ctr_;
-
-    return block_[dex_in_block];
   }
 
-  public ChaCha20() : this(RandUtils.GenericU32RandomSeed()) {}
-
-  public ChaCha20(ulong seed, ulong? stream = null) {
+  public DjbChaChaBase(int rounds, ulong seed, ulong nonce = 0) {
     Seed = seed;
+    if ((rounds % 2 != 0) || rounds < 2)
+      ThrowRounds(rounds);
+    kRounds = rounds;
 
-    ctr_       = 0;
-    block_dex_ = ulong.MaxValue;
+    Span<uint> seeds = stackalloc uint[8];
+    for (int i = 0; i < 8; i += 2) {
+      ulong mix    = RandUtils.SplitMix64(ref seed);
+      seeds[i]     = (uint)(mix & ~0u);
+      seeds[i + 1] = (uint)(mix >> 32);
+    }
+    seed_ = ImmutableArray.Create(seeds);
 
-    uint seed_val;
-    if (stream == null) {
-      RandUtils.SplitMix64(RandUtils.SplitMix64(seed, out ulong one), out ulong two);
-      seed_val = (uint)one;
-      stream_  = (uint)two;
-    } else {
-      seed_val = (uint)seed;
-      stream_  = (uint)stream;
-
-      Seed2          = (uint)stream;
+    if (nonce != 0) {
       IsDoubleSeeded = true;
+      Seed2          = nonce;
+      kNonce         = nonce;
+    }
+  }
+
+  public DjbChaChaBase(int rounds, ReadOnlySpan<uint> keys, ulong nonce = 0) {
+    // NOTE: Consider changing the API of IRandom
+    Seed = 0;
+    if ((rounds % 2 != 0) || rounds < 2)
+      ThrowRounds(rounds);
+    kRounds = rounds;
+
+    if (keys.Length == 8 || keys.Length == 4) {
+      seed_ = ImmutableArray.Create(keys);
+    } else {
+      ThrowKeyLength(keys);
+    }
+    if (nonce != 0) {
+      IsDoubleSeeded = true;
+      Seed2          = nonce;
+      kNonce         = nonce;
+    }
+  }
+
+  public DjbChaChaBase(int rounds, ReadOnlySpan<byte> keys, ulong nonce = 0) {
+    // NOTE: Consider changing the API of IRandom
+    Seed = 0;
+    if ((rounds % 2 != 0) || rounds < 2)
+      ThrowRounds(rounds);
+    kRounds = rounds;
+
+    if (keys.Length == 32) {
+      Span<uint> seeds = stackalloc uint[8];
+      for (int i = 0; i < 8; ++i) {
+        seeds[i] = BinaryPrimitives.ReadUInt32LittleEndian(keys);
+        keys     = keys[sizeof(uint)..];
+      }
+      seed_ = ImmutableArray.Create(seeds);
+    } else if (keys.Length == 16) {
+      Span<uint> seeds = stackalloc uint[4];
+      for (int i = 0; i < 4; ++i) {
+        uint seed = BinaryPrimitives.ReadUInt32LittleEndian(keys);
+        seeds[i]  = seed;
+        keys      = keys[sizeof(uint)..];
+      }
+
+      seed_ = ImmutableArray.Create(seeds);
+    } else {
+      ThrowKeyLength(keys);
     }
 
-    keysetup_[0] = seed_val & 0xffffffffu;
-    keysetup_[1] = (uint)(seed >> 32);
-    keysetup_[2] = 0xdeadbeef;
-    keysetup_[3] = 0xdeadbeef;
-    keysetup_[4] = stream_ & 0xffffffffu;
-    keysetup_[5] = (uint)(seed >> 32);
-    keysetup_[6] = 0xdeadbeef;
-    keysetup_[7] = 0xdeadbeef;
+    if (nonce != 0) {
+      IsDoubleSeeded = true;
+      Seed2          = nonce;
+      kNonce         = nonce;
+    }
   }
 
   public void Jump(ulong delta) {
-    ctr_ += delta;
     StateCount += delta;
   }
+}
+
+public class ChaCha20 : DjbChaChaBase<ChaCha20> {
+  public ChaCha20() : base(20, RandUtils.GenericU32RandomSeed()) {}
+  public ChaCha20(ulong seed, ulong nonce = 0) : base(20, seed, nonce) {}
+  public ChaCha20(ReadOnlySpan<uint> seeds, ulong nonce = 0) : base(20, seeds, nonce) {}
+  public ChaCha20(ReadOnlySpan<byte> seeds, ulong nonce = 0) : base(20, seeds, nonce) {}
+}
+
+public class ChaCha12 : DjbChaChaBase<ChaCha12> {
+  public ChaCha12() : base(12, RandUtils.GenericU32RandomSeed()) {}
+  public ChaCha12(ulong seed, ulong nonce = 0) : base(12, seed, nonce) {}
+  public ChaCha12(ReadOnlySpan<uint> seeds, ulong nonce = 0) : base(12, seeds, nonce) {}
+  public ChaCha12(ReadOnlySpan<byte> seeds, ulong nonce = 0) : base(12, seeds, nonce) {}
+}
+
+public class ChaCha8 : DjbChaChaBase<ChaCha8> {
+  public ChaCha8() : base(8, RandUtils.GenericU32RandomSeed()) {}
+  public ChaCha8(ulong seed, ulong nonce = 0) : base(8, seed, nonce) {}
+  public ChaCha8(ReadOnlySpan<uint> seeds, ulong nonce = 0) : base(8, seeds, nonce) {}
+  public ChaCha8(ReadOnlySpan<byte> seeds, ulong nonce = 0) : base(8, seeds, nonce) {}
 }
 }

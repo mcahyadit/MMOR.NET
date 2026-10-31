@@ -22,6 +22,7 @@ public partial class GenericRandomTest {
 
   [Theory]
   [MemberData(nameof(kParamsU32))]
+  [MemberData(nameof(kChaCha))]
   public void GenericTest(GenericRandomU32Param p) {
     IRandom rng = p.ctor.Invoke();
     foreach (uint expected in p.expected_sequence) {
