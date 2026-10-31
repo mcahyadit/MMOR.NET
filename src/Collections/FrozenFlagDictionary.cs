@@ -135,23 +135,36 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
 }
 
 public static class FrozenFlagDictionary {
-  [DoesNotReturn]
-  public static void ThrowNoZero<T>(ReadOnlySpan<T> keys)
-      where T : unmanaged, Enum {
-    StringBuilder sb = new StringBuilder(
-        string.Format("[ERROR]: {0} requires key of {1} to exist.\nKeys registered in source: [ ",
-            typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
-    foreach (T key in keys) {
-      sb.AppendFormat("{0}, ", key);
+  public static class ThrowHelper {
+    [DoesNotReturn]
+    public static void NoZero<T>(ReadOnlySpan<T> keys)
+        where T : unmanaged, Enum {
+      StringBuilder sb = new StringBuilder(
+          string.Format("[ERROR]: {0} requires key of {1} to exist.\nKeys registered in source: [ ",
+              typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
+      foreach (T key in keys) {
+        sb.AppendFormat("{0}, ", key);
+      }
+      sb.Append(']');
+      throw new ArgumentException(sb.ToString());
     }
-    sb.Append(']');
-    throw new ArgumentException(sb.ToString());
-  }
-  public static void ThrowZeroNotLast<T>()
-      where T : unmanaged, Enum {
-    throw new ArgumentException(
-        string.Format("[ERROR]: {0} requires key of {1} needs to be the last key.",
-            typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
+
+    [DoesNotReturn]
+    public static void ZeroNotLast<T>()
+        where T : unmanaged, Enum {
+      throw new ArgumentException(
+          string.Format("[ERROR]: {0} requires key of {1} needs to be the last key.",
+              typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
+    }
+
+    [DoesNotReturn]
+    public static void DuplicateKey<T>(ReadOnlySpan<T> keys, T duplicate)
+        where T : unmanaged, Enum {
+      int first  = keys.IndexOf(duplicate);
+      int second = first + 1 + keys[(first + 1)..].IndexOf(duplicate);
+      throw new ArgumentException(string.Format(
+          "[ERROR]: Detected duplicate key {0} at idx {1} and {2}.", duplicate, first, second));
+    }
   }
 
   public static FrozenFlagDictionary<TKey, TValue> Create<TKey, TValue>(
@@ -172,10 +185,10 @@ public static class FrozenFlagDictionary {
       ++i;
     }
     if (!has_zero) {
-      ThrowNoZero<TKey>(keys);
+      ThrowHelper.NoZero<TKey>(keys);
     }
     if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
-      ThrowZeroNotLast<TKey>();
+      ThrowHelper.ZeroNotLast<TKey>();
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
@@ -205,10 +218,10 @@ public static class FrozenFlagDictionary {
       ++i;
     }
     if (!has_zero) {
-      ThrowNoZero<TKey>(keys);
+      ThrowHelper.NoZero<TKey>(keys);
     }
     if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
-      ThrowZeroNotLast<TKey>();
+      ThrowHelper.ZeroNotLast<TKey>();
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
@@ -240,14 +253,17 @@ public static class FrozenFlagDictionary {
       if (use_hash) {
         dict!.Add(key, val);
       } else {
+        if (CollectionUtils.IndexOf(keys[..i], key) != -1) {
+          ThrowHelper.DuplicateKey(keys[..(i + 1)], key);
+        }
         values![i] = val;
       }
     }
     if (!has_zero) {
-      ThrowNoZero<TKey>(keys);
+      ThrowHelper.NoZero<TKey>(keys);
     }
     if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
-      ThrowZeroNotLast<TKey>();
+      ThrowHelper.ZeroNotLast<TKey>();
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
