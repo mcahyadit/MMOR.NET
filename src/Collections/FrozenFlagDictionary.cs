@@ -173,13 +173,16 @@ public static class FrozenFlagDictionary {
     int length    = source.Count;
     bool use_hash = length >= FrozenFlagDictionary<TKey, TValue>.kHashThreshold;
 
-    Span<TKey> keys = stackalloc TKey[length];
-    int i           = 0;
-    bool has_zero   = false;
-    TKey zero       = (TKey)Enum.ToObject(typeof(TKey), 0);
-    TKey key_union  = zero;
+    Span<TKey> keys  = stackalloc TKey[length];
+    TValue[]? values = use_hash ? null : new TValue[length];
+    int i            = 0;
+    bool has_zero    = false;
+    TKey zero        = (TKey)Enum.ToObject(typeof(TKey), 0);
+    TKey key_union   = zero;
     foreach ((TKey key, TValue val) in source) {
       keys[i] = key;
+      if (values is not null)
+        values[i] = val;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
       key_union = EnumBitwise<TKey>.Or(key_union, key);
       ++i;
@@ -193,7 +196,7 @@ public static class FrozenFlagDictionary {
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
       frozen_    = use_hash ? FrozenDictionary.ToFrozenDictionary(source) : null,
-      values_    = use_hash ? ImmutableArray<TValue>.Empty : source.Values.ToImmutableArray(),
+      values_    = use_hash ? ImmutableArray<TValue>.Empty : ImmutableArray.Create(values),
       key_union_ = key_union,
       // hot_key_   = keys[^1],
       // hot_value_ = source[keys[^1]],
@@ -206,13 +209,16 @@ public static class FrozenFlagDictionary {
     int length    = source.Count;
     bool use_hash = length >= FrozenFlagDictionary<TKey, TValue>.kHashThreshold;
 
-    Span<TKey> keys = stackalloc TKey[length];
-    int i           = 0;
-    bool has_zero   = false;
-    TKey zero       = (TKey)Enum.ToObject(typeof(TKey), 0);
-    TKey key_union  = zero;
-    foreach ((TKey key, _) in source) {
+    Span<TKey> keys  = stackalloc TKey[length];
+    TValue[]? values = use_hash ? null : new TValue[length];
+    int i            = 0;
+    bool has_zero    = false;
+    TKey zero        = (TKey)Enum.ToObject(typeof(TKey), 0);
+    TKey key_union   = zero;
+    foreach ((TKey key, TValue val) in source) {
       keys[i] = key;
+      if (values is not null)
+        values[i] = val;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
       key_union = EnumBitwise<TKey>.Or(key_union, key);
       ++i;
@@ -226,7 +232,7 @@ public static class FrozenFlagDictionary {
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
       frozen_    = use_hash ? FrozenDictionary.ToFrozenDictionary(source) : null,
-      values_    = use_hash ? ImmutableArray<TValue>.Empty : source.Values.ToImmutableArray(),
+      values_    = use_hash ? ImmutableArray<TValue>.Empty : ImmutableArray.Create(values),
       key_union_ = key_union,
       // hot_key_   = keys[^1],
       // hot_value_ = source[keys[^1]],
