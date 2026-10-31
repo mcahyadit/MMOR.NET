@@ -125,6 +125,12 @@ public static class FrozenFlagDictionary {
     sb.Append(']');
     throw new ArgumentException(sb.ToString());
   }
+  public static void ThrowZeroNotLast<T>()
+      where T : unmanaged, Enum {
+    throw new ArgumentException(
+        string.Format("[ERROR]: {0} requires key of {1} needs to be the last key.",
+            typeof(FrozenFlagDictionary), (T)Enum.ToObject(typeof(T), 0)));
+  }
 
   public static FrozenFlagDictionary<TKey, TValue> Create<TKey, TValue>(
       IDictionary<TKey, TValue> source)
@@ -141,6 +147,9 @@ public static class FrozenFlagDictionary {
     }
     if (!has_zero) {
       ThrowNoZero<TKey>(keys);
+    }
+    if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
+      ThrowZeroNotLast<TKey>();
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
@@ -166,6 +175,9 @@ public static class FrozenFlagDictionary {
     if (!has_zero) {
       ThrowNoZero<TKey>(keys);
     }
+    if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
+      ThrowZeroNotLast<TKey>();
+    }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
       frozen_    = FrozenDictionary.ToFrozenDictionary(source),
@@ -190,6 +202,9 @@ public static class FrozenFlagDictionary {
     }
     if (!has_zero) {
       ThrowNoZero<TKey>(keys);
+    }
+    if (!EqualityComparer<TKey>.Default.Equals(keys[^1], zero)) {
+      ThrowZeroNotLast<TKey>();
     }
     return new FrozenFlagDictionary<TKey, TValue> {
       keys_      = ImmutableArray.Create(keys),
