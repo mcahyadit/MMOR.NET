@@ -25,7 +25,11 @@ jobs:
             echo "FROM_REF=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
             echo "TO_REF=HEAD" >> "$GITHUB_OUTPUT"
           else
-            echo "FROM_REF=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
+              echo "FROM_REF=${{ github.event.after }}^" >> "$GITHUB_OUTPUT"
+            else
+              echo "FROM_REF=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            fi
             echo "TO_REF=${{ github.event.after }}" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
