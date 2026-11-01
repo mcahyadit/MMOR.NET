@@ -26,13 +26,13 @@ public static partial class CollectionUtils {
       where T : unmanaged {
     switch (Unsafe.SizeOf<T>()) {
       case 1:
-        return FirstSubmask(MemoryMarshal.Cast<T, byte>(self), EnumOps.As<T, byte>(mask));
+        return FirstSubmask(MemoryMarshal.Cast<T, byte>(self), BitOps.BitCast<T, byte>(mask));
       case 2:
-        return FirstSubmask(MemoryMarshal.Cast<T, ushort>(self), EnumOps.As<T, ushort>(mask));
+        return FirstSubmask(MemoryMarshal.Cast<T, ushort>(self), BitOps.BitCast<T, ushort>(mask));
       case 4:
-        return FirstSubmask(MemoryMarshal.Cast<T, uint>(self), EnumOps.As<T, uint>(mask));
+        return FirstSubmask(MemoryMarshal.Cast<T, uint>(self), BitOps.BitCast<T, uint>(mask));
       case 8:
-        return FirstSubmask(MemoryMarshal.Cast<T, ulong>(self), EnumOps.As<T, ulong>(mask));
+        return FirstSubmask(MemoryMarshal.Cast<T, ulong>(self), BitOps.BitCast<T, ulong>(mask));
       default:
         throw new NotSupportedException(
             $"[ERROR]: {typeof(T)} is unsupported for {nameof(FirstSubmask)}");
@@ -48,15 +48,17 @@ public static partial class CollectionUtils {
       where T : unmanaged {
     switch (Unsafe.SizeOf<T>()) {
       case 1:
-        return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, byte>(self), EnumOps.As<T, byte>(mask));
+        return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, byte>(self),
+            BitOps.BitCast<T, byte>(mask));
       case 2:
         return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, ushort>(self),
-            EnumOps.As<T, ushort>(mask));
+            BitOps.BitCast<T, ushort>(mask));
       case 4:
-        return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, uint>(self), EnumOps.As<T, uint>(mask));
+        return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, uint>(self),
+            BitOps.BitCast<T, uint>(mask));
       case 8:
         return IndexOfOrFirstSubmask(MemoryMarshal.Cast<T, ulong>(self),
-            EnumOps.As<T, ulong>(mask));
+            BitOps.BitCast<T, ulong>(mask));
       default:
         throw new NotSupportedException(
             $"[ERROR]: {typeof(T)} is unsupported for {nameof(IndexOfOrFirstSubmask)}");
