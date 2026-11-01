@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -13,6 +14,9 @@ public static class EnumOps {
       $"Enum {typeof(T)} has an unsupported size ({Unsafe.SizeOf<T>()} bytes).");
   [MethodImpl(MethodImplOptions.NoInlining)]
   private static int ThrowUnsupported3<T>() => throw new NotSupportedException(
+      $"Enum {typeof(T)} has an unsupported size ({Unsafe.SizeOf<T>()} bytes).");
+  [MethodImpl(MethodImplOptions.NoInlining)]
+  private static ulong ThrowUnsupported4<T>() => throw new NotSupportedException(
       $"Enum {typeof(T)} has an unsupported size ({Unsafe.SizeOf<T>()} bytes).");
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,15 +71,54 @@ public static class EnumOps {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static bool HasFlag<T>(this T value, T flag)
+  public static T ShiftRight<T>(T left, int right)
       where T : unmanaged, Enum {
     return Unsafe.SizeOf<T>() switch {
-      sizeof(byte)   => (BitCast<T, byte>(value) & BitCast<T, byte>(flag)) != 0,
-      sizeof(ushort) => (BitCast<T, ushort>(value) & BitCast<T, ushort>(flag)) != 0,
-      sizeof(uint)   => (BitCast<T, uint>(value) & BitCast<T, uint>(flag)) != 0,
-      sizeof(ulong)  => (BitCast<T, ulong>(value) & BitCast<T, ulong>(flag)) != 0,
-      _              => ThrowUnsupported2<T>(),
+      sizeof(byte)   => BitCast<byte, T>((byte)(BitCast<T, byte>(left) >> right)),
+      sizeof(ushort) => BitCast<ushort, T>((ushort)(BitCast<T, ushort>(left) >> right)),
+      sizeof(uint)   => BitCast<uint, T>(BitCast<T, uint>(left) >> right),
+      sizeof(ulong)  => BitCast<ulong, T>(BitCast<T, ulong>(left) >> right),
+      _              => ThrowUnsupported<T>(),
     };
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static T ShiftLeft<T>(T left, int right)
+      where T : unmanaged, Enum {
+    return Unsafe.SizeOf<T>() switch {
+      sizeof(byte)   => BitCast<byte, T>((byte)(BitCast<T, byte>(left) << right)),
+      sizeof(ushort) => BitCast<ushort, T>((ushort)(BitCast<T, ushort>(left) << right)),
+      sizeof(uint)   => BitCast<uint, T>(BitCast<T, uint>(left) << right),
+      sizeof(ulong)  => BitCast<ulong, T>(BitCast<T, ulong>(left) << right),
+      _              => ThrowUnsupported<T>(),
+    };
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong ToUInt64<T>(this T value)
+      where T : unmanaged, Enum {
+    return Unsafe.SizeOf<T>() switch {
+      sizeof(byte)   => BitCast<T, byte>(value),
+      sizeof(ushort) => BitCast<T, ushort>(value),
+      sizeof(uint)   => BitCast<T, uint>(value),
+      sizeof(ulong)  => BitCast<T, ulong>(value),
+      _              => ThrowUnsupported4<T>(),
+    };
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static bool ContainsFlag<T>(this T value, T flag)
+      where T : unmanaged, Enum {
+    if (EqualityComparer<T>.Default.Equals(flag, (T)Enum.ToObject(typeof(T), 0)))
+      return EqualityComparer<T>.Default.Equals(value, (T)Enum.ToObject(typeof(T), 0));
+    else
+      return Unsafe.SizeOf<T>() switch {
+        sizeof(byte)   => (BitCast<T, byte>(value) & BitCast<T, byte>(flag)) != 0,
+        sizeof(ushort) => (BitCast<T, ushort>(value) & BitCast<T, ushort>(flag)) != 0,
+        sizeof(uint)   => (BitCast<T, uint>(value) & BitCast<T, uint>(flag)) != 0,
+        sizeof(ulong)  => (BitCast<T, ulong>(value) & BitCast<T, ulong>(flag)) != 0,
+        _              => ThrowUnsupported2<T>(),
+      };
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
