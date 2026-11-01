@@ -1,13 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using MMOR.NET.Mathematics;
-
-#if NETSTANDARD
-using UltimateOrb.Mathematics;
-using UInt128 = UltimateOrb.UInt128;
-#endif
 
 namespace MMOR.NET.Random {
 public static partial class RandomExtensions {
@@ -107,18 +101,15 @@ public static partial class RandomExtensions {
       where T : IRandom {
     ThrowIfMaxExclIsLt(min_inclusive, max_exclusive);
 
-    ulong range          = max_exclusive - min_inclusive;
-    UInt128 range_u128   = range;
-    UInt128 full_product = NextUInt64(rng) * range_u128;
-    ulong low_bits       = (ulong)full_product;
+    ulong range = max_exclusive - min_inclusive;
+    MathExt.BigMulU64(NextUInt64(rng), range, out ulong high, out ulong low_bits);
     if (low_bits < range) {
       ulong threshold = (0ul - range) % range;
       while (low_bits < threshold) {
-        full_product = NextUInt64(rng) * range_u128;
-        low_bits     = (ulong)full_product;
+        MathExt.BigMulU64(NextUInt64(rng), range, out high, out low_bits);
       }
     }
-    return min_inclusive + (ulong)(full_product >> 64);
+    return min_inclusive + high;
   }
 
   /**
