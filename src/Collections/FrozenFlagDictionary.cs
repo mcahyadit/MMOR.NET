@@ -45,7 +45,7 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
       // if (EqualityComparer<TKey>.Default.Equals(hot_key_, key))
       //   return hot_value_;
 
-      key = EnumBitwise<TKey>.And(key, key_union_);
+      key = EnumOps.BitwiseAnd(key, key_union_);
       if (frozen_ is not null) {
         if (frozen_.TryGetValue(key, out TValue result))
           return result;
@@ -184,7 +184,7 @@ public static class FrozenFlagDictionary {
       if (values is not null)
         values[i] = val;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
-      key_union = EnumBitwise<TKey>.Or(key_union, key);
+      key_union = EnumOps.BitwiseOr(key_union, key);
       ++i;
     }
     if (!has_zero) {
@@ -220,7 +220,7 @@ public static class FrozenFlagDictionary {
       if (values is not null)
         values[i] = val;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
-      key_union = EnumBitwise<TKey>.Or(key_union, key);
+      key_union = EnumOps.BitwiseOr(key_union, key);
       ++i;
     }
     if (!has_zero) {
@@ -255,7 +255,7 @@ public static class FrozenFlagDictionary {
       (TKey key, TValue val) = source[i];
       keys[i]                = key;
       has_zero |= EqualityComparer<TKey>.Default.Equals(key, zero);
-      key_union = EnumBitwise<TKey>.Or(key_union, key);
+      key_union = EnumOps.BitwiseOr(key_union, key);
       if (use_hash) {
         dict!.Add(key, val);
       } else {
