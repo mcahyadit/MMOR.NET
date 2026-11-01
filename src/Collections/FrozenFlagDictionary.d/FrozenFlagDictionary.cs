@@ -1,5 +1,8 @@
+#pragma warning disable CS8600  // Converting null literal or possible null value to non-nullable
+// type.
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -32,10 +35,9 @@ public sealed class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKe
   public static readonly TKey kZero = (TKey)Enum.ToObject(typeof(TKey), 0);
 
   public ImmutableArray<TValue> vals_ { get; init; }
-  public ImmutableArray<TKey> hash_ { get; init; }
+  public FrozenDictionary<TKey, TValue>? dict_ { get; init; }
   public ImmutableArray<TKey> keys_ { get; init; }
   public TKey union_ { get; init; }
-  public ulong hash_seed { get; init; }
 
   public FreezeType FreezeType { get; init; }
 
@@ -51,14 +53,10 @@ public sealed class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKe
       if (EqualityComparer<TKey>.Default.Equals(key, kZero)) return vals_[^1];
 
       if (FreezeType == FreezeType.Hashed) {
-        ulong hash = MathExt.FastRange64(HashUtils.MurmurHash2A(key.ToUInt64(), hash_seed),
-            (ulong)Count - 1);
-        if (EqualityComparer<TKey>.Default.Equals(hash_[(int)hash], key)) return vals_[(int)hash];
-        int idx = CollectionUtils.FirstSubmask(keys_, key);
-        if (idx == Count - 1) return vals_[^1];
-        hash = MathExt.FastRange64(HashUtils.MurmurHash2A(keys_[idx].ToUInt64(), hash_seed),
-            (ulong)Count - 1);
-        return vals_[(int)hash];
+        if (dict_!.TryGetValue(key, out TValue val)) {
+          return val;
+        }
+        return dict_[keys_[CollectionUtils.FirstSubmask(keys_, key)]];
       } else {
         return vals_[CollectionUtils.IndexOfOrFirstSubmask(keys_, key)];
       }
@@ -75,38 +73,29 @@ public sealed class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKe
   public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>> {
     readonly ReadOnlyMemory<TKey> keys_;
     readonly ReadOnlyMemory<TValue> values_;
+    readonly FrozenDictionary<TKey, TValue>? dict_;
     readonly FreezeType freeze_type_;
-    readonly ulong hash_seed;
     int idx;
-    int hash;
 
     public Enumerator(FrozenFlagDictionary<TKey, TValue> self) {
       idx          = -1;
-      hash         = 0;
       keys_        = self.keys_.AsMemory();
       values_      = self.vals_.AsMemory();
+      dict_        = self.dict_;
       freeze_type_ = self.FreezeType;
-      hash_seed    = self.hash_seed;
     }
 
     public readonly KeyValuePair<TKey, TValue> Current {
       get {
         if (freeze_type_ == FreezeType.Linear)
           return new KeyValuePair<TKey, TValue>(keys_.Span[idx], values_.Span[idx]);
-        return new KeyValuePair<TKey, TValue>(keys_.Span[idx], values_.Span[hash]);
+        TKey key = keys_.Span[idx];
+        return new KeyValuePair<TKey, TValue>(key, dict_![key]);
       }
     }
     readonly object IEnumerator.Current => Current;
     public readonly void Dispose() {}
-    public bool MoveNext() {
-      if (++idx >= keys_.Length) return false;
-      hash = freeze_type_ != FreezeType.Hashed
-                 ? 0
-                 : (int)MathExt.FastRange64(
-                       HashUtils.MurmurHash2A(keys_.Span[idx].ToUInt64(), hash_seed),
-                       (ulong)keys_.Length - 1);
-      return true;
-    }
+    public bool MoveNext() => ++idx < keys_.Length;
 
     public void Reset() => idx = -1;
   }
