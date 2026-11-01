@@ -120,8 +120,8 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
         }
         if (first)
           sb.Append(kZero);
-        sb.AppendFormat("]: {0}\n", kvp.Value);
       }
+      sb.AppendFormat("]: {0}\n", kvp.Value);
     }
     sb.Append('}');
     return sb.ToString();
