@@ -18,7 +18,7 @@ namespace MMOR.NET.Collections {
  *  Backed with <see cref="FrozenDictionary"/> and SIMD lookup for submasks.
  * </summary>
  */
-public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>
+public sealed class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>
     where TKey : unmanaged, Enum {
 #pragma warning disable CS8618
   public FrozenFlagDictionary() {}
