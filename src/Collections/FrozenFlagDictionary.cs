@@ -42,10 +42,13 @@ public class FrozenFlagDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TVal
 
   public TValue this[TKey key] {
     get {
+      key = EnumOps.BitwiseAnd(key, key_union_);
+      if (EqualityComparer<TKey>.Default.Equals(key, kZero))
+        return frozen_ is null ? values_[^1] : frozen_[kZero];
+
       // if (EqualityComparer<TKey>.Default.Equals(hot_key_, key))
       //   return hot_value_;
 
-      key = EnumOps.BitwiseAnd(key, key_union_);
       if (frozen_ is not null) {
         if (frozen_.TryGetValue(key, out TValue result))
           return result;
