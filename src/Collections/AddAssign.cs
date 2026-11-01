@@ -19,8 +19,7 @@ public static partial class CollectionUtils {
 
     if (Vector.IsHardwareAccelerated) {
       start = length - (length % Vector<ulong>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      if (start == 0) goto scalar_tail;
 
       Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
       ReadOnlySpan<Vector<ulong>> other_epi =
@@ -44,8 +43,7 @@ public static partial class CollectionUtils {
 
     if (Vector.IsHardwareAccelerated) {
       start = length - (length % Vector<ulong>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      if (start == 0) goto scalar_tail;
 
       Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
       Vector<ulong> value_epi      = new(value);

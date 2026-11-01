@@ -21,8 +21,7 @@ public static partial class CollectionUtils {
     }
     int result = (int)Vector.Dot(acc_v, Vector<ulong>.One);
     for (; i < alen; ++i) {
-      if (self[i] == value)
-        ++result;
+      if (self[i] == value) ++result;
     }
     return result;
   }
@@ -44,8 +43,7 @@ public static partial class CollectionUtils {
     }
     int result = Vector.Dot(acc_v, Vector<int>.One);
     for (; i < alen; ++i) {
-      if (self[i] == value)
-        ++result;
+      if (self[i] == value) ++result;
     }
     return result;
   }
@@ -69,8 +67,7 @@ public static partial class CollectionUtils {
     }
     int result = (int)Vector.Dot(acc_v, Vector<long>.One);
     for (; i < alen; ++i) {
-      if (MathExt.Approximately(self[i], value))
-        ++result;
+      if (MathExt.Approximately(self[i], value)) ++result;
     }
     return result;
   }

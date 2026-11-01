@@ -31,8 +31,7 @@ public static partial class CollectionUtils {
     }
     ulong result = MathExt.SumElements(acc_v);
     for (; i < alen; ++i) {
-      if (((bitmask >> i) & 1) == 1)
-        result += self[i];
+      if (((bitmask >> i) & 1) == 1) result += self[i];
     }
     return result;
   }
@@ -60,8 +59,7 @@ public static partial class CollectionUtils {
     }
     ulong result = MathExt.SumElements(acc_v);
     for (; i < alen; ++i) {
-      if (conditions[i])
-        result += self[i];
+      if (conditions[i]) result += self[i];
     }
     return result;
   }

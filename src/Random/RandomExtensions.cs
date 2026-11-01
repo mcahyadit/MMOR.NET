@@ -76,8 +76,7 @@ public static partial class RandomExtensions {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong NextUInt64<T>(this T rng)
       where T : IRandom {
-    if (rng is IRandom64 rng_u64)
-      return rng_u64.NextUInt64();
+    if (rng is IRandom64 rng_u64) return rng_u64.NextUInt64();
     return ((ulong)rng.NextUInt() << 32) | rng.NextUInt();
   }
 
@@ -178,8 +177,7 @@ public static partial class RandomExtensions {
    */
   public static float NextFloat<T>(this T rng, float min_inclusive = 0, float max_inclusive = 1)
       where T : IRandom {
-    if (MathExt.Approximately(min_inclusive, max_inclusive))
-      return min_inclusive;
+    if (MathExt.Approximately(min_inclusive, max_inclusive)) return min_inclusive;
     ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     if (rng is IRandom64 rng_u64) {
       float val = rng_u64.NextUInt64(0, (1u << 24) + 1) * k0x1p24;
@@ -210,8 +208,7 @@ public static partial class RandomExtensions {
    */
   public static double NextDouble<T>(this T rng, double min_inclusive = 0, double max_inclusive = 1)
       where T : IRandom {
-    if (MathExt.Approximately(min_inclusive, max_inclusive))
-      return min_inclusive;
+    if (MathExt.Approximately(min_inclusive, max_inclusive)) return min_inclusive;
     ThrowIfMaxInclIsLt(min_inclusive, max_inclusive);
     double val = rng.NextUInt64(0, (1ul << 53) + 1) * k0x1p53;
     return min_inclusive + val * (max_inclusive - min_inclusive);
@@ -246,10 +243,8 @@ public static partial class RandomExtensions {
     }
 
     for (ulong i = 0; i < steps; ++i) {
-      if (rng is IRandom64 rng_u64)
-        rng_u64.NextUInt64();
-      else
-        rng.NextUInt();
+      if (rng is IRandom64 rng_u64) rng_u64.NextUInt64();
+      else rng.NextUInt();
     }
   }
 

@@ -18,9 +18,8 @@ public static partial class CollectionUtils {
 
     ulong result = 0;
     if (Vector.IsHardwareAccelerated) {
-      start = length - (length % Vector<ulong>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      start = length & -Vector<ulong>.Count;
+      if (start == 0) goto scalar_tail;
 
       Vector<ulong> result_epi = Vector<ulong>.Zero;
       ReadOnlySpan<Vector<ulong>> self_epi =
