@@ -2,6 +2,7 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using MMOR.NET.Collections;
 using MMOR.NET.Mathematics;
 
@@ -71,11 +72,9 @@ public static partial class TotalStatisticsExtension {
       foreach ((CommonQuantile quantile, double tau) in kCommonQuantiles) {
         // NOTE: Use type R-7 Quantile
         double point = tau * (first_pass.Count - 1);
-        if (re_cnt < Math.Ceiling(point) + 1)
-          continue;
+        if (re_cnt < Math.Ceiling(point) + 1) continue;
 
-        if (quantiles.ContainsKey(quantile))
-          continue;
+        if (quantiles.ContainsKey(quantile)) continue;
 
         double lo_rank = Math.Floor(point);
         double frac    = point - lo_rank;
@@ -121,10 +120,14 @@ public static partial class TotalStatisticsExtension {
     double u_abs_dev = 0;
     double harm_sum  = 0;
 
-    int vlen = Vector<double>.Count;
-    int vend = 0;
+    int start = 0;
     if (Vector.IsHardwareAccelerated) {
-      vend                      = unique - (unique % vlen);
+      start = unique & -Vector<double>.Count;
+      if (start == 0) goto scalar_tail;
+
+      ReadOnlySpan<Vector<double>> values_epi = MemoryMarshal.Cast<double, Vector<double>>(values);
+      ReadOnlySpan<Vector<ulong>> counts_epi  = MemoryMarshal.Cast<ulong, Vector<ulong>>(counts);
+
       Vector<double> mean_epi   = new(first_pass.Mean);
       Vector<double> median_epi = new(quantiles[CommonQuantile.Median]);
       Vector<double> lower_epi  = new(lower);
@@ -134,11 +137,11 @@ public static partial class TotalStatisticsExtension {
       Vector<double> m_abs_dev_epi = Vector<double>.Zero;
       Vector<double> u_abs_dev_epi = Vector<double>.Zero;
       Vector<double> harm_sum_epi  = Vector<double>.Zero;
-      for (int i = 0; i < vend; i += vlen) {
-        Vector<double> value_epi = values.Slice(i, vlen).ToVector();
-        Vector<ulong> count_epi  = counts.Slice(i, vlen).ToVector();
 
-        Vector<double> countf64_epi = Vector.ConvertToDouble(count_epi);
+      int unique_epi = values_epi.Length;
+      for (int i = 0; i < unique_epi; ++i) {
+        Vector<double> value_epi    = values_epi[i];
+        Vector<double> countf64_epi = Vector.ConvertToDouble(counts_epi[i]);
 
         m_abs_dev_epi += Vector.Abs(value_epi - median_epi) * countf64_epi;
         u_abs_dev_epi += Vector.Abs(value_epi - mean_epi) * countf64_epi;
@@ -149,14 +152,15 @@ public static partial class TotalStatisticsExtension {
         Vector<long> cmp_lt      = Vector.LessThan(value_epi, lower_epi);
         Vector<long> cmp_gt      = Vector.GreaterThan(value_epi, upper_epi);
         Vector<ulong> is_outlier = Vector.AsVectorUInt64(Vector.BitwiseOr(cmp_lt, cmp_gt));
-        outliers_epi += Vector.BitwiseAnd(is_outlier, count_epi);
+        outliers_epi += Vector.BitwiseAnd(is_outlier, counts_epi[i]);
       }
       outliers += outliers_epi.SumElements();
       m_abs_dev += m_abs_dev_epi.SumElements();
       u_abs_dev += u_abs_dev_epi.SumElements();
       harm_sum += harm_sum_epi.SumElements();
     }
-    for (int i = vend; i < unique; ++i) {
+  scalar_tail:
+    for (int i = start; i < unique; ++i) {
       ulong count  = counts[i];
       double value = values[i];
 
@@ -164,8 +168,7 @@ public static partial class TotalStatisticsExtension {
       u_abs_dev += Math.Abs(value - first_pass.Mean) * count;
       harm_sum += value > 0 ? count / value : 0;
 
-      if (value < lower || value > upper)
-        outliers += count;
+      if (value < lower || value > upper) outliers += count;
     }
     m_abs_dev /= first_pass.CountF64;
     u_abs_dev /= first_pass.CountF64;

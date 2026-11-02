@@ -18,9 +18,8 @@ public static partial class CollectionUtils {
     int start  = 0;
 
     if (Vector.IsHardwareAccelerated) {
-      start = length - (length % Vector<uint>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      start = length & -Vector<uint>.Count;
+      if (start == 0) goto scalar_tail;
 
       ReadOnlySpan<Vector<uint>> self_epi = MemoryMarshal.Cast<uint, Vector<uint>>(self[..start]);
       Vector<uint> item_epi               = new(mask);
@@ -38,8 +37,7 @@ public static partial class CollectionUtils {
   scalar_tail:
     for (int i = start; i < length; ++i) {
       uint mask_i = self[i];
-      if ((mask_i & mask) == mask_i)
-        return i;
+      if ((mask_i & mask) == mask_i) return i;
     }
     return -1;
   }
@@ -54,9 +52,8 @@ public static partial class CollectionUtils {
 
     int submask = -1;
     if (Vector.IsHardwareAccelerated) {
-      start = length - (length % Vector<uint>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      start = length & -Vector<uint>.Count;
+      if (start == 0) goto scalar_tail;
 
       ReadOnlySpan<Vector<uint>> self_epi = MemoryMarshal.Cast<uint, Vector<uint>>(self[..start]);
       Vector<uint> item_epi               = new(mask);
@@ -86,8 +83,7 @@ public static partial class CollectionUtils {
   scalar_tail:
     for (int i = start; i < length; ++i) {
       uint value = self[i];
-      if (value == mask)
-        return i;
+      if (value == mask) return i;
 
       if (submask < 0 && ((value & mask) == value)) {
         submask = i;

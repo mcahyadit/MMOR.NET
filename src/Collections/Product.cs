@@ -10,7 +10,7 @@ public static partial class CollectionUtils {
 
     int result;
     if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
-      start = length - (length % Vector<int>.Count);
+      start = length & -Vector<int>.Count;
 
       Vector<int> result_epi             = Vector<int>.One;
       ReadOnlySpan<Vector<int>> self_epi = MemoryMarshal.Cast<int, Vector<int>>(self[..start]);
@@ -38,7 +38,7 @@ public static partial class CollectionUtils {
 
     double result;
     if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
-      start = length - (length % Vector<double>.Count);
+      start = length & -Vector<double>.Count;
 
       Vector<double> result_epi = Vector<double>.One;
       ReadOnlySpan<Vector<double>> self_epi =
