@@ -74,7 +74,7 @@ public static partial class HashUtils {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong AvalancheH3(in ulong x0) {
     unchecked {
-      ulong x1 = (x0 ^ (x0 >> 37)) * kXxHash64Prime1;
+      ulong x1 = (x0 ^ (x0 >> 37)) * kXxHash3Prime1;
       return x1 ^ (x1 >> 32);
     }
   }
