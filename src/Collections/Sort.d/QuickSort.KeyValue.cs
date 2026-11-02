@@ -8,11 +8,9 @@ public static partial class CollectionUtils {
   public static void QuickSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
       in TComparer cmp)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     int pivot_idx = IndexMedian3<TKey, TComparer>(keys, cmp);
     QuickSelectMutate(keys, values, cmp, pivot_idx, out int lt_idx, out int gt_idx);
@@ -24,7 +22,6 @@ public static partial class CollectionUtils {
   public static bool QuickSelectMutate<TKey, TValue, TComparer>(in Span<TKey> keys,
       in Span<TValue> values, in TComparer cmp, in int pidx, out int lt_idx, out int gt_idx)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     TKey pivot = keys[pidx];
@@ -52,9 +49,7 @@ public static partial class CollectionUtils {
 
           saw_greater = true;
           break;
-        default:
-          ++i;
-          break;
+        default: ++i; break;
       }
     }
     return partitioned;
@@ -62,7 +57,6 @@ public static partial class CollectionUtils {
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void QuickSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged
-      where TValue : unmanaged => QuickSort(keys, values, Comparer<TKey>.Default);
+      where TKey : unmanaged => QuickSort(keys, values, Comparer<TKey>.Default);
 }
 }

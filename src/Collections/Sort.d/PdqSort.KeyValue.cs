@@ -10,7 +10,6 @@ public static partial class CollectionUtils {
   public static void NintherSortUnsafe<TKey, TValue, TComparer>(in Span<TKey> keys,
       in Span<TValue> values, in TComparer cmp)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     // Cheat from orlp definition
@@ -30,7 +29,6 @@ public static partial class CollectionUtils {
   public static bool PartialInsertionSort<TKey, TValue, TComparer>(in Span<TKey> keys,
       in Span<TValue> values, in TComparer cmp, int limit)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     for (int c_idx = 1; c_idx < length; ++c_idx) {
@@ -47,8 +45,7 @@ public static partial class CollectionUtils {
       values[s_idx + 1] = p_val;
 
       limit -= c_idx - s_idx - 1;
-      if (limit <= 0)
-        return false;
+      if (limit <= 0) return false;
     }
     return true;
   }
@@ -57,7 +54,6 @@ public static partial class CollectionUtils {
   public static void BreakPatterns<TKey, TValue, TComparer>(in Span<TKey> keys,
       in Span<TValue> values, in TComparer cmp, int t1, in int t2)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     if (keys.Length >= t1) {
       int l4                    = keys.Length / 4;
@@ -85,11 +81,9 @@ public static partial class CollectionUtils {
       in TComparer cmp, in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     if (length < insertion_sort_threshold) {
       InsertionSort(keys, values, cmp);
@@ -140,13 +134,12 @@ public static partial class CollectionUtils {
   public static void PdqSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
       in int insertion_sort_threshold = 24, in int ninther_threshold = 128,
       in int partial_insertion_sort_limit = 8, int? depth_limit = null)
-      where TKey : unmanaged
-      where TValue : unmanaged => PdqSort(keys,
-                     values,
-                     Comparer<TKey>.Default,
-                     insertion_sort_threshold,
-                     ninther_threshold,
-                     partial_insertion_sort_limit,
-                     depth_limit);
+      where TKey : unmanaged => PdqSort(keys,
+                   values,
+                   Comparer<TKey>.Default,
+                   insertion_sort_threshold,
+                   ninther_threshold,
+                   partial_insertion_sort_limit,
+                   depth_limit);
 }
 }

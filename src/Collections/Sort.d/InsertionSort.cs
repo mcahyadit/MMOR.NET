@@ -30,7 +30,6 @@ public static partial class CollectionUtils {
   public static void InsertionSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
       in TComparer cmp)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     for (int i = 1; i < length; ++i) {
@@ -54,7 +53,6 @@ public static partial class CollectionUtils {
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void InsertionSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged
-      where TValue : unmanaged => InsertionSort(keys, values, Comparer<TKey>.Default);
+      where TKey : unmanaged => InsertionSort(keys, values, Comparer<TKey>.Default);
 }
 }

@@ -14,8 +14,7 @@ public static partial class CollectionUtils {
       where T : unmanaged
       where TComparer : IComparer<T> {
     int length = slice.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     int last_parent = length / 2 - 1;
     for (int i = last_parent; i >= 0; --i) {

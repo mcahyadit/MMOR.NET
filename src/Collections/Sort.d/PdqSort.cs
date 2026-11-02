@@ -45,8 +45,7 @@ public static partial class CollectionUtils {
       slice[s_idx + 1] = pivot;
 
       limit -= c_idx - s_idx - 1;
-      if (limit <= 0)
-        return false;
+      if (limit <= 0) return false;
     }
     return true;
   }
@@ -81,8 +80,7 @@ public static partial class CollectionUtils {
       where T : unmanaged
       where TComparer : IComparer<T> {
     int length = slice.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     if (length < insertion_sort_threshold) {
       InsertionSort(slice, cmp);

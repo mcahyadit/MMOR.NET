@@ -10,7 +10,6 @@ public static partial class CollectionUtils {
   public static void Sort3Unsafe<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
       in TComparer cmp, int midx)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     ref TKey a = ref keys[0];
     ref TKey b = ref keys[midx];
@@ -34,11 +33,9 @@ public static partial class CollectionUtils {
   public static void IntroSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
       in TComparer cmp, int insertion_sort_threshold = 24, int? depth_limit = null)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     depth_limit ??= 2 * BitOperations.Log2((uint)length);
 
@@ -57,11 +54,10 @@ public static partial class CollectionUtils {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void IntroSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values,
       int insertion_sort_threshold = 24, int? depth_limit = null)
-      where TKey : unmanaged
-      where TValue : unmanaged => IntroSort(keys,
-                     values,
-                     Comparer<TKey>.Default,
-                     insertion_sort_threshold,
-                     depth_limit);
+      where TKey : unmanaged => IntroSort(keys,
+                   values,
+                   Comparer<TKey>.Default,
+                   insertion_sort_threshold,
+                   depth_limit);
 }
 }

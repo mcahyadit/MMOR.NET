@@ -45,12 +45,9 @@ public static partial class CollectionUtils {
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to QuickSelect {k}th element in an array of Length: {length}");
-    if (length == 1)
-      return slice[0];
-    if (k == 1)
-      return MinElement<T>(slice);
-    if (length == k)
-      return MaxElement<T>(slice);
+    if (length == 1) return slice[0];
+    if (k == 1) return MinElement<T>(slice);
+    if (length == k) return MaxElement<T>(slice);
 
     int pivot_idx = IndexMedian3<T, Comparer<T>>(slice, Comparer<T>.Default);
     QuickSortMutate(slice, Comparer<T>.Default, pivot_idx, out int lt_idx, out int gt_idx);

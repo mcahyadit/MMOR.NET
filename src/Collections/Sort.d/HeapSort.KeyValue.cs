@@ -8,11 +8,9 @@ public static partial class CollectionUtils {
   public static void HeapSort<TKey, TValue, TComparer>(Span<TKey> keys, Span<TValue> values,
       in TComparer cmp)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     int last_parent = length / 2 - 1;
     for (int i = last_parent; i >= 0; --i) {
@@ -30,7 +28,6 @@ public static partial class CollectionUtils {
   public static void HeapSortMutate<TKey, TValue, TComparer>(in Span<TKey> keys,
       in Span<TValue> values, in TComparer cmp, in int m_idx)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     int x_idx  = m_idx;
@@ -54,7 +51,6 @@ public static partial class CollectionUtils {
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static void HeapSort<TKey, TValue>(Span<TKey> keys, Span<TValue> values)
-      where TKey : unmanaged
-      where TValue : unmanaged => HeapSort(keys, values, Comparer<TKey>.Default);
+      where TKey : unmanaged => HeapSort(keys, values, Comparer<TKey>.Default);
 }
 }

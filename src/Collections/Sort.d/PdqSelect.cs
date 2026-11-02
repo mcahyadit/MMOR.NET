@@ -63,17 +63,12 @@ public static partial class CollectionUtils {
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to PdqSelect {k}th element in an array of Length: {length}");
-    if (length == 1)
-      return slice[0];
-    if (k == 1)
-      return MinElement<T>(slice);
-    if (length == k)
-      return MaxElement<T>(slice);
+    if (length == 1) return slice[0];
+    if (k == 1) return MinElement<T>(slice);
+    if (length == k) return MaxElement<T>(slice);
     if (length <= Math.Max(k, insertion_sort_threshold)) {
-      if (length == 3)
-        Sort3Unsafe(slice, Comparer<T>.Default, 1);
-      else
-        IntroSort(slice);
+      if (length == 3) Sort3Unsafe(slice, Comparer<T>.Default, 1);
+      else IntroSort(slice);
       return slice[k - 1];
     }
 
@@ -86,8 +81,7 @@ public static partial class CollectionUtils {
     }
     QuickSortMutate(slice, Comparer<T>.Default, pivot_idx, out int lt_idx, out int gt_idx);
 
-    if (k > lt_idx && k <= gt_idx)
-      return slice[lt_idx];
+    if (k > lt_idx && k <= gt_idx) return slice[lt_idx];
 
     int l8                 = length / 8;
     Span<T> lt_span        = slice[..lt_idx];
@@ -96,8 +90,7 @@ public static partial class CollectionUtils {
 
     if (highly_unbalanced) {
       depth_limit ??= BitOperations.Log2((uint)length) - (BitOperations.Log2((uint)length) >> 1);
-      if (--depth_limit == 0)
-        return MedianOfNintherMutable(slice, k);
+      if (--depth_limit == 0) return MedianOfNintherMutable(slice, k);
     }
     if (k <= lt_idx) {
       if (highly_unbalanced)

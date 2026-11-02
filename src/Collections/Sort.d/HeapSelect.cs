@@ -58,12 +58,9 @@ public static partial class CollectionUtils {
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to HeapSelect {k}th element in an array of Length: {length}");
-    if (length == 1)
-      return slice[0];
-    if (k == 1)
-      return MinElement<T>(slice);
-    if (length == k)
-      return MaxElement<T>(slice);
+    if (length == 1) return slice[0];
+    if (k == 1) return MinElement<T>(slice);
+    if (length == k) return MaxElement<T>(slice);
 
     int last_parent = length / 2 - 1;
     for (int i = last_parent; i >= 0; --i) {

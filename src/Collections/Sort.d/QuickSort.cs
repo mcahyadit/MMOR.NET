@@ -14,8 +14,7 @@ public static partial class CollectionUtils {
       where T : unmanaged
       where TComparer : IComparer<T> {
     int length = slice.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     int pivot_idx = IndexMedian3<T, TComparer>(slice, cmp);
     QuickSortMutate(slice, cmp, pivot_idx, out int lt_idx, out int gt_idx);
@@ -53,9 +52,7 @@ public static partial class CollectionUtils {
 
           saw_greater = true;
           break;
-        default:
-          ++i;
-          break;
+        default: ++i; break;
       }
     }
     return partitioned;

@@ -41,8 +41,7 @@ public static partial class CollectionUtils {
       where T : unmanaged
       where TComparer : IComparer<T> {
     int length = slice.Length;
-    if (length <= 1)
-      return;
+    if (length <= 1) return;
 
     depth_limit ??= 2 * BitOperations.Log2((uint)length);
 

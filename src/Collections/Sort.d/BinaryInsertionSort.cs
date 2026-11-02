@@ -18,8 +18,7 @@ public static partial class CollectionUtils {
       T pivot = slice[c_idx];
 
       int i_idx;
-      if (cmp.Compare(pivot, slice[c_idx - 1]) >= 0)
-        continue;
+      if (cmp.Compare(pivot, slice[c_idx - 1]) >= 0) continue;
       i_idx = TailBinarySearch(slice[..c_idx], pivot, cmp);
 
       slice[i_idx..c_idx].CopyTo(slice.Slice(i_idx + 1, c_idx - i_idx));
@@ -35,7 +34,6 @@ public static partial class CollectionUtils {
   public static void BinaryInsertionSort<TKey, TValue, TComparer>(Span<TKey> keys,
       Span<TValue> values, in TComparer cmp)
       where TKey : unmanaged
-      where TValue : unmanaged
       where TComparer : IComparer<TKey> {
     int length = keys.Length;
     for (int c_idx = 1; c_idx < length; ++c_idx) {
@@ -43,8 +41,7 @@ public static partial class CollectionUtils {
       TValue p_val = values[c_idx];
 
       int i_idx;
-      if (cmp.Compare(pivot, keys[c_idx - 1]) >= 0)
-        continue;
+      if (cmp.Compare(pivot, keys[c_idx - 1]) >= 0) continue;
       i_idx = TailBinarySearch(keys[..c_idx], pivot, cmp);
 
       keys[i_idx..c_idx].CopyTo(keys.Slice(i_idx + 1, c_idx - i_idx));

@@ -51,12 +51,9 @@ public static partial class CollectionUtils {
     if ((uint)(k - 1) >= length)
       throw new ArgumentOutOfRangeException(
           $"[ERROR]: Trying to IntroSelect {k}th element in an array of Length: {length}");
-    if (length == 1)
-      return slice[0];
-    if (k == 1)
-      return MinElement<T>(slice);
-    if (length == k)
-      return MaxElement<T>(slice);
+    if (length == 1) return slice[0];
+    if (k == 1) return MinElement<T>(slice);
+    if (length == k) return MaxElement<T>(slice);
     if (length == 3) {
       Sort3Unsafe(slice, Comparer<T>.Default, 1);
       return slice[k - 1];
@@ -64,10 +61,8 @@ public static partial class CollectionUtils {
 
     depth_limit ??= 2 * BitOperations.Log2((uint)length);
     if (depth_limit <= 0) {
-      if (bad_path == IntroSelectBadPath.MedianOfMedians)
-        return MedianOfMediansMutable(slice, k);
-      else
-        return HeapSelectMutable(slice, k);
+      if (bad_path == IntroSelectBadPath.MedianOfMedians) return MedianOfMediansMutable(slice, k);
+      else return HeapSelectMutable(slice, k);
     }
 
     int pivot_idx = IndexMedian3<T, Comparer<T>>(slice, Comparer<T>.Default);
