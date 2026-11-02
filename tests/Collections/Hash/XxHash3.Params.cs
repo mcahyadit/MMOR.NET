@@ -1,7 +1,16 @@
+using System.Text;
 using Xunit;
 
 namespace MMOR.NET.Collections.Hash {
 public partial class XxHash3RandomTest {
+  public static string Repeat1To0(int repeat) {
+    StringBuilder sb = new();
+    for (int i = 0; i < repeat; ++i) {
+      sb.Append("1234567890");
+    }
+    return sb.ToString();
+  }
+
   public static readonly TheoryData<XxHash3Param> kParams = [
     new XxHash3Param {
       value    = "",
@@ -29,10 +38,26 @@ public partial class XxHash3RandomTest {
       seed     = 0,
       expected = 0x160D8E9329BE94F9,
     },
+    new XxHash3Param {
+      value    = "abcdefghijklmnopqrstuvwxyz",
+      seed     = 0,
+      expected = 0x810F9CA067FBB90C,
+    },
+    new XxHash3Param {
+      value    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      seed     = 0,
+      expected = 0x643542BB51639CB2,
+    },
+    new XxHash3Param {
+      value    = Repeat1To0(8),
+      seed     = 0,
+      expected = 0x7F58AA2520C681F9,
+    },
     // new XxHash3Param {
-    //   value    = "abcdefghijklmnopqrstuvwxyz",
-    //   seed     = 0,
-    //   expected = 0x810F9CA067FBB90C,
+    //   identifier = "Hash240 - UnSeeded",
+    //   value      = Repeat1To0(22),
+    //   seed       = 0,
+    //   expected   = 0xB66EA795B5EDC38C,
     // },
 
     new XxHash3Param {
@@ -61,10 +86,26 @@ public partial class XxHash3RandomTest {
       seed     = 1,
       expected = 0xFE71A82A70381174,
     },
+    new XxHash3Param {
+      value    = "abcdefghijklmnopqrstuvwxyz",
+      seed     = 1,
+      expected = 0x902A2C2D016A37BA,
+    },
+    new XxHash3Param {
+      value    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      seed     = 1,
+      expected = 0xBF552E540C5C6882,
+    },
+    new XxHash3Param {
+      value    = Repeat1To0(8),
+      seed     = 1,
+      expected = 0xF2CA33235A6B865B,
+    },
     // new XxHash3Param {
-    //   value    = "abcdefghijklmnopqrstuvwxyz",
-    //   seed     = 1,
-    //   expected = 0x902A2C2D016A37BA,
+    //   identifier = "Hash240 - Seeded",
+    //   value      = Repeat1To0(22),
+    //   seed       = 1,
+    //   expected   = 0x6EF5CF958BA52C4,
     // },
   ];
 }

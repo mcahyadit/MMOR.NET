@@ -136,11 +136,11 @@ public static partial class HashUtils {
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  public static ulong Mix16(ulong seed, ReadOnlySpan<byte> value, ReadOnlySpan<byte> secret) {
-    ReadOnlySpan<ulong> blk        = MemoryMarshal.Cast<byte, ulong>(value);
-    ReadOnlySpan<ulong> secret_u64 = MemoryMarshal.Cast<byte, ulong>(secret);
-    return MulXor(blk[0] ^ unchecked(secret_u64[0] + seed),
-        blk[1] ^ unchecked(secret_u64[1] - seed));
+  public static ulong Mix16(ulong seed, ReadOnlySpan<byte> value, int secret_offset) {
+    ReadOnlySpan<ulong> secret = MemoryMarshal.Cast<byte, ulong>(kXxHash3Secret.AsSpan(  //
+        secret_offset, 2 * sizeof(ulong)));
+    ReadOnlySpan<ulong> blk    = MemoryMarshal.Cast<byte, ulong>(value);
+    return MulXor(blk[0] ^ unchecked(secret[0] + seed), blk[1] ^ unchecked(secret[1] - seed));
   }
 
   public static ulong XxHash3_Hash128(ReadOnlySpan<byte> value, ulong seed) {
@@ -150,8 +150,9 @@ public static partial class HashUtils {
         int in_offset   = 48 - (i * 16);
         int scrt_offset = 96 - (i * 32);
         if (value.Length > scrt_offset) {
-          acc += Mix16(seed, value[in_offset..], kXxHash3Secret.AsSpan(scrt_offset, 2));
-          acc += Mix16(seed, value[in_offset..], kXxHash3Secret.AsSpan(scrt_offset + 16, 2));
+          acc += Mix16(seed, value[in_offset..], scrt_offset);
+          const int wordlen = 2 * sizeof(ulong);
+          acc += Mix16(seed, value[^(in_offset + wordlen)..], scrt_offset + wordlen);
         }
       }
       return AvalancheH3(acc);
