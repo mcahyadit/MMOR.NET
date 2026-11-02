@@ -47,6 +47,17 @@ public static partial class HashUtils {
       where T : unmanaged => MurmurHash2A(MemoryMarshal.Cast<T, byte>(value), seed);
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong MurmurHash2A(string value, ulong seed) => MurmurHash2A(
+      MemoryMarshal.Cast<char, byte>(value), seed);
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong MurmurHash2A<T>(T value, ulong seed)
+      where T : unmanaged {
+    return MurmurHash2A(MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref value, 1)),
+        seed);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static ulong MurmurHash2A(ulong value, in ulong seed) {
     ulong m = 0xC6A4A7935BD1E995;
     byte r  = 47;
