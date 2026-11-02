@@ -15,54 +15,56 @@ public static partial class CollectionUtils {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static T MinElement<T>(this ReadOnlySpan<T> self)
       where T : unmanaged, IComparable<T> {
-    if (self.IsEmpty)
-      throw new ArgumentException("[ERROR]: passed span is empty.");
-    int alen = self.Length;
+    if (self.IsEmpty) throw new ArgumentException("[ERROR]: passed span is empty.");
+    int length = self.Length;
 
-    int i    = 1;
-    T result = self[0];
+    int start = 1;
+    T result  = self[0];
     if (Vector.IsHardwareAccelerated) {
       if (VectorSupported<T>()) {
         int vlen = Vector<T>.Count;
-        if (alen <= 2 * vlen)
-          goto scalar_tail;
+        if (length <= 2 * vlen) goto scalar_tail;
 
-        int rem         = alen - vlen;
-        Vector<T> acc_v = self[..vlen].ToVector();
-        i               = vlen;
-        for (; i <= rem; i += vlen) {
-          acc_v = Vector.Min(acc_v, self.Slice(i, vlen).ToVector());
+        start = length & -vlen;
+
+        ReadOnlySpan<Vector<T>> self_epi = MemoryMarshal.Cast<T, Vector<T>>(self[..start]);
+
+        Vector<T> result_epi = self_epi[0];
+        int length_epi       = self_epi.Length;
+        for (int i = 1; i < length_epi; ++i) {
+          result_epi = Vector.Min(result_epi, self_epi[i]);
         }
-        result = acc_v[0];
-        for (int j = 1; j < vlen; ++j) {
-          if (result.CompareTo(acc_v[j]) > 0)
-            result = acc_v[j];
+        result = result_epi[0];
+        for (int i = 1; i < vlen; ++i) {
+          if (result.CompareTo(result_epi[i]) > 0) result = result_epi[i];
         }
       } else if (typeof(T) == typeof(char)) {
-        ReadOnlySpan<ushort> cast = MemoryMarshal.Cast<T, ushort>(self);
-        int vlen                  = Vector<ushort>.Count;
-        if (alen <= 2 * vlen)
-          goto scalar_tail;
+        int vlen = Vector<ushort>.Count;
+        if (length <= 2 * vlen) goto scalar_tail;
 
-        int rem              = alen - vlen;
-        Vector<ushort> acc_v = cast[..vlen].ToVector();
-        i                    = vlen;
-        for (; i <= rem; i += vlen) {
-          acc_v = Vector.Min(acc_v, cast.Slice(i, vlen).ToVector());
+        start = length & -vlen;
+
+        ReadOnlySpan<Vector<ushort>> self_epi =
+            MemoryMarshal.Cast<T, Vector<ushort>>(self[..start]);
+
+        Vector<ushort> result_epi = self_epi[0];
+        int length_epi            = self_epi.Length;
+        for (int i = 1; i < length_epi; ++i) {
+          result_epi = Vector.Min(result_epi, self_epi[i]);
         }
-        ushort cres = acc_v[0];
-        for (int j = 1; j < vlen; ++j) {
-          if (cres.CompareTo(acc_v[j]) > 0)
-            cres = acc_v[j];
+
+        ReadOnlySpan<T> char_epi = MemoryMarshal.Cast<Vector<ushort>, T>(
+            MemoryMarshal.CreateReadOnlySpan(ref result_epi, 1));
+        result = char_epi[0];
+        for (int i = 1; i < vlen; ++i) {
+          if (result.CompareTo(char_epi[i]) > 0) result = char_epi[i];
         }
-        result = Unsafe.As<ushort, T>(ref cres);
       }
     }
 
   scalar_tail:
-    for (; i < alen; ++i) {
-      if (result.CompareTo(self[i]) > 0)
-        result = self[i];
+    for (int i = start; i < length; ++i) {
+      if (result.CompareTo(self[i]) > 0) result = self[i];
     }
     return result;
   }
