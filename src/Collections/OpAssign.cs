@@ -21,10 +21,9 @@ public static partial class CollectionUtils {
       start = length & -Vector<ulong>.Count;
       if (start == 0) goto scalar_tail;
 
-      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
-      ReadOnlySpan<Vector<ulong>> other_epi =
-          MemoryMarshal.Cast<ulong, Vector<ulong>>(other[..start]);
-      int length_epi = self_epi.Length;
+      Span<Vector<ulong>> self_epi          = MemoryMarshal.Cast<ulong, Vector<ulong>>(self);
+      ReadOnlySpan<Vector<ulong>> other_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(other);
+      int length_epi                        = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
         self_epi[i] += other_epi[i];
       }
@@ -45,7 +44,7 @@ public static partial class CollectionUtils {
       start = length & -Vector<ulong>.Count;
       if (start == 0) goto scalar_tail;
 
-      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self);
       Vector<ulong> value_epi      = new(value);
       int length_epi               = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
