@@ -33,6 +33,12 @@ public static partial class HashUtils {
   public const ulong kXxHash64Prime4 = 0x85EBCA77C2B2AE63;
   public const ulong kXxHash64Prime5 = 0x27D4EB2F165667C5;
 
+  public const ulong kXxHash32Prime1 = 0x9E3779B185EBCA87;
+  public const ulong kXxHash32Prime2 = 0xC2B2AE3D27D4EB4F;
+  public const ulong kXxHash32Prime3 = 0x165667B19E3779F9;
+  public const ulong kXxHash32Prime4 = 0x85EBCA77C2B2AE63;
+  public const ulong kXxHash32Prime5 = 0x27D4EB2F165667C5;
+
   public static ulong XxHash3(string value, ulong seed = 0) => XxHash3(
       MemoryMarshal.Cast<char, byte>(value), seed);
 
