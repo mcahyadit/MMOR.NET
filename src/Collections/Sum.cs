@@ -21,9 +21,9 @@ public static partial class CollectionUtils {
       start = length & -Vector<ulong>.Count;
       if (start == 0) goto scalar_tail;
 
-      Vector<ulong> result_epi = Vector<ulong>.Zero;
-      ReadOnlySpan<Vector<ulong>> self_epi =
-          MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      Vector<ulong> result_epi             = Vector<ulong>.Zero;
+      ReadOnlySpan<Vector<ulong>> self_epi = self.AsVectorSpan();
+
       int length_epi = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
         result_epi += self_epi[i];

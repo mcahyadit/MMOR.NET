@@ -19,11 +19,10 @@ public static partial class CollectionUtils {
 
     if (Vector.IsHardwareAccelerated) {
       start = length - (length % Vector<ulong>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      if (start == 0) goto scalar_tail;
 
       Vector<ulong> curr_epi       = kUInt64IotaBase;
-      Span<Vector<ulong>> self_epi = MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
+      Span<Vector<ulong>> self_epi = self.AsVectorSpan();
       int length_epi               = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
         self_epi[i] = curr_epi;
@@ -51,11 +50,10 @@ public static partial class CollectionUtils {
 
     if (Vector.IsHardwareAccelerated) {
       start = length - (length % Vector<int>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      if (start == 0) goto scalar_tail;
 
       Vector<int> curr_epi       = kInt32IotaBase;
-      Span<Vector<int>> self_epi = MemoryMarshal.Cast<int, Vector<int>>(self[..start]);
+      Span<Vector<int>> self_epi = self.AsVectorSpan();
       int length_epi             = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
         self_epi[i] = curr_epi;
@@ -83,11 +81,10 @@ public static partial class CollectionUtils {
 
     if (Vector.IsHardwareAccelerated) {
       start = length - (length % Vector<double>.Count);
-      if (start == 0)
-        goto scalar_tail;
+      if (start == 0) goto scalar_tail;
 
       Vector<double> curr_epi       = kDoubleIotaBase;
-      Span<Vector<double>> self_epi = MemoryMarshal.Cast<double, Vector<double>>(self[..start]);
+      Span<Vector<double>> self_epi = self.AsVectorSpan();
       int length_epi                = self_epi.Length;
       for (int i = 0; i < length_epi; ++i) {
         self_epi[i] = curr_epi;

@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-#if NETSTANDARD
 using System.Runtime.InteropServices;
-#endif
+using MMOR.Roslyn;
 
 namespace MMOR.NET.Collections {
 public static partial class CollectionUtils {
@@ -18,7 +19,7 @@ public static partial class CollectionUtils {
           string.Format("[ERROR]: target buffer size: {0}, is less then Vector size: {1}.",
               span.Length, Vector<T>.Count),
           nameof(span));
-    return MemoryMarshal.Read<Vector<T> >(MemoryMarshal.AsBytes(span));
+    return MemoryMarshal.Read<Vector<T>>(MemoryMarshal.AsBytes(span));
 #endif
   }
 
@@ -33,7 +34,7 @@ public static partial class CollectionUtils {
           string.Format("[ERROR]: target buffer size: {0}, is less then Vector size: {1}.",
               span.Length, Vector<T>.Count),
           nameof(span));
-    return MemoryMarshal.Read<Vector<T> >(MemoryMarshal.AsBytes(span));
+    return MemoryMarshal.Read<Vector<T>>(MemoryMarshal.AsBytes(span));
 #endif
   }
 
@@ -58,6 +59,24 @@ public static partial class CollectionUtils {
            typeof(T) == typeof(long) || typeof(T) == typeof(ulong) || typeof(T) == typeof(float) ||
            typeof(T) == typeof(double);
 #endif
+  }
+
+  [TypeMarshalOverload(typeof(Span<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Span<Vector<T>> AsVectorSpan<T>(this in Span<T> source)
+      where T : unmanaged {
+    return MemoryMarshal.Cast<T, Vector<T>>(source);
+  }
+
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(List<>), typeof(CollectionsMarshal),
+      nameof(CollectionsMarshal.AsSpan))]
+  [TypeMarshalOverload(typeof(ReadOnlySpan<>), typeof(ImmutableArray<>), typeof(ImmutableArray<>),
+      "AsSpan()")]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ReadOnlySpan<Vector<T>> AsVectorSpan<T>(this in ReadOnlySpan<T> source)
+      where T : unmanaged {
+    return MemoryMarshal.Cast<T, Vector<T>>(source);
   }
 }
 }

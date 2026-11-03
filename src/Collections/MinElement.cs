@@ -19,10 +19,9 @@ public static partial class CollectionUtils {
     if (Vector.IsHardwareAccelerated && length > 2 * Vector<ulong>.Count) {
       start = length & -Vector<ulong>.Count;
 
-      ReadOnlySpan<Vector<ulong>> self_epi =
-          MemoryMarshal.Cast<ulong, Vector<ulong>>(self[..start]);
-      Vector<ulong> result_epi = self_epi[0];
-      int length_epi           = self_epi.Length;
+      ReadOnlySpan<Vector<ulong>> self_epi = self.AsVectorSpan();
+      Vector<ulong> result_epi             = self_epi[0];
+      int length_epi                       = self_epi.Length;
       for (int i = 1; i < length_epi; ++i) {
         result_epi = Vector.Min(result_epi, self_epi[i]);
       }

@@ -27,7 +27,7 @@ public static partial class CollectionUtils {
 
         start = length & -vlen;
 
-        ReadOnlySpan<Vector<T>> self_epi = MemoryMarshal.Cast<T, Vector<T>>(self[..start]);
+        ReadOnlySpan<Vector<T>> self_epi = self.AsVectorSpan();
 
         Vector<T> result_epi = self_epi[0];
         int length_epi       = self_epi.Length;
