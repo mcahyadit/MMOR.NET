@@ -53,11 +53,16 @@ public partial class XxHash3RandomTest {
       seed     = 0,
       expected = 0x7F58AA2520C681F9,
     },
+    new XxHash3Param {
+      identifier = "Hash240 - UnSeeded",
+      value      = Repeat1To0(22)[..^ 2],
+      seed       = 0,
+      expected   = 0xB66EA795B5EDC38C,
+    },
     // new XxHash3Param {
-    //   identifier = "Hash240 - UnSeeded",
-    //   value      = Repeat1To0(22),
+    //   value      = Repeat1To0(32),
     //   seed       = 0,
-    //   expected   = 0xB66EA795B5EDC38C,
+    //   expected   = 0x8845E0B1B57330DE,
     // },
 
     new XxHash3Param {
@@ -101,11 +106,16 @@ public partial class XxHash3RandomTest {
       seed     = 1,
       expected = 0xF2CA33235A6B865B,
     },
+    new XxHash3Param {
+      identifier = "Hash240 - Seeded",
+      value      = Repeat1To0(22)[..^ 2],
+      seed       = 1,
+      expected   = 0x6EF5CF958BA52C4,
+    },
     // new XxHash3Param {
-    //   identifier = "Hash240 - Seeded",
-    //   value      = Repeat1To0(22),
+    //   value      = Repeat1To0(32),
     //   seed       = 1,
-    //   expected   = 0x6EF5CF958BA52C4,
+    //   expected   = 0xFBC5F9C53D21CB2F,
     // },
   ];
 }

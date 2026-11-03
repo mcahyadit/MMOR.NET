@@ -57,6 +57,7 @@ public static partial class HashUtils {
     if (length <= sizeof(ulong)) return XxHash3_Hash8(value, seed);
     if (length <= 16) return XxHash3_Hash16(value, seed);
     if (length <= 128) return XxHash3_Hash128(value, seed);
+    if (length <= 240) return XxHash3_Hash240(value, seed);
     return 0;
   }
 
@@ -139,8 +140,16 @@ public static partial class HashUtils {
   public static ulong Mix16(ulong seed, ReadOnlySpan<byte> value, int secret_offset) {
     ReadOnlySpan<ulong> secret = MemoryMarshal.Cast<byte, ulong>(kXxHash3Secret.AsSpan(  //
         secret_offset, 2 * sizeof(ulong)));
-    ReadOnlySpan<ulong> blk    = MemoryMarshal.Cast<byte, ulong>(value);
-    return MulXor(blk[0] ^ unchecked(secret[0] + seed), blk[1] ^ unchecked(secret[1] - seed));
+    ulong blk0                 = BinaryPrimitives.ReadUInt64LittleEndian(value[0..]);
+    ulong blk1                 = BinaryPrimitives.ReadUInt64LittleEndian(value[sizeof(ulong)..]);
+    return MulXor(blk0 ^ unchecked(secret[0] + seed), blk1 ^ unchecked(secret[1] - seed));
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static ulong Mix16(ulong seed, ReadOnlySpan<ulong> value, int secret_offset) {
+    ReadOnlySpan<ulong> secret = MemoryMarshal.Cast<byte, ulong>(kXxHash3Secret.AsSpan(  //
+        secret_offset, 2 * sizeof(ulong)));
+    return MulXor(value[0] ^ unchecked(secret[0] + seed), value[1] ^ unchecked(secret[1] - seed));
   }
 
   public static ulong XxHash3_Hash128(ReadOnlySpan<byte> value, ulong seed) {
@@ -155,6 +164,27 @@ public static partial class HashUtils {
           acc += Mix16(seed, value[^(in_offset + wordlen)..], scrt_offset + wordlen);
         }
       }
+      return AvalancheH3(acc);
+    }
+  }
+
+  public static ulong XxHash3_Hash240(ReadOnlySpan<byte> value, ulong seed) {
+    const int k2u64 = 2 * sizeof(ulong);
+    unchecked {
+      ulong acc = kXxHash64Prime1 * (ulong)value.Length;
+      for (int i = 0; i < 8; ++i) {
+        acc += Mix16(seed, value[(i * k2u64)..], i * k2u64);
+      }
+      acc = AvalancheH3(acc);
+
+      int len2 = value.Length / k2u64;
+      for (int i = 8; i < len2; ++i) {
+        // NOTE: Secret Here is Offset by 2 byte
+        acc += Mix16(seed, value[(i * k2u64)..], 3 + ((i - 8) * k2u64));
+      }
+      acc += Mix16(seed, value[^(2 * sizeof(ulong))..], 119);
+
+      // acc = unchecked(AvalancheH3(acc) + acc_end);
       return AvalancheH3(acc);
     }
   }
