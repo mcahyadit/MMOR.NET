@@ -2,9 +2,8 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using MMOR.NET.Collections;
-using MMOR.NET.Mathematics;
 using MMOR.Roslyn;
+using System.Runtime.InteropServices;
 
 #if !NETSTANDARD
 using System.Runtime.Intrinsics;
@@ -18,7 +17,7 @@ public static partial class BitOps {
     for (int i = 0; i < buffer.Length; ++i) {
       buffer[i] |= 1ul << i;
     }
-    return buffer.ToVector();
+    return MemoryMarshal.Cast<ulong, Vector<ulong>>(buffer)[0];
   })).Invoke();
 
   /// <summary> Vector of u32, where each lane is a mask of its own index. </summary>
@@ -27,7 +26,7 @@ public static partial class BitOps {
     for (int i = 0; i < buffer.Length; ++i) {
       buffer[i] |= 1u << i;
     }
-    return buffer.ToVector();
+    return MemoryMarshal.Cast<uint, Vector<uint>>(buffer)[0];
   })).Invoke();
 
   public static ulong MmMovEpiMask<T>(Vector<T> vector)
@@ -105,7 +104,11 @@ public static partial class BitOps {
       Vector<long> signed    = Vector.AsVectorInt64(vector);
       Vector<long> mask      = Vector.LessThan(signed, Vector<long>.Zero);
       Vector<ulong> weighted = Vector.BitwiseAnd(Vector.AsVectorUInt64(mask), kBitPosEpiU64);
-      return MathExt.SumElements(weighted);
+#if !NETSTANDARD
+      return Vector.Sum(weighted);
+#else
+      return Vector.Dot(weighted, Vector<ulong>.One);
+#endif
     }
 
     ulong result = 0;
@@ -164,7 +167,11 @@ public static partial class BitOps {
       Vector<int> signed    = Vector.AsVectorInt32(vector);
       Vector<int> mask      = Vector.LessThan(signed, Vector<int>.Zero);
       Vector<uint> weighted = Vector.BitwiseAnd(Vector.AsVectorUInt32(mask), kBitPosEpiU32);
-      return MathExt.SumElements(weighted);
+#if !NETSTANDARD
+      return Vector.Sum(weighted);
+#else
+      return Vector.Dot(weighted, Vector<uint>.One);
+#endif
     }
 
     ulong result = 0;
