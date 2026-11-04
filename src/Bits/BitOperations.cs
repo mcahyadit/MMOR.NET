@@ -3,7 +3,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using MMOR.NET.Random;
 using MMOR.Roslyn;
 using System.Collections.Immutable;
 
@@ -72,8 +71,7 @@ public static partial class Utilities {
     indices.Clear();
     if (indices is List<int> list) {
       int count = PopCount(bitmask);
-      if (list.Capacity < count)
-        list.Capacity = count;
+      if (list.Capacity < count) list.Capacity = count;
     }
     while (bitmask != 0) {
       indices.Add(CountRZero(bitmask));
@@ -101,8 +99,7 @@ public static partial class Utilities {
   public static void ToBoolList(this ulong bitmask, IList<bool> bools, int size = 64) {
     bools.Clear();
     if (bools is List<bool> list) {
-      if (list.Capacity < size)
-        list.Capacity = size;
+      if (list.Capacity < size) list.Capacity = size;
     }
     for (int i = 0; i < size; ++i) {
       bools.Add((bitmask & (1ul << i)) != 0);
@@ -115,37 +112,6 @@ public static partial class Utilities {
     List<bool> result = new(size);
     bitmask.ToBoolList(result, size);
     return result;
-  }
-
-  /**
-   * <summary>
-   *  Randomly selects an active bit in a bitmask and returns the position.
-   * </summary>
-   * <param name="bitmask">The bitmask to select from.</param>
-   * <param name="rng">The random engine.</param>
-   * <returns>
-   *  <c>-1</c> if <paramref name="bitmask"/> is <c>0</c>,
-   *  otherwise the index of the randomly selected active bit.
-   * </returns>
-   * */
-  [Obsolete("Moved to RandUtils")]
-  public static int GetRandomActiveBit(ulong bitmask, IRandom rng) {
-    if (bitmask == 0)
-      return -1;
-
-    int count  = PopCount(bitmask);
-    int target = rng.NextInt(0, count);
-#if !NETSTANDARD
-    if (Bmi2.X64.IsSupported) {
-      ulong mask = Bmi2.X64.ParallelBitDeposit(1ul << target, bitmask);
-      return BitOperations.TrailingZeroCount(mask);
-    }
-#endif
-    for (int i = 0; i < target; ++i) {
-      bitmask &= bitmask - 1;
-    }
-
-    return CountRZero(bitmask);
   }
 }
 }
