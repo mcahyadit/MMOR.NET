@@ -365,7 +365,6 @@ public static partial class BitOps {
   [Pure]
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static Vector<ushort> MmMovMaskEpi16Emu(ulong mask) {
-    Span<ushort> tmp = stackalloc ushort[Vector<byte>.Count >> 2];
     return Vector.Narrow(MmMovMaskEpi32Emu(mask), MmMovMaskEpi32Emu(mask >> Vector<uint>.Count));
   }
 
