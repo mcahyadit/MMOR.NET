@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/j178/prek/refs/heads/master/prek.schema.json
 exclude: |
   (?x)^(
-    .*third_party/.*
+    .*third_party/.*|
+    .*lock.json
   )$
 
 repos:
