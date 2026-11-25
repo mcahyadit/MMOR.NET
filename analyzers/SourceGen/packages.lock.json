@@ -4,9 +4,9 @@
     ".NETStandard,Version=v2.0": {
       "ANcpLua.Roslyn.Utilities.Sources": {
         "type": "Direct",
-        "requested": "[3.0.2, )",
-        "resolved": "3.0.2",
-        "contentHash": "DIukLzge8xUT2rzq4cJFPiv38d/ViHfN6u1i/dxVri3AuojDcGeH7WHKzg7mWqc4BnAVxYPol1CbXL+OwKUf0g=="
+        "requested": "[5.0.1, )",
+        "resolved": "5.0.1",
+        "contentHash": "pcSiX1U0Dx199RY9Yj+IHrfxP4Tust1UvDq4rv4pb4Y7jo1JhBijEHXu3zwuhKWqJ0aiGM0PhQsGE5Up6AS0Tg=="
       },
       "Microsoft.CodeAnalysis.Analyzers": {
         "type": "Direct",
