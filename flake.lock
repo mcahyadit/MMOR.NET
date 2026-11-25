@@ -56,11 +56,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793637662,
-        "narHash": "sha256-1zuxQZ5VCawB0ZorVAky3w7wuNnimk1WoIcyRU+OT/A=",
+        "lastModified": 1795276148,
+        "narHash": "sha256-i59JD4FojAwp9izC4c2ETYwb8oQanzBo0pmTfyt9DOY=",
         "owner": "mdarocha",
         "repo": "nuget-packageslock2nix",
-        "rev": "7ba384fdc53e84ae4e00e53c234c43dfab1a78db",
+        "rev": "a09a5f1863048a0b8e0cf894f60501890566a21c",
         "type": "github"
       },
       "original": {
